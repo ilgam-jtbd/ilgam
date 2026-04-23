@@ -69,4 +69,4 @@ jobs:
             psql postgresql://postgres:postgres@localhost:5432/postgres -f "$f"
           done
       - name: Run pgTAP
-        run: pg_prove -d postgresql://postgres:postgres@localhost:5432/postgres packages/db/tests/*.sql || true
+        run: pg_prove -d postgresql://postgres:postgres@localhost:5432/postgres packages/db/tests/*.sql
