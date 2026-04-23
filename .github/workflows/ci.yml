@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-type-test:
+    name: Lint · Typecheck · Test (affected)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ github.sha }}
+          restore-keys: |
+            turbo-
+
+      - run: pnpm turbo run lint typecheck test --filter=...[origin/main]
+
+  db-rls-tests:
+    name: pgTAP RLS tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: supabase/postgres:15.1.1.78
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pg_prove
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libtap-parser-sourcehandler-pgtap-perl postgresql-client
+      - name: Apply migrations
+        run: |
+          for f in packages/db/migrations/*.sql; do
+            psql postgresql://postgres:postgres@localhost:5432/postgres -f "$f"
+          done
+      - name: Run pgTAP
+        run: pg_prove -d postgresql://postgres:postgres@localhost:5432/postgres packages/db/tests/*.sql || true

@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "일감",
+    "slug": "ilgam-worker",
+    "scheme": "ilgam",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "kr.ilgam.worker",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "출근·퇴근 인증을 위해 위치 정보가 필요합니다.",
+        "NSCameraUsageDescription": "본인 확인 셀카 촬영을 위해 카메라 권한이 필요합니다."
+      }
+    },
+    "android": {
+      "package": "kr.ilgam.worker",
+      "versionCode": 1,
+      "permissions": ["ACCESS_FINE_LOCATION", "CAMERA", "POST_NOTIFICATIONS"]
+    },
+    "plugins": ["expo-router"],
+    "extra": {
+      "eas": { "projectId": "TBD" }
+    }
+  }
+}

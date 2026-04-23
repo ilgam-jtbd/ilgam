@@ -1,0 +1,34 @@
+# deps
+node_modules/
+.pnpm-store/
+# build
+dist/
+build/
+.next/
+.turbo/
+.expo/
+.expo-shared/
+# env
+.env
+.env.local
+.env.*.local
+# secrets & keys
+*.pem
+*.key
+.ssh/
+id_ed25519*
+# OS
+.DS_Store
+Thumbs.db
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+# logs
+*.log
+npm-debug.log*
+# test
+coverage/
+# Supabase
+supabase/.branches/
+supabase/.temp/

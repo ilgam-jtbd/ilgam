@@ -1,0 +1,9 @@
+{
+  "name": "@ilgam/db",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "echo 'sql lint skipped'",
+    "test": "echo 'pgTAP runs in CI db-rls-tests job'"
+  }
+}

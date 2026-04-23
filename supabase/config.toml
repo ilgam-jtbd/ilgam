@@ -1,0 +1,39 @@
+# Supabase 로컬 개발 구성 (Supabase CLI)
+
+project_id = "ilgam"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "app"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["ilgam://auth/callback"]
+jwt_expiry = 2592000  # 30일 (ADR-003 세션 회복력)
+
+[edge_runtime]
+enabled = true
+
+[functions.match-engine]
+verify_jwt = true
+
+[functions.notify-dispatch]
+verify_jwt = false  # pg-boss에서 호출
+
+[functions.payment-settle]
+verify_jwt = false  # PortOne 웹훅 (자체 서명 검증)
+
+[functions.cx-triage]
+verify_jwt = true

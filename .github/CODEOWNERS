@@ -1,0 +1,11 @@
+# 일감 코드 오너십 게이트
+# 형식: <path> <owner>
+
+*                       @ilgam-jtbd/maintainers
+/docs/product/          @ilgam-jtbd/po
+/docs/decisions/        @ilgam-jtbd/po @ilgam-jtbd/cpo
+/apps/admin-web/        @ilgam-jtbd/engineering
+/apps/worker-app/       @ilgam-jtbd/engineering @ilgam-jtbd/cpo
+/packages/db/           @ilgam-jtbd/engineering
+/supabase/              @ilgam-jtbd/engineering
+/.github/workflows/     @ilgam-jtbd/engineering
