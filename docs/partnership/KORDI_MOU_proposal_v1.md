@@ -159,7 +159,7 @@ Next.js · React Native · Supabase · Claude API · PortOne · 카카오 알림
 
 **제안 주체**: 일감(ILGAM) 준비팀
 - 담당: 김연재 (Product Owner)
-- 이메일: yjkim@aboutfishing.kr
+- 이메일: ilgam.jtbd@gmail.com
 - 고객지원 채널: 채널톡 (전화 미운영)
 
 **서명란**
