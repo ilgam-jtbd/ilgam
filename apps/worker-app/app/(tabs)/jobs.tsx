@@ -14,6 +14,7 @@ import { colors, typography, spacing } from "@ilgam/design-tokens";
 import type { Job, JobCategory } from "@ilgam/core";
 import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 
 // ─── 샘플 데이터 (당근알바·급구·지니어스 공고 패턴 참조) ─────────────────
 const MOCK_JOBS: Job[] = [
@@ -216,6 +217,7 @@ function CategoryBadge({ category }: { category: JobCategory | null }) {
 function JobCard({ job }: { job: Job }) {
   const startHH = toHHMM(job.shift_start_at);
   const endHH = toHHMM(job.shift_end_at);
+  const router = useRouter();
 
   return (
     <TouchableOpacity
@@ -223,6 +225,7 @@ function JobCard({ job }: { job: Job }) {
       accessible
       accessibilityLabel={`${job.title}, 시급 ${job.hourly_wage_krw.toLocaleString()}원, ${startHH}~${endHH}, ${job.dong_label ?? ""}`}
       accessibilityRole="button"
+      onPress={() => router.push({ pathname: "/job/[id]", params: { id: job.id } })}
     >
       {/* 카드 상단: 뱃지 */}
       <View style={styles.cardBadgeRow}>
@@ -269,8 +272,13 @@ function JobCard({ job }: { job: Job }) {
       )}
 
       {/* 지원 버튼 */}
-      <TouchableOpacity style={styles.applyButton} accessibilityRole="button">
-        <Text style={styles.applyButtonText}>바로 지원</Text>
+      <TouchableOpacity
+        style={styles.applyButton}
+        accessibilityRole="button"
+        accessibilityLabel={`${job.title} 상세 보기`}
+        onPress={() => router.push({ pathname: "/job/[id]", params: { id: job.id } })}
+      >
+        <Text style={styles.applyButtonText}>상세 보기</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
