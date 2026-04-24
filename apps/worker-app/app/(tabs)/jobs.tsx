@@ -13,7 +13,7 @@ import {
 import { colors, typography, spacing } from "@ilgam/design-tokens";
 import type { Job, JobCategory } from "@ilgam/core";
 import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 
 // ─── 샘플 데이터 (당근알바·급구·지니어스 공고 패턴 참조) ─────────────────
@@ -213,8 +213,8 @@ function CategoryBadge({ category }: { category: JobCategory | null }) {
   );
 }
 
-// ─── 일감 카드 ───────────────────────────────────────────────────────────
-function JobCard({ job }: { job: Job }) {
+// ─── 일감 카드 (memo: 필터 변경 시 미변경 카드 리렌더 차단) ────────────
+const JobCard = memo(function JobCard({ job }: { job: Job }) {
   const startHH = toHHMM(job.shift_start_at);
   const endHH = toHHMM(job.shift_end_at);
   const router = useRouter();
@@ -282,16 +282,25 @@ function JobCard({ job }: { job: Job }) {
       </TouchableOpacity>
     </TouchableOpacity>
   );
-}
+});
 
 // ─── 메인 화면 ────────────────────────────────────────────────────────────
 export default function JobsScreen() {
   const [activeCategory, setActiveCategory] = useState<JobCategory | "all">("all");
 
-  const filtered =
-    activeCategory === "all"
-      ? MOCK_JOBS
-      : MOCK_JOBS.filter((j) => j.category === activeCategory);
+  const filtered = useMemo(
+    () =>
+      activeCategory === "all"
+        ? MOCK_JOBS
+        : MOCK_JOBS.filter((j) => j.category === activeCategory),
+    [activeCategory]
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: Job }) => <JobCard job={item} />,
+    []
+  );
+  const keyExtractor = useCallback((item: Job) => item.id, []);
 
   return (
     <View style={styles.container}>
@@ -329,10 +338,15 @@ export default function JobsScreen() {
       {/* 일감 목록 */}
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <JobCard job={item} />}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        removeClippedSubviews
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        windowSize={7}
+        updateCellsBatchingPeriod={50}
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyText}>해당 카테고리 일감이 없습니다.</Text>
