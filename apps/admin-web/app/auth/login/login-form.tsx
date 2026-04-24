@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { sendMagicLink } from "./actions";
 import { colors, spacing, typography, radius } from "@ilgam/design-tokens";
 
@@ -17,16 +17,34 @@ const ERROR_MESSAGES: Record<string, string> = {
   forbidden: "운영자 권한이 없습니다.",
 };
 
-export default function LoginForm({ nextUrl, errorCode }: Props) {
-  const [, formAction, isPending] = useActionState(
-    async (_: unknown, formData: FormData) => {
-      await sendMagicLink(formData);
-    },
-    null
-  );
-
+function SubmitButton() {
+  const { pending } = useFormStatus();
   return (
-    <form action={formAction} style={{ width: "100%" }}>
+    <button
+      type="submit"
+      disabled={pending}
+      style={{
+        width: "100%",
+        padding: `${spacing.md}px`,
+        background: pending ? colors.gray[400] : colors.navy[700],
+        color: colors.white,
+        border: "none",
+        borderRadius: radius.md,
+        fontSize: typography.sizes.base,
+        fontWeight: typography.weights.bold,
+        cursor: pending ? "not-allowed" : "pointer",
+        transition: "background 0.2s",
+        minHeight: 48,
+      }}
+    >
+      {pending ? "발송 중…" : "Magic Link 이메일 발송"}
+    </button>
+  );
+}
+
+export default function LoginForm({ nextUrl, errorCode }: Props) {
+  return (
+    <form action={sendMagicLink} style={{ width: "100%" }}>
       <input type="hidden" name="next" value={nextUrl} />
 
       {errorCode && (
@@ -79,25 +97,7 @@ export default function LoginForm({ nextUrl, errorCode }: Props) {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        style={{
-          width: "100%",
-          padding: `${spacing.md}px`,
-          background: isPending ? colors.gray[400] : colors.navy[700],
-          color: colors.white,
-          border: "none",
-          borderRadius: radius.md,
-          fontSize: typography.sizes.base,
-          fontWeight: typography.weights.bold,
-          cursor: isPending ? "not-allowed" : "pointer",
-          transition: "background 0.2s",
-          minHeight: 48,
-        }}
-      >
-        {isPending ? "발송 중…" : "Magic Link 이메일 발송"}
-      </button>
+      <SubmitButton />
 
       <p
         style={{
