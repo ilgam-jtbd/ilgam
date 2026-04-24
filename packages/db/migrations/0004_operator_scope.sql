@@ -129,9 +129,20 @@ create policy opactions_self_or_super on public.operator_actions
 -- INSERT/UPDATE/DELETE: authenticated 에 grant 하지 않음 → service_role 및
 -- SECURITY DEFINER 함수(app.log_operator_action) 만 쓰기 가능. 기본 deny.
 
+-- platform_admins 본체: 방어심층 (defense-in-depth) — 0001 에서 누락된 RLS 보강
+-- SELECT 는 본인 record + super_admin 전체. 쓰기는 service_role 전용.
+alter table public.platform_admins enable row level security;
+
+create policy platform_admins_self_or_super on public.platform_admins
+  for select using (
+    profile_id = auth.uid()
+    or app.is_super_admin()
+  );
+
 -- ─── Grants (0003_api_exposure.sql 스타일) ──────────────
 grant select on public.operator_actions to authenticated;
 grant usage, select on sequence public.operator_actions_id_seq to authenticated;
+grant select on public.platform_admins to authenticated;
 grant execute on function app.current_admin_role() to authenticated;
 grant execute on function app.is_super_admin() to authenticated;
 grant execute on function app.log_operator_action(text, text, uuid, text, jsonb, inet) to authenticated;
