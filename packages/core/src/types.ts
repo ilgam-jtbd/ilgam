@@ -36,12 +36,39 @@ export interface Employer {
 
 export type JobStatus = "open" | "matched" | "in_progress" | "completed" | "cancelled";
 
+export type JobCategory =
+  | "logistics"    // 물류·배송
+  | "food"         // 외식·카페
+  | "cleaning"     // 청소·환경
+  | "retail"       // 유통·판매
+  | "care"         // 돌봄·의료
+  | "agriculture"; // 농업·자연
+
+export const JOB_CATEGORY_LABEL: Record<JobCategory, string> = {
+  logistics: "물류·배송",
+  food: "외식·카페",
+  cleaning: "청소·환경",
+  retail: "유통·판매",
+  care: "돌봄·의료",
+  agriculture: "농업·자연",
+};
+
+export const JOB_CATEGORY_EMOJI: Record<JobCategory, string> = {
+  logistics: "📦",
+  food: "🍽️",
+  cleaning: "🧹",
+  retail: "🛒",
+  care: "💊",
+  agriculture: "🌾",
+};
+
 export interface Job {
   id: string;
   employer_id: string;
   title: string;
   description: string | null;
   dong_code: string;
+  dong_label: string | null;
   shift_start_at: string;
   shift_end_at: string;
   hourly_wage_krw: number;
@@ -49,6 +76,10 @@ export interface Job {
   preferred_mentor_tags: string[];
   headcount: number;
   status: JobStatus;
+  category: JobCategory | null;
+  distance_km: number | null;
+  instant_pay: boolean;
+  note: string | null;
 }
 
 export interface Shift {
