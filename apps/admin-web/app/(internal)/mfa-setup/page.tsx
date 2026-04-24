@@ -138,7 +138,6 @@ export default function MfaSetupPage() {
                 marginBottom: spacing.lg,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrCode}
                 alt="MFA QR 코드"

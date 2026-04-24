@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { sendMagicLink } from "./actions";
-import { colors, spacing, typography, radius, shadow } from "@ilgam/design-tokens";
+import { colors, spacing, typography, radius } from "@ilgam/design-tokens";
 
 interface Props {
   nextUrl: string;

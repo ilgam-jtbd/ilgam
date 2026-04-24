@@ -27,16 +27,7 @@ function ReauthForm() {
     setStatus("verifying");
     setErrorMsg(null);
 
-    // 등록된 TOTP factor 조회
-    const { data: assuranceData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    const factorId = assuranceData?.currentAuthenticationMethods
-      .find((m) => m.method === "totp")
-      ? assuranceData.nextLevel === "aal2"
-        ? assuranceData.currentAuthenticationMethods[0]?.factorId
-        : null
-      : null;
-
-    // factor 목록에서 totp 타입 factor 찾기
+    // 등록된 TOTP factor 조회 — listFactors 결과에서 첫 번째 TOTP factor 사용
     const { data: factorsData } = await supabase.auth.mfa.listFactors();
     const totpFactor = factorsData?.totp?.[0];
 
