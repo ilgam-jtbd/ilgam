@@ -80,6 +80,50 @@ export interface Payment {
   settled_at: string | null;
 }
 
+// ─── 운영자 백오피스 (ADR-009) ───────────────────────────
+
+export type AdminRole = "super_admin" | "operator";
+
+export interface PlatformAdmin {
+  profile_id: string;
+  active: boolean;
+  role: AdminRole;
+  mfa_enrolled: boolean;
+  last_mfa_at: string | null;
+  allowed_ip_cidrs: string[];
+  created_at: string;
+}
+
+export type OperatorActionType =
+  | "employer_approve"
+  | "employer_reject"
+  | "employer_suspend"
+  | "report_resolve"
+  | "report_shadow_hide"
+  | "report_block_employer"
+  | "payment_refund_partial"
+  | "payment_refund_full"
+  | "payment_escrow_hold"
+  | "worker_ban"
+  | "worker_unban"
+  | "audit_search"
+  | "internal_page_view"
+  | "admin_invite"
+  | "admin_revoke"
+  | "admin_mfa_reset";
+
+export interface OperatorAction {
+  id: number;
+  actor_id: string;
+  action_type: OperatorActionType;
+  target_table: string | null;
+  target_id: string | null;
+  reason: string | null;
+  metadata: Record<string, unknown>;
+  source_ip: string | null;
+  created_at: string;
+}
+
 export interface NotifyRequest {
   templateId: string;
   channel: "alimtalk" | "sms" | "push";
