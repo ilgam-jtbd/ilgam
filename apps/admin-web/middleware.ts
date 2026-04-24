@@ -2,8 +2,10 @@
 // ADR-009: is_platform_admin() + MFA 체크는 Server Component layout에서 수행.
 // middleware는 Edge Runtime 제약상 DB 조회 없이 세션 존재 여부만 확인.
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+
+type CookieTuple = { name: string; value: string; options?: CookieOptions };
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -16,12 +18,12 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
+        setAll(cookiesToSet: CookieTuple[]) {
+          cookiesToSet.forEach(({ name, value }: CookieTuple) =>
             request.cookies.set(name, value)
           );
           response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }: CookieTuple) =>
             response.cookies.set(name, value, options)
           );
         },

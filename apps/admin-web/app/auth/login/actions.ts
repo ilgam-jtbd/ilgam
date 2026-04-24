@@ -1,8 +1,10 @@
 "use server";
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+
+type CookieTuple = { name: string; value: string; options?: CookieOptions };
 
 export async function sendMagicLink(formData: FormData) {
   const email = (formData.get("email") as string | null)?.trim();
@@ -26,8 +28,8 @@ export async function sendMagicLink(formData: FormData) {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+        setAll(cookiesToSet: CookieTuple[]) {
+          cookiesToSet.forEach(({ name, value, options }: CookieTuple) =>
             cookieStore.set(name, value, options)
           );
         },

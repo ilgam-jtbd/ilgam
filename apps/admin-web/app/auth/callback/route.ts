@@ -2,9 +2,11 @@
 // Supabase가 이메일 링크에 ?code= 파라미터를 붙여 여기로 리디렉트함.
 // exchangeCodeForSession으로 세션 쿠키 설정 후 /internal로 이동.
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+
+type CookieTuple = { name: string; value: string; options?: CookieOptions };
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -25,8 +27,8 @@ export async function GET(request: NextRequest) {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+        setAll(cookiesToSet: CookieTuple[]) {
+          cookiesToSet.forEach(({ name, value, options }: CookieTuple) =>
             cookieStore.set(name, value, options)
           );
         },
