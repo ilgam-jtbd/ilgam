@@ -99,7 +99,8 @@ function InfoRow({ label, value, strong }: { label: string; value: string; stron
 }
 
 export default function JobDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // useLocalSearchParams<{ id: string }>() — 실 구현 시 id 로 supabase 쿼리
+  useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);

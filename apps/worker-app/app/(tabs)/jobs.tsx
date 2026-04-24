@@ -188,10 +188,6 @@ function toHHMM(iso: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-function formatWage(krw: number): string {
-  return `${(krw / 1000).toFixed(1)}천원`;
-}
-
 // ─── 즉시정산 뱃지 ───────────────────────────────────────────────────────
 function InstantPayBadge() {
   return (

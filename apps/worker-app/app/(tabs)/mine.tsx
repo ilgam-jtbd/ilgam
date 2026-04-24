@@ -2,13 +2,7 @@
 // ADR-003: 18pt 기본 · 48dp 터치 · WCAG AAA 7:1 · 하단 안전존 CTA
 // 실 구현 시 supabase-js로 shifts + payments join 쿼리로 교체 (ADR-004)
 
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  SectionList,
-} from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { colors, typography, spacing, radius, touch } from "@ilgam/design-tokens";
 import { useRouter } from "expo-router";
 
