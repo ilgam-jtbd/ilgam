@@ -5,6 +5,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { colors, spacing, typography } from "@ilgam/design-tokens";
 
 export const dynamic = "force-dynamic";
@@ -138,7 +139,9 @@ export default async function JobsPage() {
               {jobs.map((j) => (
                 <tr key={j.id} style={{ borderBottom: `1px solid ${colors.gray[100]}` }}>
                   <td style={{ padding: `${spacing.md}px ${spacing.sm}px`, color: colors.navy[900] }}>
-                    {j.title}
+                    <Link href={`/jobs/${j.id}`} style={{ color: colors.navy[700], textDecoration: "none", fontWeight: 600 }}>
+                      {j.title}
+                    </Link>
                   </td>
                   <td style={{ padding: `${spacing.md}px ${spacing.sm}px`, color: colors.gray[700] }}>
                     {j.dong_code}
