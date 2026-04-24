@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ilgam.kr";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ilgam.kr"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "일감 | 한국형 시니어 스팟워크",
     template: "%s | 일감",
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "일감 | 한국형 시니어 스팟워크",
     description: "954만 시니어가 유연하게 일하는 플랫폼",
-    url: "https://ilgam.kr",
+    url: siteUrl,
     siteName: "일감",
     images: [{ url: "/og-image.png", width: 1254, height: 1254, alt: "일감 로고" }],
     locale: "ko_KR",
