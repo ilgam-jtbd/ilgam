@@ -50,6 +50,23 @@ const STUB_WORKERS: WorkerWithStatus[] = [
     ban_reason: "가짜 공고 신고 허위 접수",
     is_banned: true,
   },
+  {
+    id: "w-0003",
+    profile_id: "p-0003",
+    ci_token: null,
+    birth_ymd: "19531105",
+    gender_code: "M",
+    home_dong_code: "1150010100",
+    cert_codes: ["food_hygiene"],
+    mentor_tags: ["fnb", "care"],
+    no_show_count: 0,
+    rating_avg: 4.8,
+    display_name: "이성실",
+    phone_e164: "+821055556666",
+    ban_expires_at: null,
+    ban_reason: null,
+    is_banned: false,
+  },
 ];
 
 function BanStatusBadge({ isBanned, expiresAt }: { isBanned: boolean; expiresAt: string | null }) {

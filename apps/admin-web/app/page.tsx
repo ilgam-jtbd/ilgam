@@ -6,9 +6,9 @@ import { colors, spacing, typography } from "@ilgam/design-tokens";
 // 참고: 네이버 데이터랩·구글 트렌드 시니어 알바 카테고리 키워드
 
 export const metadata = {
-  title: "시니어 단기알바·동네알바 매칭 | 4060 당일정산",
+  title: "시니어 단기알바·동네알바 매칭 | 5070 당일정산",
   description:
-    "50대·60대 시니어와 중장년을 위한 단기알바 플랫폼. 내 주변 동네알바, 당일 정산, 유연근무.",
+    "50대·60대·70대 시니어와 중장년을 위한 단기알바 플랫폼. 내 주변 동네알바, 당일 정산, 유연근무.",
 };
 
 export default function MarketingHome() {
@@ -58,10 +58,10 @@ export default function MarketingHome() {
 
       <section style={{ marginBottom: spacing.xxxl }}>
         <h2 style={{ fontSize: typography.sizes.lg, color: colors.navy[800] }}>
-          50대·60대 시니어 단기알바, 내 주변에서 바로
+          50대·60대·70대 시니어 단기알바, 내 주변에서 바로
         </h2>
         <p style={{ color: colors.gray[700] }}>
-          베이비부머 2차 세대(4060) 954만 명의 경험을 필요로 하는 기업과 매칭합니다. 하루·반나절·주말 단기알바부터 동네알바까지, 시간과 거리를 맞춰 찾아드립니다. 일한 날{" "}
+          베이비부머 2차 세대(4060)와 70대 액티브 시니어를 합쳐 1,200만 명에 달하는 풍부한 경험을 필요로 하는 기업과 매칭합니다. 하루·반나절·주말 단기알바부터 동네알바까지, 시간과 거리를 맞춰 찾아드립니다. 일한 날{" "}
           <strong>당일 정산</strong>, 복잡한 서류 없이 모바일로 끝.
         </p>
       </section>
@@ -179,7 +179,7 @@ export default function MarketingHome() {
             기존 구인구직 플랫폼과 뭐가 다른가요?
           </summary>
           <p style={{ color: colors.gray[700], marginTop: spacing.sm }}>
-            일감은 <strong>50대 이상 시니어·중장년에 특화</strong>된 스팟워크 플랫폼입니다. 큰 글씨·큰 버튼 UX, 당일 정산, 검증된 워커 풀, 공공 파트너십(서울시 50플러스·노인일자리여기)이 차별점입니다.
+            일감은 <strong>50대·60대·70대 시니어·중장년에 특화</strong>된 스팟워크 플랫폼입니다. 큰 글씨·큰 버튼 UX, 당일 정산, 검증된 워커 풀, 공공 파트너십(서울시 50플러스·노인일자리여기)이 차별점입니다.
           </p>
         </details>
       </section>
