@@ -82,6 +82,16 @@ export interface Job {
   note: string | null;
 }
 
+export interface Match {
+  id: string;
+  job_id: string;
+  worker_id: string;
+  employer_id: string;
+  confirmed_at: string;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+}
+
 export interface Shift {
   id: string;
   match_id: string;
