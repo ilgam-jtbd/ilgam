@@ -59,18 +59,19 @@ insert into public.regions (dong_code, sido, sigungu, dong) values ('2222000000'
 insert into public.jobs (id, employer_id, title, dong_code, shift_start_at, shift_end_at, hourly_wage_krw, status) values
   ('66666666-6666-4666-8666-666666666666','55555555-5555-4555-8555-555555555555','Yjob','2222000000', now(), now()+interval '1h', 10030, 'open');
 
+-- UPDATE 시도 (RLS 차단으로 silent 0 rows changed)
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
 
-with upd as (
-  update public.jobs set title = 'HACKED'
-  where id = '66666666-6666-4666-8666-666666666666'
-  returning 1
-)
+update public.jobs set title = 'HACKED'
+  where id = '66666666-6666-4666-8666-666666666666';
+
+-- 권한 일시 해제 후 실제 행 확인 (UPDATE 가 통과했는지 검증)
+reset role;
 select results_eq(
-  $$ select count(*)::bigint from upd $$,
-  $$ values (0::bigint) $$,
-  '(2) employer X 는 employer Y 의 jobs 행을 UPDATE 할 수 없다 (0 rows changed)'
+  $$ select title from public.jobs where id = '66666666-6666-4666-8666-666666666666' $$,
+  $$ values ('Yjob'::text) $$,
+  '(2) employer X 의 UPDATE 가 차단되어 jobs.title 이 원본 그대로 유지된다'
 );
 
 select * from finish();
@@ -144,17 +145,17 @@ insert into public.matches (id, job_id, worker_id, employer_id) values
    '99999999-9999-4999-8999-999999999999',
    'a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1');
 
+-- UPDATE 시도 (UPDATE 정책 부재로 silent 0 rows changed)
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
 
-with upd as (
-  update public.matches set cancelled_at = now(), cancel_reason = 'self-cancel'
-  where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3'
-  returning 1
-)
+update public.matches set cancelled_at = now(), cancel_reason = 'self-cancel'
+  where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3';
+
+reset role;
 select results_eq(
-  $$ select count(*)::bigint from upd $$,
-  $$ values (0::bigint) $$,
+  $$ select cancelled_at is null from public.matches where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3' $$,
+  $$ values (true) $$,
   '(5) 워커는 본인 matches 라도 cancelled_at 을 UPDATE 할 수 없다 (UPDATE 정책 부재)'
 );
 
