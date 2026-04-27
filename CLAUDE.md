@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**일감 (ILGAM)** is a Korean senior spot-work platform (reference: Timee JP). The codebase is a Turborepo + pnpm monorepo containing a Next.js 14 employer admin (web), an Expo SDK 51 senior worker app (mobile), shared TS packages, and Supabase (Postgres + Auth + Edge Functions) as the primary backend. Design decisions live in `docs/decisions/ADR-001..008.md` and the ADRs are load-bearing — when making architectural changes, update or cite the relevant ADR.
+**일감 (ILGAM)** is a Korean senior spot-work platform. The codebase is a Turborepo + pnpm monorepo containing a Next.js 14 employer admin (web), an Expo SDK 51 senior worker app (mobile), shared TS packages, and Supabase (Postgres + Auth + Edge Functions) as the primary backend. Design decisions live in `docs/decisions/ADR-001..008.md` and the ADRs are load-bearing — when making architectural changes, update or cite the relevant ADR.
 
 ## Commands
 

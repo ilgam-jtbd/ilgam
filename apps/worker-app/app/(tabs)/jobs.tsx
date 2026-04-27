@@ -1,5 +1,5 @@
 // 일감 탭 — 시니어 UX: 48dp 터치 / 18pt 기본 / WCAG AAA 7:1
-// 카테고리 필터·거리·즉시정산 뱃지 (당근알바·급구·지니어스 패턴 참조)
+// 카테고리 필터·거리·즉시정산 뱃지 (시니어 UX 베이스)
 // 데이터: match-engine Edge Function (Supabase 미설정 시 MOCK_JOBS 폴백, lib/jobs.ts)
 
 import {

@@ -3,12 +3,12 @@ import Link from "next/link";
 import { colors, spacing, typography } from "@ilgam/design-tokens";
 
 // SEO: 마케팅 랜딩 — H1/H2 에 주요 키워드 자연 배치
-// 참고: 네이버 데이터랩·구글 트렌드·민간 플랫폼(알바몬·알바천국·당근알바·급구) 카테고리 키워드
+// 참고: 네이버 데이터랩·구글 트렌드 시니어 알바 카테고리 키워드
 
 export const metadata = {
   title: "시니어 단기알바·동네알바 매칭 | 4060 당일정산",
   description:
-    "50대·60대 시니어와 중장년을 위한 단기알바 플랫폼. 내 주변 동네알바, 당일 정산, 유연근무. 알바몬·알바천국·당근알바 대안.",
+    "50대·60대 시니어와 중장년을 위한 단기알바 플랫폼. 내 주변 동네알바, 당일 정산, 유연근무.",
 };
 
 export default function MarketingHome() {
@@ -176,7 +176,7 @@ export default function MarketingHome() {
         </details>
         <details>
           <summary style={{ cursor: "pointer", color: colors.navy[700], fontWeight: 600 }}>
-            알바몬·알바천국·당근알바와 뭐가 다른가요?
+            기존 구인구직 플랫폼과 뭐가 다른가요?
           </summary>
           <p style={{ color: colors.gray[700], marginTop: spacing.sm }}>
             일감은 <strong>50대 이상 시니어·중장년에 특화</strong>된 스팟워크 플랫폼입니다. 큰 글씨·큰 버튼 UX, 당일 정산, 검증된 워커 풀, 공공 파트너십(서울시 50플러스·노인일자리여기)이 차별점입니다.

@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ilgam.kr";
 
 // SEO 키워드 근거:
-// · 단기알바·당일알바·동네알바·시니어알바 → 네이버/구글 검색 고빈도 (알바몬·알바천국·당근알바·급구 카테고리)
+// · 단기알바·당일알바·동네알바·시니어알바 → 네이버/구글 검색 고빈도
 // · 4060·중장년·50대·60대 → 공공 (워크넷·서울시 50플러스) 및 민간 플랫폼 공용 태그
 // · 당일정산·즉시정산 → ILGAM USP (스팟워크 결제 모델)
 // · 내주변·근처 → dong_code 기반 proximity 매칭 USP
