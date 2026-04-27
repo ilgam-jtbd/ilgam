@@ -5,6 +5,7 @@
 import type { Employer } from "@ilgam/core";
 import { colors, spacing, typography, shadow, radius } from "@ilgam/design-tokens";
 import { getServerSupabase } from "@/lib/supabase-server";
+import { isDemoMode, DEMO_PENDING_EMPLOYERS } from "@/lib/demo";
 import { FlashBanner, type FlashSearch } from "@/components/ui/FlashBanner";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { approveEmployer, rejectEmployer } from "./actions";
@@ -13,6 +14,8 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 async function loadPending(): Promise<Employer[]> {
+  if (isDemoMode) return DEMO_PENDING_EMPLOYERS;
+
   const supabase = await getServerSupabase();
   const { data, error } = await supabase
     .from("employers")

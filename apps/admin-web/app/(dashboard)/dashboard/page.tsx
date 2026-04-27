@@ -2,16 +2,14 @@
 // ADR-003: force-dynamic + no-store — 사용자별 데이터
 // ADR-005: RLS 3축 — authenticated 사용자의 current_employer_ids() 로 자동 필터
 
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { colors, spacing, typography } from "@ilgam/design-tokens";
+import { getServerSupabase } from "@/lib/supabase-server";
+import { isDemoMode, DEMO_DASHBOARD_STATS } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
-
-type CookieTuple = { name: string; value: string; options?: CookieOptions };
 
 type Stats = {
   openJobs: number;
@@ -22,17 +20,9 @@ type Stats = {
 };
 
 async function loadStats(): Promise<Stats> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (_cookiesToSet: CookieTuple[]) => {},
-      },
-    }
-  );
+  if (isDemoMode) return DEMO_DASHBOARD_STATS;
+
+  const supabase = await getServerSupabase();
 
   const {
     data: { user },

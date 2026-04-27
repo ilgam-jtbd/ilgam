@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { colors, spacing, typography } from "@ilgam/design-tokens";
 import { getServerSupabase } from "@/lib/supabase-server";
+import { isDemoMode, DEMO_EMPLOYER_OPTIONS } from "@/lib/demo";
 import { createJob } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,8 @@ export const fetchCache = "force-no-store";
 type EmployerOption = { id: string; biz_name: string };
 
 async function listEmployers(): Promise<EmployerOption[]> {
+  if (isDemoMode) return DEMO_EMPLOYER_OPTIONS;
+
   const supabase = await getServerSupabase();
   const {
     data: { user },
