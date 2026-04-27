@@ -1,13 +1,14 @@
--- pgTAP · RLS 부정 경로 (cross-tenant) 검증 (ADR-005, iter03)
--- 목적: 다른 워커/구인자/익명/비관리자가 권한 외 데이터를 읽거나 쓰지 못하는지 보증.
--- 5 케이스 · 각 begin/rollback 격리. authenticated 역할 + request.jwt.claims JSON 패턴.
+-- pgTAP · RLS 부정 경로 (cross-tenant) 검증 (ADR-005, iter03/10)
+-- pg_prove 는 파일 1개 = TAP stream 1개 → plan/finish 도 파일당 1회.
+-- 각 케이스는 savepoint 로 격리, fixture UUID 는 케이스별 unique.
+
+begin;
+select plan(5);
 
 -- ───────────────────────────────────────────────────────────
 -- (1) worker A → worker B 의 matches 조회 차단
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
+savepoint c1;
 insert into auth.users (id, email) values
   ('11111111-1111-4111-8111-111111111111', 'a@test'),
   ('22222222-2222-4222-8222-222222222222', 'b@test');
@@ -27,25 +28,20 @@ insert into public.matches (id, job_id, worker_id, employer_id) values
    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
    'cccccccc-cccc-4ccc-8ccc-cccccccccccc');
-
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
-
 select results_eq(
   $$ select count(*)::bigint from public.matches where worker_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' $$,
   $$ values (0::bigint) $$,
   '(1) worker A 는 worker B 의 matches 행을 SELECT 할 수 없다'
 );
-
-select * from finish();
-rollback;
+reset role;
+rollback to c1;
 
 -- ───────────────────────────────────────────────────────────
 -- (2) employer X → employer Y 의 jobs UPDATE 차단
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
+savepoint c2;
 insert into auth.users (id, email) values
   ('33333333-3333-4333-8333-333333333333', 'x@test');
 insert into public.profiles (id, role) values
@@ -58,76 +54,45 @@ insert into public.employer_members (employer_id, profile_id, role) values
 insert into public.regions (dong_code, sido, sigungu, dong) values ('2222000000','S','G','D');
 insert into public.jobs (id, employer_id, title, dong_code, shift_start_at, shift_end_at, hourly_wage_krw, status) values
   ('66666666-6666-4666-8666-666666666666','55555555-5555-4555-8555-555555555555','Yjob','2222000000', now(), now()+interval '1h', 10030, 'open');
-
--- UPDATE 시도 (RLS 차단으로 silent 0 rows changed)
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"33333333-3333-4333-8333-333333333333","role":"authenticated"}';
-
-update public.jobs set title = 'HACKED'
-  where id = '66666666-6666-4666-8666-666666666666';
-
--- 권한 일시 해제 후 실제 행 확인 (UPDATE 가 통과했는지 검증)
+update public.jobs set title = 'HACKED' where id = '66666666-6666-4666-8666-666666666666';
 reset role;
 select results_eq(
   $$ select title from public.jobs where id = '66666666-6666-4666-8666-666666666666' $$,
   $$ values ('Yjob'::text) $$,
-  '(2) employer X 의 UPDATE 가 차단되어 jobs.title 이 원본 그대로 유지된다'
+  '(2) employer X 의 UPDATE 가 차단되어 jobs.title 원본 유지'
 );
-
-select * from finish();
-rollback;
+rollback to c2;
 
 -- ───────────────────────────────────────────────────────────
--- (3) anon → public.employers 직접 조회 차단
+-- (3) anon role 에 employers SELECT 권한이 없는지 검증
+--     (throws_ok 패턴 대신 has_table_privilege 로 직접 검증)
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-set local role anon;
-set local "request.jwt.claims" = '{"role":"anon"}';
-
-select throws_ok(
-  $$ select id from public.employers limit 1 $$,
-  '42501',
-  null,
-  '(3) anon 은 public.employers 를 SELECT 할 수 없다 (permission denied)'
+savepoint c3;
+select results_eq(
+  $$ select has_table_privilege('anon', 'public.employers', 'SELECT') $$,
+  $$ values (false) $$,
+  '(3) anon role 은 public.employers 에 SELECT 권한이 없다'
 );
-
-select * from finish();
-rollback;
+rollback to c3;
 
 -- ───────────────────────────────────────────────────────────
--- (4) non-admin → operator_actions INSERT 차단
+-- (4) authenticated 에 operator_actions INSERT 권한이 없는지 검증
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-insert into auth.users (id, email) values
-  ('77777777-7777-4777-8777-777777777777', 'w@test');
-insert into public.profiles (id, role) values
-  ('77777777-7777-4777-8777-777777777777', 'worker');
-
-set local role authenticated;
-set local "request.jwt.claims" = '{"sub":"77777777-7777-4777-8777-777777777777","role":"authenticated"}';
-
-select throws_ok(
-  $$ insert into public.operator_actions (actor_id, action_type)
-     values ('77777777-7777-4777-8777-777777777777','internal_page_view') $$,
-  '42501',
-  null,
-  '(4) 일반 워커는 operator_actions 에 직접 INSERT 할 수 없다 (permission denied)'
+savepoint c4;
+select results_eq(
+  $$ select has_table_privilege('authenticated', 'public.operator_actions', 'INSERT') $$,
+  $$ values (false) $$,
+  '(4) authenticated role 은 operator_actions 에 INSERT 권한이 없다'
 );
-
-select * from finish();
-rollback;
+rollback to c4;
 
 -- ───────────────────────────────────────────────────────────
 -- (5) worker → 본인 matches.cancelled_at UPDATE 시도 차단
---      매치 취소 정책 부재 (matches_worker 는 SELECT only) → 0 rows
+--     matches_worker 정책은 SELECT 전용 → UPDATE 0 rows
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
+savepoint c5;
 insert into auth.users (id, email) values
   ('88888888-8888-4888-8888-888888888888', 'w2@test');
 insert into public.profiles (id, role) values
@@ -144,20 +109,17 @@ insert into public.matches (id, job_id, worker_id, employer_id) values
    'b2b2b2b2-b2b2-4b2b-8b2b-b2b2b2b2b2b2',
    '99999999-9999-4999-8999-999999999999',
    'a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1');
-
--- UPDATE 시도 (UPDATE 정책 부재로 silent 0 rows changed)
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"88888888-8888-4888-8888-888888888888","role":"authenticated"}';
-
 update public.matches set cancelled_at = now(), cancel_reason = 'self-cancel'
   where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3';
-
 reset role;
 select results_eq(
   $$ select cancelled_at is null from public.matches where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3' $$,
   $$ values (true) $$,
-  '(5) 워커는 본인 matches 라도 cancelled_at 을 UPDATE 할 수 없다 (UPDATE 정책 부재)'
+  '(5) 워커는 본인 matches 라도 cancelled_at UPDATE 차단 (UPDATE 정책 부재)'
 );
+rollback to c5;
 
 select * from finish();
 rollback;

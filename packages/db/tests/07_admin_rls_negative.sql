@@ -1,12 +1,13 @@
 -- pgTAP · admin / operator_actions / private.* RLS 부정 경로 검증 (ADR-009, iter10)
--- 5 케이스 · 각 begin/rollback 격리. 운영자 백오피스 보안 회귀 사각지대 차단.
+-- pg_prove: 파일당 plan() 1회 + savepoint 격리.
+
+begin;
+select plan(5);
 
 -- ───────────────────────────────────────────────────────────
 -- (1) 비-admin worker → platform_admins SELECT 차단
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
+savepoint c1;
 insert into auth.users (id, email) values
   ('aaaa1111-1111-4111-8111-aaaa11111111', 'w@test'),
   ('aaaa2222-2222-4222-8222-aaaa22222222', 'a@test');
@@ -15,118 +16,66 @@ insert into public.profiles (id, role) values
   ('aaaa2222-2222-4222-8222-aaaa22222222', 'admin');
 insert into public.platform_admins (profile_id, active, role, mfa_enrolled, last_mfa_at) values
   ('aaaa2222-2222-4222-8222-aaaa22222222', true, 'operator', true, now());
-
 set local role authenticated;
 set local "request.jwt.claims" = '{"sub":"aaaa1111-1111-4111-8111-aaaa11111111","role":"authenticated"}';
-
 select results_eq(
   $$ select count(*)::bigint from public.platform_admins $$,
   $$ values (0::bigint) $$,
   '(1) 일반 워커는 platform_admins 행을 SELECT 할 수 없다 (RLS or grant)'
 );
-
-select * from finish();
-rollback;
+reset role;
+rollback to c1;
 
 -- ───────────────────────────────────────────────────────────
--- (2) 비활성(active=false) admin → operator_actions INSERT 차단
+-- (2) authenticated 에 operator_actions INSERT 권한 부재 검증
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-insert into auth.users (id, email) values
-  ('bbbb1111-1111-4111-8111-bbbb11111111', 'inactive@test');
-insert into public.profiles (id, role) values
-  ('bbbb1111-1111-4111-8111-bbbb11111111', 'admin');
-insert into public.platform_admins (profile_id, active, role, mfa_enrolled, last_mfa_at) values
-  ('bbbb1111-1111-4111-8111-bbbb11111111', false, 'operator', true, now());
-
-set local role authenticated;
-set local "request.jwt.claims" = '{"sub":"bbbb1111-1111-4111-8111-bbbb11111111","role":"authenticated"}';
-
--- operator_actions 는 authenticated 에 INSERT grant 없음 + active 가드 어차피 통과 못 함
-select throws_ok(
-  $$ insert into public.operator_actions (actor_id, action_type)
-     values ('bbbb1111-1111-4111-8111-bbbb11111111','employer_approve') $$,
-  '42501',
-  null,
-  '(2) 비활성 admin은 operator_actions 직접 INSERT 불가 (permission denied)'
+savepoint c2;
+select results_eq(
+  $$ select has_table_privilege('authenticated', 'public.operator_actions', 'INSERT') $$,
+  $$ values (false) $$,
+  '(2) authenticated role 은 operator_actions INSERT 권한 없음 (admin 우회 차단)'
 );
-
-select * from finish();
-rollback;
+rollback to c2;
 
 -- ───────────────────────────────────────────────────────────
--- (3) anon → operator_actions SELECT 차단
+-- (3) anon 에 operator_actions SELECT 권한이 없는지 검증
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-set local role anon;
-set local "request.jwt.claims" = '{"role":"anon"}';
-
-select throws_ok(
-  $$ select id from public.operator_actions limit 1 $$,
-  '42501',
-  null,
-  '(3) anon은 operator_actions를 SELECT 할 수 없다'
+savepoint c3;
+select results_eq(
+  $$ select has_table_privilege('anon', 'public.operator_actions', 'SELECT') $$,
+  $$ values (false) $$,
+  '(3) anon role 은 operator_actions 에 SELECT 권한 없음'
 );
-
-select * from finish();
-rollback;
+rollback to c3;
 
 -- ───────────────────────────────────────────────────────────
--- (4) authenticated 워커 → private.workers_tax_identity SELECT 완전 차단
+-- (4) authenticated 에 private.workers_tax_identity 권한 부재 (PII 격리)
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-insert into auth.users (id, email) values
-  ('cccc1111-1111-4111-8111-cccc11111111', 'w2@test');
-insert into public.profiles (id, role) values
-  ('cccc1111-1111-4111-8111-cccc11111111', 'worker');
-
-set local role authenticated;
-set local "request.jwt.claims" = '{"sub":"cccc1111-1111-4111-8111-cccc11111111","role":"authenticated"}';
-
--- private 스키마는 anon/authenticated 에 모든 권한 revoke (ADR-005)
-select throws_ok(
-  $$ select worker_id from private.workers_tax_identity limit 1 $$,
-  '42501',
-  null,
-  '(4) authenticated 워커는 private.workers_tax_identity SELECT 차단 (PII)'
+savepoint c4;
+select results_eq(
+  $$
+    select has_table_privilege('authenticated', 'private.workers_tax_identity', 'SELECT')
+        or has_table_privilege('anon', 'private.workers_tax_identity', 'SELECT')
+  $$,
+  $$ values (false) $$,
+  '(4) authenticated/anon 둘 다 private.workers_tax_identity SELECT 차단 (PII)'
 );
-
-select * from finish();
-rollback;
+rollback to c4;
 
 -- ───────────────────────────────────────────────────────────
--- (5) 비-admin worker → app.log_operator_action() RPC 호출 시도 차단
---      함수는 SECURITY DEFINER 이지만 grant 가 없으므로 호출 자체 불가
+-- (5) authenticated 에 app.log_operator_action EXECUTE 권한 부재
+--     (admin 만 호출 가능. 함수 grant 검증)
 -- ───────────────────────────────────────────────────────────
-begin;
-select plan(1);
-
-insert into auth.users (id, email) values
-  ('dddd1111-1111-4111-8111-dddd11111111', 'w3@test');
-insert into public.profiles (id, role) values
-  ('dddd1111-1111-4111-8111-dddd11111111', 'worker');
-insert into public.workers (id, profile_id) values
-  ('dddd2222-2222-4222-8222-dddd22222222', 'dddd1111-1111-4111-8111-dddd11111111');
-
-set local role authenticated;
-set local "request.jwt.claims" = '{"sub":"dddd1111-1111-4111-8111-dddd11111111","role":"authenticated"}';
-
--- app schema 의 log_operator_action 은 admin-only 호출. 일반 워커가 직접 호출 시 grant 부재 또는 함수 내부 admin 검증 실패.
--- 정확한 SQLSTATE 는 함수 정의에 따라 다를 수 있어 throws 만 확인 (any error).
-select throws_ok(
-  $$ select app.log_operator_action(
-       'employer_approve','employers',
-       '00000000-0000-4000-8000-000000000000'::uuid,'forced','{}'::jsonb
-     ) $$,
-  null, null,
-  '(5) 일반 워커는 app.log_operator_action 직접 호출 차단'
+savepoint c5;
+-- 4-bis 가 plan 카운트 5에 포함됨 → 5번째 테스트는 (4) 의 두 번째가 아닌 별도 케이스
+-- 실제 plan(5): (1) (2) (3) (4) (5)
+-- (4) 안의 4-bis 를 제거하고 (5) 를 함수 권한 검증으로
+select results_eq(
+  $$ select has_function_privilege('authenticated', 'app.log_operator_action(text,text,uuid,text,jsonb)', 'EXECUTE') $$,
+  $$ values (false) $$,
+  '(5) authenticated role 은 app.log_operator_action EXECUTE 권한 없음 (admin only)'
 );
+rollback to c5;
 
 select * from finish();
 rollback;
