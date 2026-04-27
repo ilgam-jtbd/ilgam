@@ -5,6 +5,8 @@
 import type { Employer } from "@ilgam/core";
 import { colors, spacing, typography, shadow, radius } from "@ilgam/design-tokens";
 import { getServerSupabase } from "@/lib/supabase-server";
+import { FlashBanner, type FlashSearch } from "@/components/ui/FlashBanner";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { approveEmployer, rejectEmployer } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -25,84 +27,7 @@ async function loadPending(): Promise<Employer[]> {
   return (data ?? []) as Employer[];
 }
 
-function StatusBadge({ approved, suspended }: { approved: boolean; suspended: boolean }) {
-  const label = suspended ? "차단" : approved ? "승인됨" : "대기";
-  const bg = suspended ? colors.danger : approved ? colors.success : colors.warning;
-  return (
-    <span
-      style={{
-        fontSize: typography.sizes.xs,
-        color: colors.white,
-        background: bg,
-        padding: `2px ${spacing.sm}px`,
-        borderRadius: radius.full,
-        fontWeight: typography.weights.medium,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-type Search = { ok?: string; error?: string; warn?: string };
-
-function FlashBanner({ search }: { search: Search }) {
-  if (search.ok) {
-    return (
-      <div
-        role="status"
-        style={{
-          padding: spacing.md,
-          marginBottom: spacing.lg,
-          borderRadius: radius.sm,
-          background: "#D4EDDA",
-          border: "1px solid #28A745",
-          color: "#155724",
-          fontSize: typography.sizes.sm,
-        }}
-      >
-        {search.ok === "approved" ? "승인 처리되었습니다." : "반려 처리되었습니다."}
-      </div>
-    );
-  }
-  if (search.warn) {
-    return (
-      <div
-        role="alert"
-        style={{
-          padding: spacing.md,
-          marginBottom: spacing.lg,
-          borderRadius: radius.sm,
-          background: "#FFF3CD",
-          border: "1px solid #F0AD4E",
-          color: "#856404",
-          fontSize: typography.sizes.sm,
-        }}
-      >
-        {search.warn}
-      </div>
-    );
-  }
-  if (search.error) {
-    return (
-      <div
-        role="alert"
-        style={{
-          padding: spacing.md,
-          marginBottom: spacing.lg,
-          borderRadius: radius.sm,
-          background: "#F8D7DA",
-          border: "1px solid #DC3545",
-          color: "#721C24",
-          fontSize: typography.sizes.sm,
-        }}
-      >
-        오류: {search.error}
-      </div>
-    );
-  }
-  return null;
-}
+type Search = FlashSearch;
 
 export default async function EmployersPage(props: { searchParams: Promise<Search> }) {
   const search = await props.searchParams;

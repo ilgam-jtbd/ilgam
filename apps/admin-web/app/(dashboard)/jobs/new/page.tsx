@@ -2,32 +2,19 @@
 // Server Action 으로 제출 (client-side JS 불필요) — 고령 고용주도 저대역폭 환경에서 안정
 // RLS 가 employer_id 권한 강제 — UI 에 나오지 않는 employer 는 insert 실패
 
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { colors, spacing, typography } from "@ilgam/design-tokens";
+import { getServerSupabase } from "@/lib/supabase-server";
 import { createJob } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-type CookieTuple = { name: string; value: string; options?: CookieOptions };
-
 type EmployerOption = { id: string; biz_name: string };
 
 async function listEmployers(): Promise<EmployerOption[]> {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (_cookiesToSet: CookieTuple[]) => {},
-      },
-    }
-  );
+  const supabase = await getServerSupabase();
   const {
     data: { user },
   } = await supabase.auth.getUser();
