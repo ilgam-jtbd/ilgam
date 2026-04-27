@@ -160,6 +160,9 @@ export default async function DashboardHome() {
             borderRadius: 8,
             textDecoration: "none",
             fontWeight: 600,
+            display: "inline-flex",
+            alignItems: "center",
+            minHeight: 48,
           }}
         >
           새 공고 등록
@@ -174,6 +177,9 @@ export default async function DashboardHome() {
             borderRadius: 8,
             textDecoration: "none",
             fontWeight: 600,
+            display: "inline-flex",
+            alignItems: "center",
+            minHeight: 48,
           }}
         >
           공고 목록 보기

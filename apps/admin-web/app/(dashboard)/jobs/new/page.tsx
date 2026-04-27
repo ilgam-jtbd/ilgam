@@ -14,7 +14,7 @@ export const fetchCache = "force-no-store";
 
 type CookieTuple = { name: string; value: string; options?: CookieOptions };
 
-type EmployerOption = { id: string; company_name: string };
+type EmployerOption = { id: string; biz_name: string };
 
 async function listEmployers(): Promise<EmployerOption[]> {
   const cookieStore = await cookies();
@@ -34,7 +34,7 @@ async function listEmployers(): Promise<EmployerOption[]> {
   if (!user) redirect("/auth/login");
 
   // RLS 가 employer_members 로 필터링 — 본인 소속 사업체만 반환
-  const { data } = await supabase.from("employers").select("id, company_name").order("company_name");
+  const { data } = await supabase.from("employers").select("id, biz_name").order("biz_name");
   return (data ?? []) as EmployerOption[];
 }
 
@@ -111,7 +111,7 @@ export default async function NewJobPage(props: { searchParams: Promise<Search> 
             <select id="employer_id" name="employer_id" required style={inputBase}>
               {employers.map((e) => (
                 <option key={e.id} value={e.id}>
-                  {e.company_name}
+                  {e.biz_name}
                 </option>
               ))}
             </select>
@@ -271,6 +271,7 @@ export default async function NewJobPage(props: { searchParams: Promise<Search> 
                 fontWeight: 600,
                 display: "inline-flex",
                 alignItems: "center",
+                minHeight: 48,
               }}
             >
               취소

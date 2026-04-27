@@ -11,6 +11,9 @@ const navLink: React.CSSProperties = {
   borderRadius: 6,
   fontSize: typography.sizes.sm,
   fontWeight: 500,
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: 44,
 };
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -18,12 +21,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <div style={{ minHeight: "100vh", background: colors.gray[50] }}>
       <nav
         style={{
-          padding: `${spacing.md}px ${spacing.xl}px`,
+          padding: `${spacing.md}px ${spacing.lg}px`,
           background: colors.navy[800],
           color: colors.white,
           display: "flex",
           alignItems: "center",
-          gap: spacing.xl,
+          gap: spacing.lg,
+          flexWrap: "wrap",
         }}
       >
         <Link
@@ -38,7 +42,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         >
           일감 어드민
         </Link>
-        <div style={{ display: "flex", gap: spacing.sm }}>
+        <div style={{ display: "flex", gap: spacing.xs, flexWrap: "wrap" }}>
           <Link href="/dashboard" style={navLink}>
             대시보드
           </Link>
@@ -50,7 +54,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </Link>
         </div>
       </nav>
-      <div style={{ padding: spacing.xxl, maxWidth: 1200, margin: "0 auto" }}>{children}</div>
+      <div style={{ padding: spacing.lg, maxWidth: 1200, margin: "0 auto" }}>{children}</div>
     </div>
   );
 }

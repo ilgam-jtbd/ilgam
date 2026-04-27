@@ -93,6 +93,7 @@ export default function LoginForm({ nextUrl, errorCode }: Props) {
             color: colors.gray[900],
             boxSizing: "border-box",
             outline: "none",
+            minHeight: 48,
           }}
         />
       </div>
