@@ -215,6 +215,7 @@ export default async function EmployersPage(props: { searchParams: Promise<Searc
               >
                 <form action={approveEmployer} style={{ display: "flex", gap: spacing.sm, flex: 1, minWidth: 280 }}>
                   <input type="hidden" name="employer_id" value={employer.id} />
+                  <input type="hidden" name="idem_key" value={`apv_${employer.id}_${Date.now()}`} />
                   <input
                     type="text"
                     name="reason"
@@ -251,6 +252,7 @@ export default async function EmployersPage(props: { searchParams: Promise<Searc
 
                 <form action={rejectEmployer} style={{ display: "flex", gap: spacing.sm, flex: 1, minWidth: 280 }}>
                   <input type="hidden" name="employer_id" value={employer.id} />
+                  <input type="hidden" name="idem_key" value={`rej_${employer.id}_${Date.now()}`} />
                   <input
                     type="text"
                     name="reason"
