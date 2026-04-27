@@ -8,7 +8,7 @@ select plan(2);
 -- ───────────────────────────────────────────────────────────
 -- (1) 비-admin worker → platform_admins SELECT 차단 (RLS)
 -- ───────────────────────────────────────────────────────────
-savepoint c1;
+
 insert into auth.users (id, email) values
   ('aaaa1111-1111-4111-8111-aaaa11111111', 'w@test'),
   ('aaaa2222-2222-4222-8222-aaaa22222222', 'a@test');
@@ -25,12 +25,12 @@ select results_eq(
   '(1) 일반 워커는 platform_admins 행을 SELECT 할 수 없다 (RLS)'
 );
 reset role;
-rollback to c1;
+
 
 -- ───────────────────────────────────────────────────────────
 -- (2) authenticated worker → private.workers_tax_identity 직접 SELECT 시 throws 검증
 -- ───────────────────────────────────────────────────────────
-savepoint c2;
+
 insert into auth.users (id, email) values
   ('cccc1111-1111-4111-8111-cccc11111111', 'w2@test');
 insert into public.profiles (id, role) values
@@ -43,7 +43,7 @@ select throws_ok(
   '(2) authenticated 워커는 private.workers_tax_identity SELECT 차단 (PII)'
 );
 reset role;
-rollback to c2;
+
 
 select * from finish();
 rollback;

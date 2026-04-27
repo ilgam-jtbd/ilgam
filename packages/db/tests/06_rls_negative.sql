@@ -9,7 +9,7 @@ select plan(3);
 -- ───────────────────────────────────────────────────────────
 -- (1) worker A → worker B 의 matches 조회 차단
 -- ───────────────────────────────────────────────────────────
-savepoint c1;
+
 insert into auth.users (id, email) values
   ('11111111-1111-4111-8111-111111111111', 'a@test'),
   ('22222222-2222-4222-8222-222222222222', 'b@test');
@@ -37,12 +37,12 @@ select results_eq(
   '(1) worker A 는 worker B 의 matches 행을 SELECT 할 수 없다 (RLS)'
 );
 reset role;
-rollback to c1;
+
 
 -- ───────────────────────────────────────────────────────────
 -- (2) employer X → employer Y 의 jobs UPDATE 차단 (RLS USING)
 -- ───────────────────────────────────────────────────────────
-savepoint c2;
+
 insert into auth.users (id, email) values
   ('33333333-3333-4333-8333-333333333333', 'x@test');
 insert into public.profiles (id, role) values
@@ -64,13 +64,13 @@ select results_eq(
   $$ values ('Yjob'::text) $$,
   '(2) employer X 의 UPDATE 가 차단되어 jobs.title 원본 유지'
 );
-rollback to c2;
+
 
 -- ───────────────────────────────────────────────────────────
 -- (3) worker → 본인 matches.cancelled_at UPDATE 시도 차단
 --     matches_worker 정책은 SELECT 전용 → UPDATE 0 rows
 -- ───────────────────────────────────────────────────────────
-savepoint c3;
+
 insert into auth.users (id, email) values
   ('88888888-8888-4888-8888-888888888888', 'w2@test');
 insert into public.profiles (id, role) values
@@ -97,7 +97,7 @@ select results_eq(
   $$ values (true) $$,
   '(3) 워커는 본인 matches 라도 cancelled_at UPDATE 차단 (UPDATE 정책 부재)'
 );
-rollback to c3;
+
 
 select * from finish();
 rollback;
