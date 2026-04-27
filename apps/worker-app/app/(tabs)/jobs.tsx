@@ -1,6 +1,6 @@
 // 일감 탭 — 시니어 UX: 48dp 터치 / 18pt 기본 / WCAG AAA 7:1
 // 카테고리 필터·거리·즉시정산 뱃지 (당근알바·급구·지니어스 패턴 참조)
-// 실 구현 시 match-engine RPC + supabase-js 연결 (ADR-004)
+// 데이터: match-engine Edge Function (Supabase 미설정 시 MOCK_JOBS 폴백, lib/jobs.ts)
 
 import {
   View,
@@ -9,168 +9,14 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { colors, typography, spacing } from "@ilgam/design-tokens";
 import type { Job, JobCategory } from "@ilgam/core";
 import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
-
-// ─── 샘플 데이터 (당근알바·급구·지니어스 공고 패턴 참조) ─────────────────
-const MOCK_JOBS: Job[] = [
-  {
-    id: "job-001",
-    employer_id: "emp-001",
-    title: "강서 쿠팡 물류센터 피킹 보조",
-    description: "지게차 불필요, 가벼운 물품 분류·피킹 작업",
-    dong_code: "1150010100",
-    dong_label: "강서구 마곡동",
-    shift_start_at: "2026-04-25T09:00:00+09:00",
-    shift_end_at: "2026-04-25T13:00:00+09:00",
-    hourly_wage_krw: 12000,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["logistics"],
-    headcount: 3,
-    status: "open",
-    category: "logistics",
-    distance_km: 1.2,
-    instant_pay: true,
-    note: "지게차 불필요 · 서서 작업",
-  },
-  {
-    id: "job-002",
-    employer_id: "emp-002",
-    title: "송파 베이커리 오전 프렙 보조",
-    description: "빵 성형 보조, 앉아서 작업 가능, 경험 무관",
-    dong_code: "1174010500",
-    dong_label: "송파구 방이동",
-    shift_start_at: "2026-04-25T06:00:00+09:00",
-    shift_end_at: "2026-04-25T10:00:00+09:00",
-    hourly_wage_krw: 12000,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["fnb"],
-    headcount: 1,
-    status: "open",
-    category: "food",
-    distance_km: 0.8,
-    instant_pay: true,
-    note: "앉아서 작업 가능 · 고령자 환영",
-  },
-  {
-    id: "job-003",
-    employer_id: "emp-003",
-    title: "마포 국밥집 점심 서빙",
-    description: "주문 접수·상차림·퇴식 보조",
-    dong_code: "1144010400",
-    dong_label: "마포구 합정동",
-    shift_start_at: "2026-04-25T10:30:00+09:00",
-    shift_end_at: "2026-04-25T14:30:00+09:00",
-    hourly_wage_krw: 11500,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["fnb"],
-    headcount: 2,
-    status: "open",
-    category: "food",
-    distance_km: 2.3,
-    instant_pay: false,
-    note: "고령자 우대",
-  },
-  {
-    id: "job-004",
-    employer_id: "emp-004",
-    title: "노원 재활병원 청소 보조",
-    description: "병동 복도·화장실 청소, 세제 제공",
-    dong_code: "1135010300",
-    dong_label: "노원구 중계동",
-    shift_start_at: "2026-04-25T07:00:00+09:00",
-    shift_end_at: "2026-04-25T11:00:00+09:00",
-    hourly_wage_krw: 11500,
-    required_cert_codes: [],
-    preferred_mentor_tags: [],
-    headcount: 2,
-    status: "open",
-    category: "cleaning",
-    distance_km: 0.5,
-    instant_pay: true,
-    note: null,
-  },
-  {
-    id: "job-005",
-    employer_id: "emp-005",
-    title: "영등포 이마트 행사 물품 진열",
-    description: "음료·과자 행사 코너 진열, 무거운 짐 없음",
-    dong_code: "1156010200",
-    dong_label: "영등포구 당산동",
-    shift_start_at: "2026-04-25T08:00:00+09:00",
-    shift_end_at: "2026-04-25T12:00:00+09:00",
-    hourly_wage_krw: 11500,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["retail"],
-    headcount: 3,
-    status: "open",
-    category: "retail",
-    distance_km: 3.1,
-    instant_pay: false,
-    note: "무거운 짐 없음",
-  },
-  {
-    id: "job-006",
-    employer_id: "emp-006",
-    title: "중랑 요양원 식사 보조",
-    description: "어르신 식사 배식·보조, 요양보호사 우대",
-    dong_code: "1126010100",
-    dong_label: "중랑구 면목동",
-    shift_start_at: "2026-04-25T07:30:00+09:00",
-    shift_end_at: "2026-04-25T11:30:00+09:00",
-    hourly_wage_krw: 12500,
-    required_cert_codes: ["care_worker_2"],
-    preferred_mentor_tags: ["care"],
-    headcount: 1,
-    status: "open",
-    category: "care",
-    distance_km: 1.8,
-    instant_pay: true,
-    note: "요양보호사 자격 우대",
-  },
-  {
-    id: "job-007",
-    employer_id: "emp-007",
-    title: "파주 딸기 수확 보조",
-    description: "하우스 딸기 수확 보조, 앉아서 작업, 교통비 지원",
-    dong_code: "4148025300",
-    dong_label: "파주시 탄현면",
-    shift_start_at: "2026-04-25T07:00:00+09:00",
-    shift_end_at: "2026-04-25T12:00:00+09:00",
-    hourly_wage_krw: 12000,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["agriculture"],
-    headcount: 5,
-    status: "open",
-    category: "agriculture",
-    distance_km: 28.4,
-    instant_pay: false,
-    note: "교통비 지원 · 점심 제공",
-  },
-  {
-    id: "job-008",
-    employer_id: "emp-008",
-    title: "고양 CJ대한통운 택배 분류",
-    description: "택배 상자 무게순 분류, 체력 보통 수준",
-    dong_code: "4128110000",
-    dong_label: "고양시 덕양구",
-    shift_start_at: "2026-04-25T06:00:00+09:00",
-    shift_end_at: "2026-04-25T10:00:00+09:00",
-    hourly_wage_krw: 12500,
-    required_cert_codes: [],
-    preferred_mentor_tags: ["logistics"],
-    headcount: 4,
-    status: "open",
-    category: "logistics",
-    distance_km: 15.6,
-    instant_pay: true,
-    note: null,
-  },
-];
+import { useMatchedJobs } from "../../lib/jobs";
 
 const CATEGORY_TABS: Array<{ key: JobCategory | "all"; label: string }> = [
   { key: "all", label: "전체" },
@@ -283,14 +129,15 @@ const JobCard = memo(function JobCard({ job }: { job: Job }) {
 // ─── 메인 화면 ────────────────────────────────────────────────────────────
 export default function JobsScreen() {
   const [activeCategory, setActiveCategory] = useState<JobCategory | "all">("all");
+  // workerId 는 인증 연결 후 세션에서 주입. 미연결 상태에서는 mock 폴백.
+  const { data: jobs, isLoading } = useMatchedJobs(null);
 
-  const filtered = useMemo(
-    () =>
-      activeCategory === "all"
-        ? MOCK_JOBS
-        : MOCK_JOBS.filter((j) => j.category === activeCategory),
-    [activeCategory]
-  );
+  const filtered = useMemo(() => {
+    const list = jobs ?? [];
+    return activeCategory === "all"
+      ? list
+      : list.filter((j) => j.category === activeCategory);
+  }, [activeCategory, jobs]);
 
   const renderItem = useCallback(
     ({ item }: { item: Job }) => <JobCard job={item} />,
@@ -344,9 +191,16 @@ export default function JobsScreen() {
         windowSize={7}
         updateCellsBatchingPeriod={50}
         ListEmptyComponent={
-          <View style={styles.emptyWrap}>
-            <Text style={styles.emptyText}>해당 카테고리 일감이 없습니다.</Text>
-          </View>
+          isLoading ? (
+            <View style={styles.emptyWrap}>
+              <ActivityIndicator size="large" color={colors.navy[700]} />
+              <Text style={styles.emptyText}>일감을 불러오는 중…</Text>
+            </View>
+          ) : (
+            <View style={styles.emptyWrap}>
+              <Text style={styles.emptyText}>해당 카테고리 일감이 없습니다.</Text>
+            </View>
+          )
         }
       />
     </View>
