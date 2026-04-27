@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { colors, typography, spacing, radius, touch } from "@ilgam/design-tokens";
-import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
+import { JOB_CATEGORY_LABEL, JOB_CATEGORY_LETTER } from "@ilgam/core";
 import { useMatch } from "../../lib/matches";
 
 function formatTime(iso: string): string {
@@ -210,8 +210,16 @@ export default function MatchDetailScreen() {
                     borderRadius: radius.sm,
                   }}
                 >
-                  <Text style={{ fontSize: 14, marginRight: 4 }}>
-                    {JOB_CATEGORY_EMOJI[job.category]}
+                  <Text
+                    accessibilityLabel={JOB_CATEGORY_LABEL[job.category]}
+                    style={{
+                      fontSize: 14,
+                      marginRight: 4,
+                      fontWeight: "700",
+                      color: colors.navy[700],
+                    }}
+                  >
+                    [{JOB_CATEGORY_LETTER[job.category]}]
                   </Text>
                   <Text
                     style={{

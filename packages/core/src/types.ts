@@ -53,6 +53,18 @@ export const JOB_CATEGORY_LABEL: Record<JobCategory, string> = {
   agriculture: "농업·자연",
 };
 
+// 시니어 가독성 + 스크린리더 일관성을 위해 한글 1자 라벨 채택 (DESIGN.md, iter06).
+// 이모지는 OS·폰트별 렌더 차이 + TalkBack/VoiceOver 발음 불일치로 폐기.
+export const JOB_CATEGORY_LETTER: Record<JobCategory, string> = {
+  logistics: "물", // 물류·배송
+  food: "식", // 외식·카페
+  cleaning: "청", // 청소·환경
+  retail: "유", // 유통·판매
+  care: "돌", // 돌봄·의료
+  agriculture: "농", // 농업·자연
+};
+
+/** @deprecated Use JOB_CATEGORY_LETTER for ARIA + cross-OS consistency. */
 export const JOB_CATEGORY_EMOJI: Record<JobCategory, string> = {
   logistics: "📦",
   food: "🍽️",

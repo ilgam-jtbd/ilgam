@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { colors, typography, spacing } from "@ilgam/design-tokens";
 import type { Job, JobCategory } from "@ilgam/core";
-import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
+import { JOB_CATEGORY_LABEL, JOB_CATEGORY_LETTER } from "@ilgam/core";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { useMatchedJobs } from "../../lib/jobs";
@@ -49,7 +49,7 @@ function CategoryBadge({ category }: { category: JobCategory | null }) {
   return (
     <View style={styles.categoryBadge}>
       <Text style={styles.categoryBadgeText}>
-        {JOB_CATEGORY_EMOJI[category]} {JOB_CATEGORY_LABEL[category]}
+        [{JOB_CATEGORY_LETTER[category]}] {JOB_CATEGORY_LABEL[category]}
       </Text>
     </View>
   );

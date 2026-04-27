@@ -14,7 +14,7 @@ import {
 import { useRouter, Stack } from "expo-router";
 import { colors, typography, spacing, radius, touch } from "@ilgam/design-tokens";
 import type { JobCategory } from "@ilgam/core";
-import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
+import { JOB_CATEGORY_LABEL, JOB_CATEGORY_LETTER } from "@ilgam/core";
 
 // ─── 프로필 데이터 ─────────────────────────────────────────────────────
 const PROFILE = {
@@ -363,7 +363,7 @@ export default function ProfileScreen() {
               <Chip
                 key={cat}
                 label={JOB_CATEGORY_LABEL[cat]}
-                emoji={JOB_CATEGORY_EMOJI[cat]}
+                emoji={`[${JOB_CATEGORY_LETTER[cat]}]`}
                 active={categories.includes(cat)}
                 onPress={() => toggleCategory(cat)}
               />
