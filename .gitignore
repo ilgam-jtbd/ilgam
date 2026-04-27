@@ -24,6 +24,8 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+# Claude Code local state (worktree runtime, scheduled task locks 등)
+.claude/
 # logs
 *.log
 npm-debug.log*
