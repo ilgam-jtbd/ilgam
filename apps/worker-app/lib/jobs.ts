@@ -32,6 +32,30 @@ export function useMatchedJobs(workerId: string | null) {
   });
 }
 
+async function fetchJobById(id: string): Promise<Job | null> {
+  if (!isSupabaseConfigured || !supabase) {
+    return MOCK_JOBS.find((j) => j.id === id) ?? null;
+  }
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.warn("[jobs.fetchById]", error.message);
+    return MOCK_JOBS.find((j) => j.id === id) ?? null;
+  }
+  return (data as Job) ?? null;
+}
+
+export function useJob(id: string | undefined) {
+  return useQuery({
+    queryKey: ["job", id ?? ""],
+    queryFn: () => fetchJobById(id!),
+    enabled: Boolean(id),
+  });
+}
+
 type ApplyArgs = { jobId: string; workerId: string };
 
 async function applyToJob({ jobId, workerId }: ApplyArgs) {

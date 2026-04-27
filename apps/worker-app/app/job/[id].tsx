@@ -1,6 +1,7 @@
 // 일감 상세 — 공고 전체 정보 + 지원 CTA (하단 고정)
 // ADR-003: 18pt 기본 · 48dp 터치 · 하단 안전존 · 2초 Undo 토스트
-// 실 구현 시 supabase.from("jobs").select().eq("id", id) (ADR-004)
+// 데이터: useJob(id) — Supabase 미설정 시 MOCK_JOBS 폴백 (lib/jobs.ts)
+// 지원: useApplyToJob — RLS: worker 본인만 INSERT job_applications
 
 import { useState } from "react";
 import {
@@ -13,32 +14,10 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { colors, typography, spacing, radius, touch, motion } from "@ilgam/design-tokens";
-import type { Job } from "@ilgam/core";
 import { JOB_CATEGORY_LABEL, JOB_CATEGORY_EMOJI } from "@ilgam/core";
+import { useJob, useApplyToJob } from "../../lib/jobs";
+import { supabase } from "../../lib/supabase";
 
-// ─── 샘플 (실제로는 id로 fetch) ─────────────────────────────────────────
-const MOCK_JOB: Job = {
-  id: "job-001",
-  employer_id: "emp-001",
-  title: "강서 쿠팡 물류센터 피킹 보조",
-  description:
-    "가벼운 생필품(세제·휴지 등)을 주문 번호에 맞춰 분류·피킹하는 작업입니다. 지게차 없이 손수레만 사용하며, 휴게 시간 1회 15분 제공됩니다. 안전화는 현장에서 대여 가능합니다.",
-  dong_code: "1150010100",
-  dong_label: "강서구 마곡동",
-  shift_start_at: "2026-04-25T09:00:00+09:00",
-  shift_end_at: "2026-04-25T13:00:00+09:00",
-  hourly_wage_krw: 12000,
-  required_cert_codes: [],
-  preferred_mentor_tags: ["logistics"],
-  headcount: 3,
-  status: "open",
-  category: "logistics",
-  distance_km: 1.2,
-  instant_pay: true,
-  note: "지게차 불필요 · 서서 작업",
-};
-
-// ─── 포매터 ────────────────────────────────────────────────────────────
 function formatTime(iso: string): string {
   const d = new Date(iso);
   const hh = d.getHours().toString().padStart(2, "0");
@@ -62,7 +41,6 @@ function formatHours(min: number): string {
   return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
 }
 
-// ─── 정보 Row ──────────────────────────────────────────────────────────
 function InfoRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <View
@@ -99,14 +77,35 @@ function InfoRow({ label, value, strong }: { label: string; value: string; stron
 }
 
 export default function JobDetailScreen() {
-  // useLocalSearchParams<{ id: string }>() — 실 구현 시 id 로 supabase 쿼리
-  useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [applying, setApplying] = useState(false);
+  const { data: job, isLoading } = useJob(params.id);
+  const applyMutation = useApplyToJob();
   const [applied, setApplied] = useState(false);
 
-  // 실연동 시: const { data: job } = useQuery(["job", id], () => supabase.from("jobs")...)
-  const job = MOCK_JOB;
+  if (isLoading || !job) {
+    return (
+      <>
+        <Stack.Screen options={{ title: "일감 상세", headerBackTitle: "뒤로" }} />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: colors.gray[50],
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="large" color={colors.navy[700]} />
+          ) : (
+            <Text style={{ fontSize: typography.sizes.base, color: colors.gray[600] }}>
+              일감을 찾을 수 없습니다.
+            </Text>
+          )}
+        </View>
+      </>
+    );
+  }
 
   const workMinutes = diffMinutes(job.shift_start_at, job.shift_end_at);
   const estWage = Math.round((job.hourly_wage_krw * workMinutes) / 60);
@@ -124,24 +123,31 @@ export default function JobDetailScreen() {
           text: "지원하기",
           style: "default",
           onPress: async () => {
-            setApplying(true);
-            // 실연동: await supabase.from("matches").insert({...})
-            await new Promise((r) => setTimeout(r, 800));
-            setApplying(false);
-            setApplied(true);
-            // 2초 Undo 토스트 (motion.undoTimeoutMs)
-            setTimeout(() => {
-              Alert.alert(
-                "지원 완료",
-                "고용주 확인 후 알림톡으로 결과를 알려드립니다.",
-                [{ text: "확인", onPress: () => router.back() }]
-              );
-            }, motion.undoTimeoutMs);
+            // 인증 미연결 환경(mock)에서는 anon worker id 로 통과.
+            // 인증 연결 후에는 supabase.auth.getUser() 가 워커 UUID 를 돌려줌.
+            const session = supabase ? (await supabase.auth.getUser()).data.user : null;
+            const workerId = session?.id ?? "anon-worker";
+            try {
+              await applyMutation.mutateAsync({ jobId: job.id, workerId });
+              setApplied(true);
+              setTimeout(() => {
+                Alert.alert(
+                  "지원 완료",
+                  "고용주 확인 후 알림톡으로 결과를 알려드립니다.",
+                  [{ text: "확인", onPress: () => router.back() }]
+                );
+              }, motion.undoTimeoutMs);
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "지원 중 오류가 발생했습니다.";
+              Alert.alert("지원 실패", msg);
+            }
           },
         },
       ]
     );
   };
+
+  const applying = applyMutation.isPending;
 
   return (
     <>
@@ -152,7 +158,6 @@ export default function JobDetailScreen() {
             paddingBottom: touch.buttonHeight + touch.bottomSafeZoneHeight,
           }}
         >
-          {/* 헤더 영역 */}
           <View
             style={{
               backgroundColor: colors.white,
@@ -161,7 +166,6 @@ export default function JobDetailScreen() {
               borderBottomColor: colors.gray[200],
             }}
           >
-            {/* 카테고리 + 거리 + 즉시정산 */}
             <View
               style={{
                 flexDirection: "row",
@@ -249,7 +253,6 @@ export default function JobDetailScreen() {
               {job.title}
             </Text>
 
-            {/* 시급 강조 */}
             <View
               style={{
                 flexDirection: "row",
@@ -273,7 +276,6 @@ export default function JobDetailScreen() {
             </View>
           </View>
 
-          {/* 근무 정보 */}
           <View
             style={{
               backgroundColor: colors.white,
@@ -303,7 +305,6 @@ export default function JobDetailScreen() {
             {job.note && <InfoRow label="특이사항" value={job.note} />}
           </View>
 
-          {/* 업무 설명 */}
           {job.description && (
             <View
               style={{
@@ -334,7 +335,6 @@ export default function JobDetailScreen() {
             </View>
           )}
 
-          {/* 예상 수령액 */}
           <View
             style={{
               backgroundColor: colors.navy[50],
@@ -372,7 +372,6 @@ export default function JobDetailScreen() {
             </Text>
           </View>
 
-          {/* 안전 안내 */}
           <View
             style={{
               marginHorizontal: spacing.lg,
@@ -401,7 +400,6 @@ export default function JobDetailScreen() {
           </View>
         </ScrollView>
 
-        {/* 하단 고정 CTA */}
         <View
           style={{
             position: "absolute",
