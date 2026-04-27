@@ -1,34 +1,29 @@
 // RSC · 구인자 승인 큐 (ADR-009 스크린 1)
-// 실 구현: supabase.from('employers').select(...).is('approved_at', null) 연결 예정.
-// 승인/반려 액션은 Server Action + app.log_operator_action() 호출로 구현.
+// 실 데이터: employers WHERE approved_at IS NULL (RLS · platform_admin only)
+// 승인/반려 → Server Action + app.log_operator_action() 기록.
 
 import type { Employer } from "@ilgam/core";
 import { colors, spacing, typography, shadow, radius } from "@ilgam/design-tokens";
+import { getServerSupabase } from "@/lib/supabase-server";
+import { approveEmployer, rejectEmployer } from "./actions";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
-// 스텁 데이터 — 실 Supabase 쿼리 연결 전 UI 골격 확인용
-const STUB_EMPLOYERS: (Employer & { pending_reason?: string })[] = [
-  {
-    id: "a1b2c3d4-0000-0000-0000-000000000001",
-    biz_name: "(주)한빛물류",
-    contact_name: "이철수",
-    contact_phone_e164: "+821012345678",
-    biz_type: "물류·유통",
-    approved_at: null,
-    suspended_at: null,
-    pending_reason: "사업자등록증 확인 대기",
-  },
-  {
-    id: "a1b2c3d4-0000-0000-0000-000000000002",
-    biz_name: "본죽 성북점",
-    contact_name: "박영희",
-    contact_phone_e164: "+821087654321",
-    biz_type: "F&B",
-    approved_at: null,
-    suspended_at: null,
-  },
-];
+async function loadPending(): Promise<Employer[]> {
+  const supabase = await getServerSupabase();
+  const { data, error } = await supabase
+    .from("employers")
+    .select("id, biz_name, contact_name, contact_phone_e164, biz_type, approved_at, suspended_at")
+    .is("approved_at", null)
+    .is("suspended_at", null)
+    .order("biz_name");
+  if (error) {
+    console.warn("[internal/employers] load:", error.message);
+    return [];
+  }
+  return (data ?? []) as Employer[];
+}
 
 function StatusBadge({ approved, suspended }: { approved: boolean; suspended: boolean }) {
   const label = suspended ? "차단" : approved ? "승인됨" : "대기";
@@ -49,7 +44,70 @@ function StatusBadge({ approved, suspended }: { approved: boolean; suspended: bo
   );
 }
 
-export default function EmployersPage() {
+type Search = { ok?: string; error?: string; warn?: string };
+
+function FlashBanner({ search }: { search: Search }) {
+  if (search.ok) {
+    return (
+      <div
+        role="status"
+        style={{
+          padding: spacing.md,
+          marginBottom: spacing.lg,
+          borderRadius: radius.sm,
+          background: "#D4EDDA",
+          border: "1px solid #28A745",
+          color: "#155724",
+          fontSize: typography.sizes.sm,
+        }}
+      >
+        {search.ok === "approved" ? "승인 처리되었습니다." : "반려 처리되었습니다."}
+      </div>
+    );
+  }
+  if (search.warn) {
+    return (
+      <div
+        role="alert"
+        style={{
+          padding: spacing.md,
+          marginBottom: spacing.lg,
+          borderRadius: radius.sm,
+          background: "#FFF3CD",
+          border: "1px solid #F0AD4E",
+          color: "#856404",
+          fontSize: typography.sizes.sm,
+        }}
+      >
+        {search.warn}
+      </div>
+    );
+  }
+  if (search.error) {
+    return (
+      <div
+        role="alert"
+        style={{
+          padding: spacing.md,
+          marginBottom: spacing.lg,
+          borderRadius: radius.sm,
+          background: "#F8D7DA",
+          border: "1px solid #DC3545",
+          color: "#721C24",
+          fontSize: typography.sizes.sm,
+        }}
+      >
+        오류: {search.error}
+      </div>
+    );
+  }
+  return null;
+}
+
+export default async function EmployersPage(props: { searchParams: Promise<Search> }) {
+  const search = await props.searchParams;
+  const employers = await loadPending();
+
   return (
     <section>
       <div
@@ -58,6 +116,8 @@ export default function EmployersPage() {
           alignItems: "center",
           justifyContent: "space-between",
           marginBottom: spacing.xl,
+          flexWrap: "wrap",
+          gap: spacing.md,
         }}
       >
         <h1
@@ -71,125 +131,165 @@ export default function EmployersPage() {
           구인자 승인 큐
         </h1>
         <span style={{ fontSize: typography.sizes.sm, color: colors.gray[500] }}>
-          대기 {STUB_EMPLOYERS.filter((e) => !e.approved_at).length}건
+          대기 {employers.length}건
         </span>
       </div>
 
-      <div
-        style={{
-          background: colors.white,
-          borderRadius: radius.md,
-          boxShadow: shadow.sm,
-          overflow: "hidden",
-        }}
-      >
-        {/* 테이블 헤더 */}
+      <FlashBanner search={search} />
+
+      {employers.length === 0 ? (
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr 180px",
-            padding: `${spacing.md}px ${spacing.lg}px`,
-            background: colors.gray[100],
-            fontSize: typography.sizes.xs,
+            padding: spacing.xxl,
+            background: colors.white,
+            borderRadius: radius.md,
+            boxShadow: shadow.sm,
             color: colors.gray[600],
-            fontWeight: typography.weights.medium,
-            borderBottom: `1px solid ${colors.gray[200]}`,
+            textAlign: "center" as const,
           }}
         >
-          <span>사업체명</span>
-          <span>담당자</span>
-          <span>업종</span>
-          <span>상태</span>
-          <span>액션</span>
+          승인 대기 중인 구인자가 없습니다.
         </div>
-
-        {/* 테이블 바디 */}
-        {STUB_EMPLOYERS.map((employer, idx) => (
-          <div
-            key={employer.id}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr 1fr 180px",
-              padding: `${spacing.lg}px ${spacing.lg}px`,
-              alignItems: "center",
-              borderBottom:
-                idx < STUB_EMPLOYERS.length - 1
-                  ? `1px solid ${colors.gray[100]}`
-                  : "none",
-            }}
-          >
-            <div>
+      ) : (
+        <div
+          style={{
+            background: colors.white,
+            borderRadius: radius.md,
+            boxShadow: shadow.sm,
+            overflow: "hidden",
+          }}
+        >
+          {employers.map((employer, idx) => (
+            <div
+              key={employer.id}
+              style={{
+                padding: spacing.lg,
+                borderBottom:
+                  idx < employers.length - 1 ? `1px solid ${colors.gray[100]}` : "none",
+                display: "grid",
+                gap: spacing.md,
+              }}
+            >
               <div
                 style={{
-                  fontSize: typography.sizes.base,
-                  color: colors.navy[800],
-                  fontWeight: typography.weights.medium,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: spacing.md,
+                  flexWrap: "wrap",
                 }}
               >
-                {employer.biz_name}
-              </div>
-              {employer.pending_reason && (
-                <div
-                  style={{
-                    fontSize: typography.sizes.xs,
-                    color: colors.warning,
-                    marginTop: spacing.xs,
-                  }}
-                >
-                  {employer.pending_reason}
+                <div>
+                  <div
+                    style={{
+                      fontSize: typography.sizes.base,
+                      color: colors.navy[800],
+                      fontWeight: typography.weights.medium,
+                    }}
+                  >
+                    {employer.biz_name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: typography.sizes.sm,
+                      color: colors.gray[600],
+                      marginTop: spacing.xs,
+                    }}
+                  >
+                    {employer.contact_name} · {employer.contact_phone_e164} ·{" "}
+                    {employer.biz_type ?? "—"}
+                  </div>
                 </div>
-              )}
-            </div>
-            <div style={{ fontSize: typography.sizes.sm, color: colors.gray[700] }}>
-              {employer.contact_name}
-            </div>
-            <div style={{ fontSize: typography.sizes.sm, color: colors.gray[600] }}>
-              {employer.biz_type ?? "—"}
-            </div>
-            <div>
-              <StatusBadge
-                approved={!!employer.approved_at}
-                suspended={!!employer.suspended_at}
-              />
-            </div>
-            <div style={{ display: "flex", gap: spacing.sm }}>
-              {/* 승인/반려 버튼 — Server Action 연결 예정 */}
-              <button
-                type="button"
+                <StatusBadge
+                  approved={!!employer.approved_at}
+                  suspended={!!employer.suspended_at}
+                />
+              </div>
+
+              <div
                 style={{
-                  padding: `${spacing.xs}px ${spacing.md}px`,
-                  background: colors.success,
-                  color: colors.white,
-                  border: "none",
-                  borderRadius: radius.sm,
-                  fontSize: typography.sizes.xs,
-                  cursor: "pointer",
-                  fontWeight: typography.weights.medium,
+                  display: "flex",
+                  gap: spacing.sm,
+                  flexWrap: "wrap",
                 }}
-                aria-label={`${employer.biz_name} 승인`}
               >
-                승인
-              </button>
-              <button
-                type="button"
-                style={{
-                  padding: `${spacing.xs}px ${spacing.md}px`,
-                  background: colors.danger,
-                  color: colors.white,
-                  border: "none",
-                  borderRadius: radius.sm,
-                  fontSize: typography.sizes.xs,
-                  cursor: "pointer",
-                  fontWeight: typography.weights.medium,
-                }}
-                aria-label={`${employer.biz_name} 반려`}
-              >
-                반려
-              </button>
+                <form action={approveEmployer} style={{ display: "flex", gap: spacing.sm, flex: 1, minWidth: 280 }}>
+                  <input type="hidden" name="employer_id" value={employer.id} />
+                  <input
+                    type="text"
+                    name="reason"
+                    maxLength={500}
+                    placeholder="승인 메모 (선택)"
+                    aria-label={`${employer.biz_name} 승인 메모`}
+                    style={{
+                      flex: 1,
+                      padding: `${spacing.sm}px ${spacing.md}px`,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: radius.sm,
+                      fontSize: typography.sizes.sm,
+                      minHeight: 40,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: `${spacing.sm}px ${spacing.lg}px`,
+                      background: colors.success,
+                      color: colors.white,
+                      border: "none",
+                      borderRadius: radius.sm,
+                      fontSize: typography.sizes.sm,
+                      cursor: "pointer",
+                      fontWeight: typography.weights.medium,
+                      minHeight: 40,
+                    }}
+                    aria-label={`${employer.biz_name} 승인`}
+                  >
+                    승인
+                  </button>
+                </form>
+
+                <form action={rejectEmployer} style={{ display: "flex", gap: spacing.sm, flex: 1, minWidth: 280 }}>
+                  <input type="hidden" name="employer_id" value={employer.id} />
+                  <input
+                    type="text"
+                    name="reason"
+                    required
+                    maxLength={500}
+                    placeholder="반려 사유 (필수)"
+                    aria-label={`${employer.biz_name} 반려 사유`}
+                    style={{
+                      flex: 1,
+                      padding: `${spacing.sm}px ${spacing.md}px`,
+                      border: `1px solid ${colors.gray[300]}`,
+                      borderRadius: radius.sm,
+                      fontSize: typography.sizes.sm,
+                      minHeight: 40,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: `${spacing.sm}px ${spacing.lg}px`,
+                      background: colors.danger,
+                      color: colors.white,
+                      border: "none",
+                      borderRadius: radius.sm,
+                      fontSize: typography.sizes.sm,
+                      cursor: "pointer",
+                      fontWeight: typography.weights.medium,
+                      minHeight: 40,
+                    }}
+                    aria-label={`${employer.biz_name} 반려`}
+                  >
+                    반려
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <p
         style={{
@@ -198,9 +298,7 @@ export default function EmployersPage() {
           color: colors.gray[400],
         }}
       >
-        실 데이터: employers WHERE approved_at IS NULL 연결 예정.
-        승인·반려 시 operator_actions (employer_approve/employer_reject) 기록.
-        반려 사유 입력은 Server Action modal로 구현 예정.
+        승인·반려 모든 액션은 operator_actions 에 자동 기록됩니다 (ADR-009).
       </p>
     </section>
   );

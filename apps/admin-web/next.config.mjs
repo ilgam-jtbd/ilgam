@@ -24,19 +24,22 @@ const nextConfig = {
 
   // 보안 헤더 + 캐시 튜닝
   async headers() {
+    const isDev = process.env.NODE_ENV !== "production";
+    const baseSecurityHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      // dev 에서는 Claude Preview iframe 접근을 위해 X-Frame-Options 생략.
+      ...(isDev ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+    ];
     return [
       {
         source: "/:path*",
-        headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-        ],
+        headers: baseSecurityHeaders,
       },
       {
         source: "/(logo|og-image|icon-512).(png|jpg)",
