@@ -74,3 +74,60 @@ jobs:
           done
       - name: Run pgTAP
         run: pg_prove -d postgresql://postgres:postgres@localhost:5432/postgres packages/db/tests/*.sql
+
+  edge-deno-check:
+    name: Edge Functions · Deno check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: deno check
+        run: |
+          if compgen -G "supabase/functions/*/index.ts" > /dev/null; then
+            deno check supabase/functions/*/index.ts
+          else
+            echo "no edge functions found · skipping"
+          fi
+      - name: deno lint
+        run: |
+          if compgen -G "supabase/functions/*/index.ts" > /dev/null; then
+            deno lint supabase/functions
+          else
+            echo "no edge functions · skipping lint"
+          fi
+
+  expo-prebuild-check:
+    name: Expo prebuild dry-run
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Determine if worker-app affected
+        id: affected
+        run: |
+          if pnpm turbo run typecheck --filter=...[origin/main] --dry-run=json 2>/dev/null | grep -q '@ilgam/worker-app'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Expo doctor
+        if: steps.affected.outputs.changed == 'true'
+        working-directory: apps/worker-app
+        run: npx expo-doctor || true
+      - name: Expo prebuild (android only · dry)
+        if: steps.affected.outputs.changed == 'true'
+        working-directory: apps/worker-app
+        run: npx expo prebuild --no-install --platform android --clean
