@@ -20,6 +20,16 @@ const SecureStorageAdapter = {
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
+// Mock 폴백 가드 (QA #2): prod 빌드에서 실수로 mock 데이터가 노출되는 것 방지.
+// `__DEV__=true` (Expo dev/QA build) 또는 `EXPO_PUBLIC_ALLOW_MOCK=true`일 때만 mock 허용.
+// prod 에서 isSupabaseConfigured=false 면 화면이 빈 상태/에러를 표시 — silent mock 금지.
+const ALLOW_MOCK_FLAG = process.env.EXPO_PUBLIC_ALLOW_MOCK === "true";
+// __DEV__ 는 RN 전역. 타입스크립트가 모르는 경우 fallback false.
+const IS_DEV = typeof (globalThis as { __DEV__?: boolean }).__DEV__ === "boolean"
+  ? (globalThis as { __DEV__?: boolean }).__DEV__
+  : false;
+export const isMockAllowed = ALLOW_MOCK_FLAG || IS_DEV;
+
 export const supabase = isSupabaseConfigured
   ? createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
       auth: {

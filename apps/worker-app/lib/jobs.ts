@@ -5,12 +5,14 @@
 // 지원(apply): 직접 supabase.from("job_applications").insert (RLS 가 worker 본인만 INSERT 허용)
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { supabase, isSupabaseConfigured, isMockAllowed } from "./supabase";
 import type { Job } from "@ilgam/core";
 import { MOCK_JOBS } from "./mockJobs";
 
 async function fetchMatchedJobs(workerId: string, limit = 20): Promise<Job[]> {
-  if (!isSupabaseConfigured || !supabase) return MOCK_JOBS;
+  if (!isSupabaseConfigured || !supabase) {
+    return isMockAllowed ? MOCK_JOBS : [];
+  }
 
   // match-engine 은 service-role 로 RPC 를 호출하므로 클라이언트는 인증 토큰을 함께 전달.
   const { data, error } = await supabase.functions.invoke("match-engine", {
@@ -18,10 +20,12 @@ async function fetchMatchedJobs(workerId: string, limit = 20): Promise<Job[]> {
   });
   if (error) {
     console.warn("[match-engine]", error.message);
-    return MOCK_JOBS;
+    if (isMockAllowed) return MOCK_JOBS;
+    throw error;
   }
   const rows = (data?.jobs ?? []) as Array<Job & { score?: number }>;
-  return rows.length > 0 ? rows : MOCK_JOBS;
+  if (rows.length > 0) return rows;
+  return isMockAllowed ? MOCK_JOBS : [];
 }
 
 export function useMatchedJobs(workerId: string | null) {
@@ -34,7 +38,8 @@ export function useMatchedJobs(workerId: string | null) {
 
 async function fetchJobById(id: string): Promise<Job | null> {
   if (!isSupabaseConfigured || !supabase) {
-    return MOCK_JOBS.find((j) => j.id === id) ?? null;
+    if (isMockAllowed) return MOCK_JOBS.find((j) => j.id === id) ?? null;
+    return null;
   }
   const { data, error } = await supabase
     .from("jobs")
@@ -43,7 +48,8 @@ async function fetchJobById(id: string): Promise<Job | null> {
     .maybeSingle();
   if (error) {
     console.warn("[jobs.fetchById]", error.message);
-    return MOCK_JOBS.find((j) => j.id === id) ?? null;
+    if (isMockAllowed) return MOCK_JOBS.find((j) => j.id === id) ?? null;
+    throw error;
   }
   return (data as Job) ?? null;
 }

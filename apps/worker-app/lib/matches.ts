@@ -3,13 +3,14 @@
 // Supabase 미설정 시 MOCK_MATCHES 폴백 (UI 검증용).
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase, isSupabaseConfigured } from "./supabase";
+import { supabase, isSupabaseConfigured, isMockAllowed } from "./supabase";
 import type { Match, Job } from "@ilgam/core";
 import { MOCK_MATCHES, type MatchWithJob } from "./mockMatches";
 
 async function fetchMyMatches(workerId: string | null): Promise<MatchWithJob[]> {
   if (!isSupabaseConfigured || !supabase || !workerId) {
-    return MOCK_MATCHES;
+    if (isMockAllowed) return MOCK_MATCHES;
+    return [];
   }
   const { data, error } = await supabase
     .from("matches")
@@ -21,7 +22,8 @@ async function fetchMyMatches(workerId: string | null): Promise<MatchWithJob[]> 
     .order("confirmed_at", { ascending: false });
   if (error) {
     console.warn("[matches.fetchMy]", error.message);
-    return MOCK_MATCHES;
+    if (isMockAllowed) return MOCK_MATCHES;
+    throw error;
   }
   return (data ?? []) as unknown as MatchWithJob[];
 }
@@ -36,7 +38,8 @@ export function useMyMatches(workerId: string | null) {
 
 async function fetchMatchById(id: string): Promise<MatchWithJob | null> {
   if (!isSupabaseConfigured || !supabase) {
-    return MOCK_MATCHES.find((m) => m.id === id) ?? null;
+    if (isMockAllowed) return MOCK_MATCHES.find((m) => m.id === id) ?? null;
+    return null;
   }
   const { data, error } = await supabase
     .from("matches")
@@ -47,7 +50,8 @@ async function fetchMatchById(id: string): Promise<MatchWithJob | null> {
     .maybeSingle();
   if (error) {
     console.warn("[matches.fetchById]", error.message);
-    return MOCK_MATCHES.find((m) => m.id === id) ?? null;
+    if (isMockAllowed) return MOCK_MATCHES.find((m) => m.id === id) ?? null;
+    throw error;
   }
   return (data as unknown as MatchWithJob) ?? null;
 }

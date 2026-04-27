@@ -243,19 +243,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tab: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 20,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 24,
     backgroundColor: colors.gray[100],
-    minHeight: 36,
+    minHeight: 48, // ADR-003 senior UX baseline: 48dp tap target
     justifyContent: "center",
   },
   tabActive: {
     backgroundColor: colors.navy[700],
   },
   tabText: {
-    fontSize: typography.sizes.sm,
-    color: colors.gray[600],
+    fontSize: typography.sizes.base, // ADR-003: minimum 16pt for senior readability
+    color: colors.gray[700],
     fontWeight: "500" as const,
   },
   tabTextActive: {
