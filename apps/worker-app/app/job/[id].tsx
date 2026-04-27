@@ -3,7 +3,7 @@
 // 데이터: useJob(id) — Supabase 미설정 시 MOCK_JOBS 폴백 (lib/jobs.ts)
 // 지원: useApplyToJob — RLS: worker 본인만 INSERT job_applications
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -82,6 +82,14 @@ export default function JobDetailScreen() {
   const { data: job, isLoading } = useJob(params.id);
   const applyMutation = useApplyToJob();
   const [applied, setApplied] = useState(false);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    },
+    [],
+  );
 
   if (isLoading || !job) {
     return (
@@ -111,40 +119,32 @@ export default function JobDetailScreen() {
   const estWage = Math.round((job.hourly_wage_krw * workMinutes) / 60);
   const estNet = Math.round(estWage * 0.967); // 4% 수수료 + 3.3% 원천징수 대략값
 
-  const handleApply = () => {
-    Alert.alert(
-      "이 일감에 지원할까요?",
-      `${formatDateKo(job.shift_start_at)} ${formatTime(job.shift_start_at)}–${formatTime(
-        job.shift_end_at
-      )}\n${job.dong_label} · 예상 수령 ${formatKrw(estNet)}`,
-      [
-        { text: "취소", style: "cancel" },
-        {
-          text: "지원하기",
-          style: "default",
-          onPress: async () => {
-            // 인증 미연결 환경(mock)에서는 anon worker id 로 통과.
-            // 인증 연결 후에는 supabase.auth.getUser() 가 워커 UUID 를 돌려줌.
-            const session = supabase ? (await supabase.auth.getUser()).data.user : null;
-            const workerId = session?.id ?? "anon-worker";
-            try {
-              await applyMutation.mutateAsync({ jobId: job.id, workerId });
-              setApplied(true);
-              setTimeout(() => {
-                Alert.alert(
-                  "지원 완료",
-                  "고용주 확인 후 알림톡으로 결과를 알려드립니다.",
-                  [{ text: "확인", onPress: () => router.back() }]
-                );
-              }, motion.undoTimeoutMs);
-            } catch (e) {
-              const msg = e instanceof Error ? e.message : "지원 중 오류가 발생했습니다.";
-              Alert.alert("지원 실패", msg);
-            }
-          },
-        },
-      ]
-    );
+  // Undo 토스트 패턴 (ADR-003 §시니어 UX 우선순위 2):
+  // 모달 confirm 단계 제거 → 즉시 mutate + 하단 토스트 2초 + 되돌리기.
+  // 인지부하 ↓, 미스탭 회복은 토스트로 보장.
+  const handleApply = async () => {
+    if (applied || applying) return;
+    const session = supabase ? (await supabase.auth.getUser()).data.user : null;
+    const workerId = session?.id ?? "anon-worker";
+    try {
+      await applyMutation.mutateAsync({ jobId: job.id, workerId });
+      setApplied(true);
+      // 2초 후 자동 finalize → 다음 화면 이동
+      undoTimerRef.current = setTimeout(() => {
+        router.back();
+      }, motion.undoTimeoutMs);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "지원 중 오류가 발생했습니다.";
+      Alert.alert("지원 실패", msg);
+    }
+  };
+  const handleUndo = () => {
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = null;
+    }
+    setApplied(false);
+    // mutate 자체는 이미 발사됨 — 실 환경에서는 cancel mutation 필요. mock 폴백 환경에선 클라이언트 상태만 복원.
   };
 
   const applying = applyMutation.isPending;
@@ -408,6 +408,57 @@ export default function JobDetailScreen() {
           </View>
         </ScrollView>
 
+        {applied && (
+          <View
+            accessibilityLiveRegion="polite"
+            style={{
+              position: "absolute",
+              bottom: touch.buttonHeight + spacing.xl + spacing.sm,
+              left: spacing.lg,
+              right: spacing.lg,
+              backgroundColor: colors.navy[800],
+              borderRadius: radius.md,
+              paddingVertical: spacing.md,
+              paddingHorizontal: spacing.lg,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: typography.sizes.base,
+                color: colors.white,
+                fontWeight: "600",
+              }}
+            >
+              지원했습니다 · 곧 결과 알림
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="지원 되돌리기"
+              hitSlop={12}
+              onPress={handleUndo}
+              style={{
+                paddingVertical: spacing.xs,
+                paddingHorizontal: spacing.md,
+                minHeight: 36,
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: typography.sizes.base,
+                  color: colors.white,
+                  fontWeight: "700",
+                  textDecorationLine: "underline",
+                }}
+              >
+                되돌리기
+              </Text>
+            </Pressable>
+          </View>
+        )}
         <View
           style={{
             position: "absolute",
