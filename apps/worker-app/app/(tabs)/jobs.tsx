@@ -18,14 +18,15 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { useMatchedJobs } from "../../lib/jobs";
 
+// 한글 1자 칩 + 풀라벨 (DESIGN.md 컴포넌트 정의 준수, iter06 일관성).
 const CATEGORY_TABS: Array<{ key: JobCategory | "all"; label: string }> = [
   { key: "all", label: "전체" },
-  { key: "logistics", label: "📦 물류·배송" },
-  { key: "food", label: "🍽️ 외식·카페" },
-  { key: "cleaning", label: "🧹 청소·환경" },
-  { key: "retail", label: "🛒 유통·판매" },
-  { key: "care", label: "💊 돌봄·의료" },
-  { key: "agriculture", label: "🌾 농업·자연" },
+  { key: "logistics", label: `[${JOB_CATEGORY_LETTER.logistics}] ${JOB_CATEGORY_LABEL.logistics}` },
+  { key: "food", label: `[${JOB_CATEGORY_LETTER.food}] ${JOB_CATEGORY_LABEL.food}` },
+  { key: "cleaning", label: `[${JOB_CATEGORY_LETTER.cleaning}] ${JOB_CATEGORY_LABEL.cleaning}` },
+  { key: "retail", label: `[${JOB_CATEGORY_LETTER.retail}] ${JOB_CATEGORY_LABEL.retail}` },
+  { key: "care", label: `[${JOB_CATEGORY_LETTER.care}] ${JOB_CATEGORY_LABEL.care}` },
+  { key: "agriculture", label: `[${JOB_CATEGORY_LETTER.agriculture}] ${JOB_CATEGORY_LABEL.agriculture}` },
 ];
 
 // ─── 시간 포맷 헬퍼 ──────────────────────────────────────────────────────
@@ -38,7 +39,7 @@ function toHHMM(iso: string): string {
 function InstantPayBadge() {
   return (
     <View style={styles.instantBadge}>
-      <Text style={styles.instantBadgeText}>⚡ 즉시정산</Text>
+      <Text accessibilityLabel="즉시정산" style={styles.instantBadgeText}>즉시정산</Text>
     </View>
   );
 }

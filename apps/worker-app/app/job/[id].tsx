@@ -119,24 +119,26 @@ export default function JobDetailScreen() {
   const estWage = Math.round((job.hourly_wage_krw * workMinutes) / 60);
   const estNet = Math.round(estWage * 0.967); // 4% 수수료 + 3.3% 원천징수 대략값
 
-  // Undo 토스트 패턴 (ADR-003 §시니어 UX 우선순위 2):
-  // 모달 confirm 단계 제거 → 즉시 mutate + 하단 토스트 2초 + 되돌리기.
-  // 인지부하 ↓, 미스탭 회복은 토스트로 보장.
-  const handleApply = async () => {
+  // Undo 토스트 — Optimistic Delay 패턴 (ADR-003 §시니어 UX 우선순위 2):
+  // mutate를 2초 후에 실행. 사용자가 그 안에 "되돌리기"를 누르면 mutate 자체가 발사되지 않음.
+  // → DB에 row가 만들어지지 않으므로 cancel API 불필요 + 진정한 미스탭 회복.
+  const handleApply = () => {
     if (applied || applying) return;
-    const session = supabase ? (await supabase.auth.getUser()).data.user : null;
-    const workerId = session?.id ?? "anon-worker";
-    try {
-      await applyMutation.mutateAsync({ jobId: job.id, workerId });
-      setApplied(true);
-      // 2초 후 자동 finalize → 다음 화면 이동
-      undoTimerRef.current = setTimeout(() => {
+    setApplied(true);
+    undoTimerRef.current = setTimeout(async () => {
+      undoTimerRef.current = null;
+      try {
+        const session = supabase ? (await supabase.auth.getUser()).data.user : null;
+        const workerId = session?.id ?? "anon-worker";
+        await applyMutation.mutateAsync({ jobId: job.id, workerId });
         router.back();
-      }, motion.undoTimeoutMs);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "지원 중 오류가 발생했습니다.";
-      Alert.alert("지원 실패", msg);
-    }
+      } catch (e) {
+        // 실패 시 토스트 닫고 에러 표시
+        setApplied(false);
+        const msg = e instanceof Error ? e.message : "지원 중 오류가 발생했습니다.";
+        Alert.alert("지원 실패", msg);
+      }
+    }, motion.undoTimeoutMs);
   };
   const handleUndo = () => {
     if (undoTimerRef.current) {
@@ -144,7 +146,7 @@ export default function JobDetailScreen() {
       undoTimerRef.current = null;
     }
     setApplied(false);
-    // mutate 자체는 이미 발사됨 — 실 환경에서는 cancel mutation 필요. mock 폴백 환경에선 클라이언트 상태만 복원.
+    // mutate 자체가 아직 발사되지 않았으므로 클라이언트 state만 복원하면 끝.
   };
 
   const applying = applyMutation.isPending;
