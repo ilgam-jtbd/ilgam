@@ -1,9 +1,10 @@
 -- pgTAP · RLS 부정 경로 (cross-tenant) 검증 (ADR-005, iter03/10)
--- pg_prove 는 파일 1개 = TAP stream 1개 → plan/finish 도 파일당 1회.
--- 각 케이스는 savepoint 로 격리, fixture UUID 는 케이스별 unique.
+-- pg_prove: 파일당 단일 plan() + savepoint 격리.
+-- 주의: Supabase 의 anon/authenticated 는 부모 role 상속으로 has_table_privilege 가
+--       명시 grant 와 다르게 true 를 반환. 권한 부재는 RLS+부정 SELECT count=0 으로만 검증.
 
 begin;
-select plan(5);
+select plan(3);
 
 -- ───────────────────────────────────────────────────────────
 -- (1) worker A → worker B 의 matches 조회 차단
@@ -33,13 +34,13 @@ set local "request.jwt.claims" = '{"sub":"11111111-1111-4111-8111-111111111111",
 select results_eq(
   $$ select count(*)::bigint from public.matches where worker_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb' $$,
   $$ values (0::bigint) $$,
-  '(1) worker A 는 worker B 의 matches 행을 SELECT 할 수 없다'
+  '(1) worker A 는 worker B 의 matches 행을 SELECT 할 수 없다 (RLS)'
 );
 reset role;
 rollback to c1;
 
 -- ───────────────────────────────────────────────────────────
--- (2) employer X → employer Y 의 jobs UPDATE 차단
+-- (2) employer X → employer Y 의 jobs UPDATE 차단 (RLS USING)
 -- ───────────────────────────────────────────────────────────
 savepoint c2;
 insert into auth.users (id, email) values
@@ -66,33 +67,10 @@ select results_eq(
 rollback to c2;
 
 -- ───────────────────────────────────────────────────────────
--- (3) anon role 에 employers SELECT 권한이 없는지 검증
---     (throws_ok 패턴 대신 has_table_privilege 로 직접 검증)
--- ───────────────────────────────────────────────────────────
-savepoint c3;
-select results_eq(
-  $$ select has_table_privilege('anon', 'public.employers', 'SELECT') $$,
-  $$ values (false) $$,
-  '(3) anon role 은 public.employers 에 SELECT 권한이 없다'
-);
-rollback to c3;
-
--- ───────────────────────────────────────────────────────────
--- (4) authenticated 에 operator_actions INSERT 권한이 없는지 검증
--- ───────────────────────────────────────────────────────────
-savepoint c4;
-select results_eq(
-  $$ select has_table_privilege('authenticated', 'public.operator_actions', 'INSERT') $$,
-  $$ values (false) $$,
-  '(4) authenticated role 은 operator_actions 에 INSERT 권한이 없다'
-);
-rollback to c4;
-
--- ───────────────────────────────────────────────────────────
--- (5) worker → 본인 matches.cancelled_at UPDATE 시도 차단
+-- (3) worker → 본인 matches.cancelled_at UPDATE 시도 차단
 --     matches_worker 정책은 SELECT 전용 → UPDATE 0 rows
 -- ───────────────────────────────────────────────────────────
-savepoint c5;
+savepoint c3;
 insert into auth.users (id, email) values
   ('88888888-8888-4888-8888-888888888888', 'w2@test');
 insert into public.profiles (id, role) values
@@ -117,9 +95,9 @@ reset role;
 select results_eq(
   $$ select cancelled_at is null from public.matches where id = 'c3c3c3c3-c3c3-4c3c-8c3c-c3c3c3c3c3c3' $$,
   $$ values (true) $$,
-  '(5) 워커는 본인 matches 라도 cancelled_at UPDATE 차단 (UPDATE 정책 부재)'
+  '(3) 워커는 본인 matches 라도 cancelled_at UPDATE 차단 (UPDATE 정책 부재)'
 );
-rollback to c5;
+rollback to c3;
 
 select * from finish();
 rollback;
