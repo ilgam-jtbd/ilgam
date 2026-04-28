@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko" data-mode="senior">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일감(ILGAM) · /jobs — 일자리 찾기</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.search-bar {
+  display: flex; gap: 8px; padding: 12px 20px 0;
+}
+.search-input {
+  flex: 1; min-height: var(--btn-min-height);
+  background: var(--n100); border-radius: 14px;
+  padding: 0 18px; font-size: .95em; color: var(--n700);
+  display: flex; align-items: center; gap: 8px;
+}
+.cat-scroll {
+  display: flex; gap: 8px; padding: 12px 20px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.cat-scroll::-webkit-scrollbar { display: none; }
+.cat-chip {
+  flex: 0 0 auto; padding: 10px 16px; border-radius: 12px;
+  background: var(--n100); color: var(--n700);
+  font-size: .82em; font-weight: 700; min-height: var(--tap-target);
+  display: flex; align-items: center; gap: 6px;
+}
+.cat-chip[aria-selected="true"] { background: var(--primary); color: var(--white); }
+
+.sort-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 20px 4px; font-size: .82em;
+}
+.sort-btn {
+  font-size: .85em; font-weight: 700; color: var(--n700);
+  display: flex; align-items: center; gap: 4px;
+  min-height: var(--tap-target); padding: 0 10px;
+}
+.result-count { color: var(--n500); font-size: .82em; }
+
+.feed { padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.job-card {
+  background: var(--white); border: 1px solid var(--n200);
+  border-radius: var(--radius-md); padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.job-card:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.jc-head {
+  display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;
+}
+.jc-icon {
+  width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px;
+  background: var(--primary-soft); color: var(--primary-dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1em; font-weight: 800;
+}
+.jc-icon--clean { background: var(--accent-light); color: var(--accent-dark); }
+.jc-icon--guard { background: var(--primary-soft); color: var(--primary-dark); }
+.jc-icon--kitchen { background: var(--amber-light); color: #B45309; }
+.jc-icon--fac { background: #F3E8FF; color: #6B21A8; }
+.jc-icon--drive { background: #FFE4E6; color: var(--rose); }
+
+.jc-title {
+  font-size: 1em; font-weight: 800; line-height: 1.3;
+  color: var(--n900); letter-spacing: -.01em;
+}
+.jc-sub { font-size: .76em; color: var(--n500); margin-top: 2px; }
+
+.jc-meta {
+  display: flex; gap: 10px; align-items: baseline;
+  margin: 8px 0; font-size: .9em;
+}
+.jc-wage { font-weight: 800; color: var(--primary-dark); font-size: 1em; }
+.jc-duration { color: var(--n700); font-weight: 600; }
+.jc-date { font-size: .82em; color: var(--n500); }
+
+.jc-footer {
+  display: flex; gap: 8px; margin-top: 8px; align-items: center;
+}
+.jc-distance {
+  font-size: .82em; color: var(--n700); font-weight: 600;
+  display: flex; align-items: center; gap: 4px;
+}
+.jc-closed {
+  background: var(--n100); color: var(--n500);
+}
+
+/* 필터 드로어 */
+.filter-drawer {
+  background: var(--white); padding: 20px;
+}
+.filter-group { margin-bottom: 20px; }
+.filter-group-title {
+  font-size: .88em; font-weight: 800; margin-bottom: 10px;
+}
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Empty */
+.empty {
+  text-align: center; padding: 40px 20px;
+  background: var(--white); border-radius: var(--radius-md);
+  margin: 16px;
+}
+.empty-title { font-size: 1.05em; font-weight: 800; margin-bottom: 8px; }
+.empty-desc { font-size: .85em; color: var(--n500); margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="page-bg">
+<div class="page-title">일감 · /jobs — 와이어프레임 v1.0 (2026-04-23)</div>
+
+<!-- DEMO 1 : 검색 · 필터 · 결과 리스트 -->
+<main class="phone-frame" aria-label="일자리 찾기">
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">일자리 찾기</div>
+        <div class="topbar-loc">부평구 산곡동 · 반경 5km</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" aria-label="지도 보기">지도</button>
+        <button class="icon-btn" aria-label="필터 열기">필터</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="search-bar">
+    <div class="search-input" role="search">
+      <span aria-hidden="true">🔍</span>
+      <span class="sr-only">검색어</span>
+      <span>청소, 경비, 주방...</span>
+    </div>
+  </div>
+
+  <nav class="cat-scroll" role="tablist" aria-label="직군 카테고리">
+    <button class="cat-chip" role="tab" aria-selected="true">전체</button>
+    <button class="cat-chip" role="tab" aria-selected="false">요양·간병</button>
+    <button class="cat-chip" role="tab" aria-selected="false">경비·보안</button>
+    <button class="cat-chip" role="tab" aria-selected="false">청소·미화</button>
+    <button class="cat-chip" role="tab" aria-selected="false">조리·주방</button>
+    <button class="cat-chip" role="tab" aria-selected="false">시설·기술</button>
+    <button class="cat-chip" role="tab" aria-selected="false">운전·배송</button>
+    <button class="cat-chip" role="tab" aria-selected="false">사무·안내</button>
+    <button class="cat-chip" role="tab" aria-selected="false">걸어서 10분</button>
+    <button class="cat-chip" role="tab" aria-selected="false">당일지급</button>
+    <button class="cat-chip" role="tab" aria-selected="false">주휴수당</button>
+    <button class="cat-chip" role="tab" aria-selected="false">동네 추천</button>
+  </nav>
+
+  <div class="sort-row">
+    <div class="result-count">총 <strong>47</strong>개 공고 · 부담 없이 지원해보세요</div>
+    <button class="sort-btn" aria-label="정렬 기준 변경">
+      거리순 <span aria-hidden="true">▼</span>
+    </button>
+  </div>
+
+  <section class="feed" aria-label="공고 목록">
+
+    <article class="job-card" tabindex="0">
+      <div class="jc-head">
+        <div class="jc-icon jc-icon--clean" aria-hidden="true">청</div>
+        <div style="flex:1;">
+          <div class="jc-title">청소원 · 오피스</div>
+          <div class="jc-sub">⊙ 부평동 제일빌딩 · 우리 동네 가게</div>
+        </div>
+      </div>
+      <div class="jc-meta">
+        <span class="jc-wage">시급 13,500원</span>
+        <span class="jc-duration">· 3시간</span>
+      </div>
+      <div class="jc-date">2026.04.25 (토) 09:00 – 12:00</div>
+      <div class="jc-footer">
+        <span class="jc-distance">걸어서 18분</span>
+        <span class="badge badge--sameday">당일지급</span>
+        <span class="badge badge--senior">주휴수당</span>
+        <span class="badge badge--first">경력 환영</span>
+      </div>
+    </article>
+
+    <article class="job-card" tabindex="0">
+      <div class="jc-head">
+        <div class="jc-icon jc-icon--guard" aria-hidden="true">경</div>
+        <div style="flex:1;">
+          <div class="jc-title">경비원 · 아파트</div>
+          <div class="jc-sub">⊙ 삼산동 한양아파트 · ⭐4.8 (41)</div>
+        </div>
+      </div>
+      <div class="jc-meta">
+        <span class="jc-wage">시급 11,500원</span>
+        <span class="jc-duration">· 6시간</span>
+      </div>
+      <div class="jc-date">2026.04.25 (토) 14:00 – 20:00</div>
+      <div class="jc-footer">
+        <span class="jc-distance">걸어서 42분</span>
+        <span class="badge badge--senior">주휴수당</span>
+        <span class="badge badge--first">경력 환영</span>
+      </div>
+    </article>
+
+    <article class="job-card" tabindex="0">
+      <div class="jc-head">
+        <div class="jc-icon jc-icon--kitchen" aria-hidden="true">주</div>
+        <div style="flex:1;">
+          <div class="jc-title">주방 보조 · 식당</div>
+          <div class="jc-sub">⊙ 계양구 효성동 한솥도시락 · ⭐4.5 (18)</div>
+        </div>
+      </div>
+      <div class="jc-meta">
+        <span class="jc-wage">시급 12,000원</span>
+        <span class="jc-duration">· 4시간</span>
+      </div>
+      <div class="jc-date">2026.04.23 (목) 11:00 – 15:00</div>
+      <div class="jc-footer">
+        <span class="jc-distance">걸어서 52분</span>
+        <span class="badge badge--sameday">당일지급</span>
+        <span class="badge badge--first">초보 환영</span>
+      </div>
+    </article>
+
+    <article class="job-card" tabindex="0">
+      <div class="jc-head">
+        <div class="jc-icon jc-icon--fac" aria-hidden="true">시</div>
+        <div style="flex:1;">
+          <div class="jc-title">시설관리 보조</div>
+          <div class="jc-sub">⊙ 부평구청 부평종합운동장 · KYC 인증</div>
+        </div>
+      </div>
+      <div class="jc-meta">
+        <span class="jc-wage">시급 14,000원</span>
+        <span class="jc-duration">· 5시간</span>
+      </div>
+      <div class="jc-date">2026.04.26 (일) 08:00 – 13:00</div>
+      <div class="jc-footer">
+        <span class="jc-distance">걸어서 40분</span>
+        <span class="badge badge--senior">주휴수당</span>
+        <span class="badge badge--first">경력 환영</span>
+      </div>
+    </article>
+
+    <article class="job-card" tabindex="0">
+      <div class="jc-head">
+        <div class="jc-icon jc-icon--drive" aria-hidden="true">운</div>
+        <div style="flex:1;">
+          <div class="jc-title">실버택배 배송</div>
+          <div class="jc-sub">⊙ 부평CGV 단지 내 · 우리 동네 가게</div>
+        </div>
+      </div>
+      <div class="jc-meta">
+        <span class="jc-wage">건당 1,500원</span>
+        <span class="jc-duration">· 평균 3시간</span>
+      </div>
+      <div class="jc-date">2026.04.24 (금) 10:00 – 13:00</div>
+      <div class="jc-footer">
+        <span class="jc-distance">걸어서 12분</span>
+        <span class="badge badge--sameday">당일지급</span>
+        <span class="badge badge--first">초보 환영</span>
+      </div>
+    </article>
+
+  </section>
+
+  <nav class="tabbar" aria-label="하단 메뉴">
+    <a class="tab" aria-current="page"><span class="tab-icon">일</span>일자리</a>
+    <a class="tab"><span class="tab-icon">지</span>내 지원</a>
+    <a class="tab"><span class="tab-icon">홈</span>홈</a>
+    <a class="tab"><span class="tab-icon">알</span>알림</a>
+    <a class="tab"><span class="tab-icon">내</span>내 정보</a>
+  </nav>
+
+</main>
+
+<!-- DEMO 2 : 필터 드로어 -->
+<div class="demo-label">상태 — 필터 드로어 열림</div>
+<main class="phone-frame" aria-label="필터">
+  <header class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">필터</div>
+        <div class="topbar-loc">원하는 조건을 선택하세요</div>
+      </div>
+      <button class="topbar-back" aria-label="닫기">✕</button>
+    </div>
+  </header>
+
+  <div class="filter-drawer">
+    <div class="filter-group">
+      <div class="filter-group-title">거리</div>
+      <div class="filter-chips">
+        <button class="chip" aria-selected="false">도보 10분</button>
+        <button class="chip" aria-selected="true">도보 20분</button>
+        <button class="chip" aria-selected="false">2km</button>
+        <button class="chip" aria-selected="false">5km</button>
+        <button class="chip" aria-selected="false">10km</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">근무 시간</div>
+      <div class="filter-chips">
+        <button class="chip" aria-selected="true">오전 (06–12)</button>
+        <button class="chip" aria-selected="false">오후 (12–18)</button>
+        <button class="chip" aria-selected="false">저녁 (18–22)</button>
+        <button class="chip" aria-selected="false">야간</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">최소 시급</div>
+      <div class="filter-chips">
+        <button class="chip" aria-selected="false">10,000원</button>
+        <button class="chip" aria-selected="true">12,000원</button>
+        <button class="chip" aria-selected="false">15,000원</button>
+        <button class="chip" aria-selected="false">20,000원</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">조건</div>
+      <div class="filter-chips">
+        <button class="chip" aria-selected="true">오늘 정산</button>
+        <button class="chip" aria-selected="true">시니어 환영</button>
+        <button class="chip" aria-selected="false">초보 교육</button>
+        <button class="chip" aria-selected="false">4대보험</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:28px;">
+      <button class="btn btn--secondary">초기화</button>
+      <button class="btn btn--primary">결과 47개 보기</button>
+    </div>
+  </div>
+
+  <footer class="bottom-support">
+    <a href="#channeltalk" data-support="channeltalk" class="support-btn">
+      <span aria-hidden="true">☎</span>
+      <span>채널톡으로 문의하기</span>
+    </a>
+  </footer>
+</main>
+
+<!-- DEMO 3 : 빈 결과 -->
+<div class="demo-label">상태 — 검색 결과 0건</div>
+<main class="phone-frame" aria-label="결과 없음">
+  <header class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">일자리 찾기</div>
+        <div class="topbar-loc">부평구 산곡동 · "요양 야간"</div>
+      </div>
+      <button class="topbar-back" aria-label="뒤로">←</button>
+    </div>
+  </header>
+
+  <div class="empty" role="status">
+    <div class="empty-title">걸어서 10분 안에는 지금 일자리가 없어요</div>
+    <div class="empty-desc">
+      반경을 넓혀볼까요? 시급 · 시간대도 조금 풀어보세요.<br>
+      동네에서 편하게 — 조건 저장하면 카카오 알림톡으로 안내드려요.
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px; max-width:260px; margin:0 auto;">
+      <button class="btn btn--primary">조건 완화해서 다시 찾기</button>
+      <button class="btn btn--secondary">조건 저장 + 카카오 알림</button>
+    </div>
+  </div>
+
+  <footer class="bottom-support">
+    <a href="#channeltalk" data-support="channeltalk" class="support-btn">
+      <span aria-hidden="true">☎</span>
+      <span>채널톡으로 문의하기</span>
+    </a>
+  </footer>
+</main>
+
+<div class="page-title" style="margin-top:40px; text-align:center;">
+  07_Wireframes/_tokens.css 공유 · 시니어 모드 고정 20pt · WCAG AA+ 대응
+</div>
+
+</div>
+</body>
+</html>

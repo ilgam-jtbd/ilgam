@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+<title>일감(ILGAM) v3.1 — 인력사무소 디지털화 + 시니어 단독 점유</title>
+<meta name="description" content="베이비부머 954만 + YOLD 1,200만을 위한 한국형 시니어 스폿워크 플랫폼. 5중 해자 + 단계화 수수료." />
+<meta property="og:title" content="일감(ILGAM) v3.1" />
+<meta property="og:description" content="인력사무소 디지털화 + 시니어 단독 점유 = Blue Ocean" />
+<style>
+  :root {
+    --navy-900: #0B1736;
+    --navy-800: #142548;
+    --navy-700: #1A2C4E;
+    --navy-100: #D4DEEC;
+    --navy-50: #EEF2F9;
+    --gray-900: #0F1417;
+    --gray-700: #2E3740;
+    --gray-600: #4A5560;
+    --gray-500: #6B7681;
+    --gray-300: #C3CAD1;
+    --gray-100: #EEF1F3;
+    --gray-50: #F7F8FA;
+    --white: #FFFFFF;
+    --amber: #F59E0B;
+    --success: #1E7A3D;
+    --danger: #C0392B;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: var(--gray-900);
+    background: var(--gray-50);
+    line-height: 1.5;
+    font-size: 18px;
+  }
+  a { color: var(--navy-700); }
+  .nav {
+    position: sticky;
+    top: 0;
+    background: var(--navy-900);
+    color: var(--white);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .nav strong { font-size: 20px; letter-spacing: -0.02em; }
+  .nav a { color: var(--navy-100); text-decoration: none; font-size: 15px; }
+  .nav a:hover { color: var(--white); }
+  .nav .spacer { flex: 1; }
+  .badge { background: var(--amber); color: var(--navy-900); padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 700; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 64px 0; border-bottom: 1px solid var(--gray-100); }
+  h1, h2, h3 { color: var(--navy-800); letter-spacing: -0.02em; }
+  h1 { font-size: 40px; margin: 0 0 16px; line-height: 1.2; }
+  h2 { font-size: 28px; margin: 0 0 12px; }
+  h3 { font-size: 20px; margin: 0 0 8px; }
+  .hero {
+    background: linear-gradient(135deg, var(--navy-800), var(--navy-700));
+    color: var(--white);
+    padding: 88px 24px 64px;
+    text-align: center;
+  }
+  .hero h1 { color: var(--white); font-size: 44px; }
+  .hero .sub { font-size: 20px; color: var(--navy-100); max-width: 740px; margin: 0 auto 32px; }
+  .hero .cta-row { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    background: var(--amber); color: var(--navy-900);
+    padding: 14px 28px; border-radius: 12px;
+    text-decoration: none; font-weight: 700; font-size: 16px;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.secondary { background: transparent; color: var(--white); border: 2px solid var(--navy-100); }
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 32px; }
+    h1 { font-size: 30px; }
+  }
+  .card {
+    background: var(--white); border: 1px solid var(--gray-100);
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 1px 2px rgba(10,23,54,0.04);
+  }
+  .card.amber { border-left: 4px solid var(--amber); }
+  .card .num { font-size: 14px; color: var(--amber); font-weight: 700; margin-bottom: 4px; }
+  .card .label { font-size: 16px; color: var(--gray-700); }
+
+  .moat { padding: 20px; background: var(--white); border-radius: 14px; border: 1px solid var(--gray-100); }
+  .moat .icon { width: 32px; height: 32px; border-radius: 8px; background: var(--navy-50); color: var(--navy-700); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 8px; }
+
+  .timeline { display: grid; gap: 12px; }
+  .phase { display: grid; grid-template-columns: 130px 1fr; gap: 16px; align-items: stretch; }
+  .phase .tag { background: var(--navy-700); color: var(--white); padding: 10px; border-radius: 8px; text-align: center; font-weight: 700; }
+  .phase.p0 .tag { background: var(--gray-700); }
+  .phase.p1 .tag { background: var(--navy-700); }
+  .phase.p2 .tag { background: var(--amber); color: var(--navy-900); }
+  .phase .body { background: var(--white); padding: 14px 18px; border-radius: 8px; border: 1px solid var(--gray-100); }
+  .phase .body strong { color: var(--navy-800); }
+  .phase .body small { display: block; color: var(--gray-600); margin-top: 4px; font-size: 14px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,23,54,0.04); }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--gray-100); font-size: 15px; }
+  th { background: var(--navy-700); color: var(--white); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  td.amber { color: var(--amber); font-weight: 700; }
+
+  .wf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .wf-card { display: block; background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(10,23,54,0.04); text-decoration: none; color: inherit; transition: transform 0.15s; }
+  .wf-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(10,23,54,0.1); }
+  .wf-card iframe { width: 100%; height: 380px; border: none; pointer-events: none; }
+  .wf-card .meta { padding: 14px 18px; }
+  .wf-card .meta strong { color: var(--navy-800); display: block; margin-bottom: 2px; }
+  .wf-card .meta small { color: var(--gray-600); }
+
+  .map-wrap { text-align: center; }
+  .map-wrap img { max-width: 100%; border-radius: 12px; box-shadow: 0 1px 4px rgba(10,23,54,0.08); }
+
+  .docs-list { display: grid; gap: 8px; }
+  .docs-list a { display: flex; gap: 12px; padding: 14px 18px; background: var(--white); border-radius: 10px; border: 1px solid var(--gray-100); text-decoration: none; color: var(--navy-800); }
+  .docs-list a:hover { border-color: var(--navy-300); }
+  .docs-list a small { display: block; color: var(--gray-600); margin-top: 2px; font-size: 13px; font-weight: 400; }
+
+  footer { padding: 40px 24px; text-align: center; color: var(--gray-500); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <strong>일감 (ILGAM)</strong>
+  <span class="badge">v3.1</span>
+  <span class="spacer"></span>
+  <a href="#problem">문제</a>
+  <a href="#solution">해결</a>
+  <a href="#moat">5중 해자</a>
+  <a href="#roadmap">로드맵</a>
+  <a href="#wireframes">화면</a>
+  <a href="#docs">자료</a>
+</nav>
+
+<header class="hero">
+  <span class="badge">Pre-Seed · 2026.04 · 2027 법인 설립</span>
+  <h1 style="margin-top: 18px;">인력사무소를 디지털화하다</h1>
+  <p class="sub">베이비부머 954만 + <strong style="color:var(--amber)">YOLD 1,200만</strong>을 시니어 전담 UX·공공 MOU·컨텐츠 QA·자문 트랙으로 묶은 한국형 스폿워크 플랫폼</p>
+  <div class="cta-row">
+    <a href="#wireframes" class="btn">화면 보기 →</a>
+    <a href="#docs" class="btn secondary">IR 자료</a>
+  </div>
+</header>
+
+<!-- ─── 문제 ─── -->
+<section id="problem" class="container">
+  <h2>문제 정의</h2>
+  <p style="color:var(--gray-700); margin: 0 0 24px;">시니어(50~79세) 노동시장의 5가지 구조적 공백:</p>
+  <div class="grid grid-2">
+    <div class="card"><div class="num">01</div><strong>기존 알바 플랫폼</strong> 시니어 전담 UX 부재 (잠재 세그먼트로만 언급)</div>
+    <div class="card"><div class="num">02</div><strong>인력사무소</strong> 오프라인 10% 수수료 표준 · 디지털 전환 ×</div>
+    <div class="card"><div class="num">03</div><strong>사기·악성 공고</strong> 시니어 표적 (성인·도박·MLM·고액일당 사기)</div>
+    <div class="card"><div class="num">04</div><strong>60~74세 앱 이탈 60~70%</strong> (정보화진흥원 실증)</div>
+    <div class="card amber"><div class="num">05</div><strong>YOLD 경험 사장</strong> 대기업·CEO·전문가 출신이 단순 시급 노동에 갇힘</div>
+    <div class="card"><div class="num">06</div><strong>공공형 노인일자리</strong> 월 30~60시간 고정 저단가</div>
+  </div>
+</section>
+
+<!-- ─── 해결 ─── -->
+<section id="solution" class="container">
+  <h2>해결: <span style="color:var(--amber)">Blue Ocean</span> 단독 점유</h2>
+  <p style="color:var(--gray-700); margin: 0 0 24px;">무료 + 시니어 전담 + AI 디지털 + 단계화 = 경쟁사 어디에도 없는 4축 결합</p>
+  <div class="map-wrap">
+    <img src="assets/ILGAM_Competitive_Map_v3_1.png" alt="ILGAM 경쟁 매트릭스 v3.1 — 무료/수수료 × 시니어 전담/전 연령 매트릭스에서 일감 단독 점유" />
+    <p style="font-size:13px; color:var(--gray-500); margin-top: 12px;">출처: 각사 IR 2023~2024 · KB경영연구소 2025 · WEF 2024 · 인력사무소 업계 평균 10%</p>
+  </div>
+</section>
+
+<!-- ─── 5중 해자 ─── -->
+<section id="moat" class="container">
+  <h2>5중 해자 · 일감만의 결합</h2>
+  <p style="color:var(--gray-700); margin: 0 0 24px;">단일 차별화 1개로는 카피 쉽지만, 5개를 결합하면 디지털·오프라인 어느 쪽도 따라 못 함</p>
+  <div class="grid grid-3">
+    <div class="moat"><div class="icon">①</div><h3>단계화 수수료</h3><p style="color:var(--gray-700); font-size:15px;">검증 5개월 양측 0% → 법인 후 10% (인력사무소 표준)</p></div>
+    <div class="moat"><div class="icon">②</div><h3>시니어 UX</h3><p style="color:var(--gray-700); font-size:15px;">18pt 기본 / 48dp 터치 / WCAG AAA 7:1 (ADR-003)</p></div>
+    <div class="moat"><div class="icon">③</div><h3>공공 MOU</h3><p style="color:var(--gray-700); font-size:15px;">한국노인인력개발원·50플러스재단·구청 일자리센터</p></div>
+    <div class="moat"><div class="icon">④</div><h3>컨텐츠 QA</h3><p style="color:var(--gray-700); font-size:15px;">4-Tier (Postgres 룰 + Claude + 운영자 + 신고)</p></div>
+    <div class="moat" style="border:2px solid var(--amber);"><div class="icon" style="background: var(--amber); color: var(--navy-900);">★</div><h3>YOLD 자문 트랙</h3><p style="color:var(--gray-700); font-size:15px;">대기업·중견·스타트업 출신 50~64세 임원 멘토링·자문</p></div>
+  </div>
+</section>
+
+<!-- ─── 로드맵 ─── -->
+<section id="roadmap" class="container">
+  <h2>3 Phase 로드맵</h2>
+  <div class="timeline">
+    <div class="phase p0">
+      <div class="tag">Phase 0<br><small style="font-weight:400">M0~M5</small></div>
+      <div class="body"><strong>무료 검증 (2026.10~2027.02, 5개월)</strong>
+        <small>양측 0% · 워커 5,000명 + 검증 공고 5,000건 · MVP 부평·강서 · KORDI MOU 본 체결 추진</small></div>
+    </div>
+    <div class="phase p1">
+      <div class="tag">★ M6<br><small style="font-weight:400">2027.04</small></div>
+      <div class="body"><strong>법인 설립 + 10% 수수료 도입 (인력사무소 표준)</strong>
+        <small>구인자 10% · 워커 영구 0% · PortOne 에스크로 정산 부활 · 욜드 자문 트랙 출시</small></div>
+    </div>
+    <div class="phase p1">
+      <div class="tag">M7~M12</div>
+      <div class="body"><strong>Phase 1 안정화</strong>
+        <small>KORDI MOU 본 체결 · 워커 50K · 월 매출 ~₩4,000만 (GMV ₩4억 × 10%)</small></div>
+    </div>
+    <div class="phase p2">
+      <div class="tag">M13~M18</div>
+      <div class="body"><strong>Phase 2 진입 — 광고 + 자문 멤버십 인플렉션</strong>
+        <small>수도권 확장 · MAU 15만 · ARPU ~₩900</small></div>
+    </div>
+    <div class="phase p2">
+      <div class="tag">M19~M22</div>
+      <div class="body"><strong>BEP 도달 · TIPS ₩10억 진입</strong>
+        <small>월 ₩3억 · 4종 매출 라인 (10% + CPC + B2B Premium + 자문 멤버십) · MAU 30만</small></div>
+    </div>
+    <div class="phase p2">
+      <div class="tag">M23~M30</div>
+      <div class="body"><strong>전국 확장 · 흑자 안정</strong>
+        <small>MAU 80만 · 월 ~₩9.6억 · Pre-A ₩10~15억 라운드 추진</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Unit Economics ─── -->
+<section id="economics" class="container">
+  <h2>Unit Economics · 단계별 매출</h2>
+  <table>
+    <thead><tr><th>단계</th><th>시점</th><th>MAU</th><th>ARPU(월)</th><th>월 매출</th><th>비고</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 0</td><td>M0~M5</td><td>0 → 5K</td><td>₩0</td><td>₩0</td><td>무료 검증</td></tr>
+      <tr><td>법인</td><td>M6 (2027.04)</td><td>10K</td><td>~₩600</td><td class="amber">~₩600만</td><td>10% 수수료 도입</td></tr>
+      <tr><td>확장</td><td>M12</td><td>50K</td><td>~₩800</td><td class="amber">~₩4,000만</td><td>GMV ₩4억 × 10%</td></tr>
+      <tr><td>광고+자문</td><td>M18</td><td>150K</td><td>~₩900</td><td class="amber">~₩1.35억</td><td>4종 매출 라인</td></tr>
+      <tr><td><strong>BEP</strong></td><td>M22</td><td>300K</td><td>~₩1,000</td><td class="amber">~₩3억</td><td>손익분기</td></tr>
+      <tr><td>수익</td><td>M30</td><td>800K</td><td>~₩1,200</td><td class="amber">~₩9.6억</td><td>월 흑자 안정</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px; color:var(--gray-500); margin-top: 12px;">가정: CPC ₩250 · 전환율 0.5% · 노출 비율 5% (보수). ARPU = (수수료 + CPC + B2B 멤버십 + 자문 매칭) ÷ MAU</p>
+</section>
+
+<!-- ─── 와이어프레임 ─── -->
+<section id="wireframes" class="container">
+  <h2>화면 미리보기 (시니어 워커 앱)</h2>
+  <p style="color:var(--gray-700); margin: 0 0 24px;">18pt 기본 / 48dp 터치 / WCAG AAA · 카드 클릭하면 전체 화면으로 열림</p>
+  <div class="wf-grid">
+    <a class="wf-card" href="wireframes/jobs.html" target="_blank">
+      <iframe src="wireframes/jobs.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>일감 리스트</strong><small>오늘 일감 / 카테고리 칩 / 즉시정산 뱃지</small></div>
+    </a>
+    <a class="wf-card" href="wireframes/jobs_detail.html" target="_blank">
+      <iframe src="wireframes/jobs_detail.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>일감 상세</strong><small>시급·시간·예상 수령액 + 하단 안전존 CTA</small></div>
+    </a>
+    <a class="wf-card" href="wireframes/apply.html" target="_blank">
+      <iframe src="wireframes/apply.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>지원 확정</strong><small>2초 Undo 토스트 · 미스탭 회복 패턴</small></div>
+    </a>
+    <a class="wf-card" href="wireframes/job_recommend.html" target="_blank">
+      <iframe src="wireframes/job_recommend.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>매칭 추천</strong><small>거리·시급·시간 가중합 RPC + Edge Function</small></div>
+    </a>
+    <a class="wf-card" href="wireframes/my.html" target="_blank">
+      <iframe src="wireframes/my.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>내 근무</strong><small>월 누적 카드 + 근무 이력 + 입금 상태</small></div>
+    </a>
+    <a class="wf-card" href="wireframes/00_Investor_Showcase.html" target="_blank">
+      <iframe src="wireframes/00_Investor_Showcase.html" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>
+      <div class="meta"><strong>투자자 쇼케이스</strong><small>전체 화면 흐름 한 페이지 요약</small></div>
+    </a>
+  </div>
+</section>
+
+<!-- ─── 자료 ─── -->
+<section id="docs" class="container">
+  <h2>IR 자료 (다운로드)</h2>
+  <div class="docs-list">
+    <a href="https://drive.google.com/drive/folders/1oslRprlS-0bSixespL3imqWQv-_YOpk8" target="_blank">
+      <span>📂</span>
+      <div><strong>Google Drive 전체 폴더 (ilgam.jtbd@gmail.com 권한 필요)</strong>
+        <small>IR Deck (pptx) · Executive Summary (docx) · Financial Model (xlsx) · 와이어프레임 · 백업</small></div>
+    </a>
+    <a href="https://github.com/ilgam-jtbd/ilgam/pull/14" target="_blank">
+      <span>💻</span>
+      <div><strong>GitHub PR #14 — 코드 검토</strong>
+        <small>30 커밋 · 130 파일 · CI 4/4 green · ADR 11개 · DB 마이그레이션 6개</small></div>
+    </a>
+    <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/ir/handoff.md" target="_blank">
+      <span>📑</span>
+      <div><strong>v3.1 Handoff · 핵심 결정 5건 + 코드 매핑</strong>
+        <small>Cowork 산출 인덱스 · 후속 PR 큐 · M0~M30 마일스톤</small></div>
+    </a>
+    <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/decisions/ADR-002-product-nsm-mvp.md" target="_blank">
+      <span>📐</span>
+      <div><strong>ADR-002 v2.2 — 5중 해자 + Phase 0/1/2</strong>
+        <small>NSM = MAVJ × MAU × TrustScore · 단계화 수수료 정책</small></div>
+    </a>
+    <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/product/PRD.md" target="_blank">
+      <span>📋</span>
+      <div><strong>PRD v3.1 — Product Requirements</strong>
+        <small>해결 가설 · 워커 3트랙 · 의도 배제 5건 · 위험 매트릭스</small></div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  © 2026 ILGAM JTBD · Confidential · v3.1 Pivot · 2026-04-28<br>
+  Pre-Seed · 2027 법인 설립 · 김연재(PO) · ilgam.jtbd@gmail.com
+</footer>
+
+</body>
+</html>

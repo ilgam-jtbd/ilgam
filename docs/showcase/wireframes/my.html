@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko" data-mode="senior">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일감(ILGAM) · /my — 내 정보</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+/* 프로필 히어로 */
+.profile-hero {
+  padding: 24px 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: var(--white);
+}
+.ph-row {
+  display: flex; align-items: center; gap: 16px;
+}
+.avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(255,255,255,.2); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4em; font-weight: 800;
+  border: 3px solid rgba(255,255,255,.3);
+}
+.ph-name { font-size: 1.2em; font-weight: 800; letter-spacing: -.02em; }
+.ph-sub { font-size: .85em; opacity: .85; margin-top: 2px; }
+.ph-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 6px;
+  background: rgba(255,255,255,.2); padding: 4px 10px;
+  border-radius: 100px; font-size: .72em; font-weight: 700;
+}
+
+/* 정산 카운터 */
+.earnings-card {
+  margin: -20px 20px 20px; background: var(--white);
+  border-radius: var(--radius-md); padding: 20px;
+  box-shadow: var(--shadow-md); position: relative; z-index: 2;
+}
+.earn-label {
+  font-size: .78em; color: var(--n500); font-weight: 700;
+  margin-bottom: 4px; letter-spacing: .04em;
+}
+.earn-value {
+  font-size: 1.6em; font-weight: 800;
+  color: var(--n900); letter-spacing: -.03em;
+  margin-bottom: 12px;
+}
+.earn-value .won { font-size: .6em; color: var(--n500); font-weight: 600; margin-left: 4px; }
+
+.earn-breakdown {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; padding-top: 12px; border-top: 1px solid var(--n100);
+}
+.earn-cell { text-align: center; }
+.earn-cell-val { font-size: .95em; font-weight: 800; color: var(--n900); }
+.earn-cell-label { font-size: .72em; color: var(--n500); font-weight: 600; margin-top: 2px; }
+
+/* 섹션 */
+.sec { padding: 0 20px 24px; }
+.sec-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.sec-title {
+  font-size: 1em; font-weight: 800;
+  letter-spacing: -.01em;
+}
+.sec-link {
+  font-size: .78em; color: var(--primary-dark);
+  font-weight: 700; min-height: var(--tap-target);
+  display: flex; align-items: center; padding: 0 8px;
+}
+
+/* 지원 현황 아이템 */
+.app-item {
+  background: var(--white); border: 1px solid var(--n200);
+  border-radius: var(--radius-md); padding: 16px;
+  margin-bottom: 10px; display: flex; gap: 12px;
+  align-items: center;
+}
+.app-status {
+  flex-shrink: 0; width: 72px; text-align: center;
+  padding: 8px 6px; border-radius: 10px;
+  font-size: .78em; font-weight: 800;
+}
+.app-status--waiting { background: var(--amber-light); color: #92400E; }
+.app-status--accepted { background: var(--primary-soft); color: var(--primary-dark); }
+.app-status--completed { background: var(--accent-light); color: var(--accent-dark); }
+.app-status--settled { background: #DCFCE7; color: #14532D; }
+.app-status--canceled { background: var(--n100); color: var(--n500); }
+
+.app-body { flex: 1; min-width: 0; }
+.app-title {
+  font-size: .95em; font-weight: 800; color: var(--n900);
+  letter-spacing: -.01em; line-height: 1.3;
+}
+.app-sub {
+  font-size: .78em; color: var(--n500);
+  margin-top: 2px; font-weight: 500;
+}
+.app-wage {
+  font-size: .82em; font-weight: 700; color: var(--primary-dark);
+  margin-top: 4px;
+}
+
+/* 설정 메뉴 */
+.menu-list {
+  background: var(--white); border: 1px solid var(--n200);
+  border-radius: var(--radius-md); overflow: hidden;
+}
+.menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--n100);
+  min-height: var(--tap-target);
+  font-size: .9em; color: var(--n900);
+  width: 100%; text-align: left;
+}
+.menu-item:last-child { border-bottom: 0; }
+.menu-item:hover { background: var(--n50); }
+.menu-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--n100); color: var(--n700);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: .9em;
+}
+.menu-text { flex: 1; font-weight: 600; }
+.menu-value { font-size: .82em; color: var(--n500); font-weight: 600; }
+.menu-caret { color: var(--n400); font-size: .9em; }
+
+/* 모드 토글 */
+.mode-panel {
+  background: var(--white); border: 1px solid var(--n200);
+  border-radius: var(--radius-md); padding: 16px;
+}
+.mode-title {
+  font-size: .85em; font-weight: 800; margin-bottom: 12px;
+}
+.mode-options {
+  display: flex; gap: 8px;
+}
+.mode-btn {
+  flex: 1; padding: 12px 8px; border-radius: 12px;
+  background: var(--n100); color: var(--n700);
+  font-size: .82em; font-weight: 700;
+  border: 2px solid transparent; min-height: var(--tap-target);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.mode-btn[aria-pressed="true"] {
+  background: var(--primary-soft); color: var(--primary-dark);
+  border-color: var(--primary);
+}
+.mode-btn-sub { font-size: .68em; color: var(--n500); font-weight: 600; }
+.mode-btn[aria-pressed="true"] .mode-btn-sub { color: var(--primary-dark); opacity: .8; }
+
+/* 알림 설정 행 */
+.notif-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid var(--n100);
+  font-size: .9em;
+}
+.notif-row:last-child { border-bottom: 0; }
+.notif-label { font-weight: 600; color: var(--n900); }
+.notif-desc { font-size: .78em; color: var(--n500); margin-top: 2px; }
+.toggle {
+  width: 56px; height: 32px; border-radius: 100px;
+  background: var(--n300); position: relative;
+  flex-shrink: 0; transition: .2s;
+}
+.toggle::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--white); transition: .2s;
+  box-shadow: var(--shadow-sm);
+}
+.toggle[aria-checked="true"] { background: var(--primary); }
+.toggle[aria-checked="true"]::after { left: 27px; }
+
+/* 로그아웃 */
+.logout-btn {
+  width: 100%; min-height: var(--btn-min-height);
+  background: transparent; color: var(--rose);
+  border: 1px solid var(--rose-light);
+  border-radius: 14px; font-size: .85em; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+</style>
+</head>
+<body>
+<div class="page-bg">
+<div class="page-title">일감 · /my — 와이어프레임 v1.0 (2026-04-23)</div>
+
+<!-- ===== DEMO 1 : 내 정보 홈 ===== -->
+<main class="phone-frame" aria-label="내 정보">
+
+  <header class="topbar" style="background: transparent; border: 0; position: static;">
+    <div class="topbar-row">
+      <div class="topbar-title" style="color: var(--white);">내 정보</div>
+      <button class="icon-btn" aria-label="설정" style="background: rgba(255,255,255,.2); color: var(--white);">설정</button>
+    </div>
+  </header>
+
+  <div class="profile-hero" style="padding-top: 0;">
+    <div class="ph-row">
+      <div class="avatar" aria-hidden="true">김</div>
+      <div style="flex:1; min-width: 0;">
+        <div class="ph-name">김연재님</div>
+        <div class="ph-sub">⊙ 부평구 산곡동 · 산곡동 3개월 · 2026.02 가입</div>
+        <span class="ph-badge">
+          <span aria-hidden="true">✓</span>
+          <span>본인 인증 완료 · 우리 동네 인증</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 정산 요약 -->
+  <div class="earnings-card">
+    <div class="earn-label">이번 달 총 정산액</div>
+    <div class="earn-value">512,000<span class="won">원</span></div>
+    <div class="earn-breakdown">
+      <div class="earn-cell">
+        <div class="earn-cell-val">11회</div>
+        <div class="earn-cell-label">완료</div>
+      </div>
+      <div class="earn-cell">
+        <div class="earn-cell-val">38시간</div>
+        <div class="earn-cell-label">근무</div>
+      </div>
+      <div class="earn-cell">
+        <div class="earn-cell-val">★ 4.8</div>
+        <div class="earn-cell-label">평점 · 재요청률 68%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 진행 중 지원 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">진행 중 · 2건</div>
+      <a class="sec-link" href="#">전체 보기 →</a>
+    </div>
+
+    <article class="app-item" tabindex="0">
+      <div class="app-status app-status--waiting">
+        수락<br>대기
+      </div>
+      <div class="app-body">
+        <div class="app-title">오피스 일상 청소</div>
+        <div class="app-sub">⊙ 부평동 제일빌딩 · 04.25 (토) 09:00</div>
+        <div class="app-wage">13,500원/h · 3시간</div>
+      </div>
+    </article>
+
+    <article class="app-item" tabindex="0">
+      <div class="app-status app-status--accepted">
+        수락<br>완료
+      </div>
+      <div class="app-body">
+        <div class="app-title">경비원 · 아파트</div>
+        <div class="app-sub">한양아파트 · 04.25 (토) 14:00</div>
+        <div class="app-wage">11,500원/h · 6시간</div>
+      </div>
+    </article>
+  </div>
+
+  <!-- 모드 토글 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">화면 크기</div>
+    </div>
+    <div class="mode-panel">
+      <div class="mode-options">
+        <button class="mode-btn" aria-pressed="true">
+          <strong style="font-size: 1.05em;">시니어</strong>
+          <span class="mode-btn-sub">글자 큼 (20pt)</span>
+        </button>
+        <button class="mode-btn" aria-pressed="false">
+          <strong style="font-size: 1.05em;">표준</strong>
+          <span class="mode-btn-sub">기본 (16pt)</span>
+        </button>
+        <button class="mode-btn" aria-pressed="false">
+          <strong style="font-size: 1.05em;">컴팩트</strong>
+          <span class="mode-btn-sub">작게 (14pt)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메뉴 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">내 정보 관리</div>
+    </div>
+    <div class="menu-list">
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">프</div>
+        <div class="menu-text">프로필 수정</div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">계</div>
+        <div class="menu-text">정산 계좌</div>
+        <span class="menu-value">신한 *** 1234</span>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">직</div>
+        <div class="menu-text">관심 직군</div>
+        <span class="menu-value">청소·경비</span>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">위</div>
+        <div class="menu-text">활동 지역</div>
+        <span class="menu-value">부평·계양</span>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 알림 설정 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">알림 받기</div>
+    </div>
+    <div style="font-size: .78em; color: var(--n500); font-weight: 600; margin-bottom: 8px;">
+      번호 노출 없이, 알림톡으로 안전하게
+    </div>
+    <div class="menu-list" style="padding: 4px 16px;">
+      <div class="notif-row">
+        <div>
+          <div class="notif-label">새 추천 공고</div>
+          <div class="notif-desc">카카오 알림톡으로 발송 (실패 시 문자)</div>
+        </div>
+        <button class="toggle" aria-checked="true" role="switch" aria-label="새 추천 공고 알림 켜짐"></button>
+      </div>
+      <div class="notif-row">
+        <div>
+          <div class="notif-label">지원 결과</div>
+          <div class="notif-desc">수락·거절·취소 즉시</div>
+        </div>
+        <button class="toggle" aria-checked="true" role="switch" aria-label="지원 결과 알림 켜짐"></button>
+      </div>
+      <div class="notif-row">
+        <div>
+          <div class="notif-label">정산 완료</div>
+          <div class="notif-desc">입금 확인 안내</div>
+        </div>
+        <button class="toggle" aria-checked="true" role="switch" aria-label="정산 완료 알림 켜짐"></button>
+      </div>
+      <div class="notif-row">
+        <div>
+          <div class="notif-label">마케팅 정보</div>
+          <div class="notif-desc">프로모션 · 이벤트 · 혜택</div>
+        </div>
+        <button class="toggle" aria-checked="false" role="switch" aria-label="마케팅 알림 꺼짐"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 고객지원 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">도움이 필요하세요?</div>
+    </div>
+    <div class="menu-list">
+      <button class="menu-item" data-support="channeltalk">
+        <div class="menu-icon" style="background: var(--accent-light); color: var(--accent-dark);" aria-hidden="true">톡</div>
+        <div class="menu-text">채널톡으로 문의하기
+          <div style="font-size: .78em; color: var(--n500); font-weight: 500;">평일 09:00~20:00 · 평균 2분 이내 응대</div>
+        </div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">?</div>
+        <div class="menu-text">자주 묻는 질문</div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-icon" aria-hidden="true">공</div>
+        <div class="menu-text">공지사항</div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 약관 -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-title">약관 · 정책</div>
+    </div>
+    <div class="menu-list">
+      <button class="menu-item">
+        <div class="menu-text">서비스 이용약관</div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-text">개인정보 처리방침</div>
+        <span class="menu-caret" aria-hidden="true">›</span>
+      </button>
+      <button class="menu-item">
+        <div class="menu-text">버전 정보</div>
+        <span class="menu-value">v1.0.0 (MVP)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 로그아웃 -->
+  <div class="sec">
+    <button class="logout-btn">로그아웃</button>
+  </div>
+
+  <nav class="tabbar" aria-label="하단 메뉴">
+    <a class="tab"><span class="tab-icon">일</span>일자리</a>
+    <a class="tab"><span class="tab-icon">지</span>내 지원</a>
+    <a class="tab"><span class="tab-icon">홈</span>홈</a>
+    <a class="tab"><span class="tab-icon">알</span>알림</a>
+    <a class="tab" aria-current="page"><span class="tab-icon">내</span>내 정보</a>
+  </nav>
+
+</main>
+
+
+<!-- ===== DEMO 2 : 내 지원 상세 (applications 탭) ===== -->
+<div class="demo-label">내 지원 탭 — 상태별 필터</div>
+<main class="phone-frame" aria-label="내 지원">
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="topbar-title">내 지원</div>
+        <div class="topbar-loc">이번 달 · 13건</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; scrollbar-width: none;">
+      <button class="chip" aria-selected="true">전체 13</button>
+      <button class="chip" aria-selected="false">대기 2</button>
+      <button class="chip" aria-selected="false">확정 1</button>
+      <button class="chip" aria-selected="false">완료 8</button>
+      <button class="chip" aria-selected="false">취소 2</button>
+    </div>
+  </header>
+
+  <div class="sec" style="padding-top: 20px;">
+
+    <article class="app-item">
+      <div class="app-status app-status--waiting">수락<br>대기</div>
+      <div class="app-body">
+        <div class="app-title">오피스 일상 청소</div>
+        <div class="app-sub">⊙ 부평동 제일빌딩 · 04.25 (토) 09:00 · 지원 2시간 전</div>
+        <div class="app-wage">시급 13,500원 · 3시간 · 예상 40,500원</div>
+      </div>
+    </article>
+
+    <article class="app-item">
+      <div class="app-status app-status--accepted">수락<br>완료</div>
+      <div class="app-body">
+        <div class="app-title">경비원 · 아파트</div>
+        <div class="app-sub">한양아파트 · 04.25 (토) 14:00</div>
+        <div class="app-wage">시급 11,500원 · 6시간 · 예상 69,000원</div>
+      </div>
+    </article>
+
+    <article class="app-item">
+      <div class="app-status app-status--completed">근무<br>완료</div>
+      <div class="app-body">
+        <div class="app-title">주방 보조</div>
+        <div class="app-sub">한솥도시락 · 04.23 (목) 11:00</div>
+        <div class="app-wage">시급 12,000원 · 4시간 · 48,000원</div>
+      </div>
+    </article>
+
+    <article class="app-item">
+      <div class="app-status app-status--settled">정산<br>완료</div>
+      <div class="app-body">
+        <div class="app-title">실버택배 배송</div>
+        <div class="app-sub">부평CGV · 04.22 (수) 10:00</div>
+        <div class="app-wage">건당 1,500원 · 18건 · 27,000원 입금</div>
+      </div>
+    </article>
+
+    <article class="app-item">
+      <div class="app-status app-status--canceled">워커<br>취소</div>
+      <div class="app-body" style="opacity: .7;">
+        <div class="app-title">시설관리 보조</div>
+        <div class="app-sub">부평종합운동장 · 04.20 (일) 취소</div>
+        <div class="app-wage">사유: 개인 일정</div>
+      </div>
+    </article>
+
+    <div style="text-align:center; font-size: .82em; color: var(--n500); font-weight: 600; padding: 20px 12px 4px;">
+      동네에 비슷한 일자리가 생기면 알림톡으로 알려드릴게요
+    </div>
+
+  </div>
+
+  <nav class="tabbar" aria-label="하단 메뉴">
+    <a class="tab"><span class="tab-icon">일</span>일자리</a>
+    <a class="tab" aria-current="page"><span class="tab-icon">지</span>내 지원</a>
+    <a class="tab"><span class="tab-icon">홈</span>홈</a>
+    <a class="tab"><span class="tab-icon">알</span>알림</a>
+    <a class="tab"><span class="tab-icon">내</span>내 정보</a>
+  </nav>
+</main>
+
+<div class="page-title" style="margin-top:40px; text-align:center;">
+  시니어 모드 기본값 · 표준/컴팩트 전환 가능 · 채널톡 문의 메뉴 내 상시 노출
+</div>
+
+</div>
+</body>
+</html>
