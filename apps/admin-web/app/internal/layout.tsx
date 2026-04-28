@@ -26,7 +26,7 @@ async function getAdminSession(): Promise<PlatformAdmin | null> {
           // Server Component에서는 쿠키 쓰기 불가; middleware가 담당
         },
       },
-    }
+    },
   );
 
   const {
@@ -64,14 +64,18 @@ export default async function InternalLayout({ children }: { children: ReactNode
     }
   }
 
+  // ADR-009 v2 (피벗): QA 큐가 P0 = 첫 화면. payments 폐기 (직거래 모델, ADR-004 v2).
   const navItems = [
-    { href: "/internal", label: "대시보드" },
-    { href: "/internal/employers", label: "구인자 승인" },
-    { href: "/internal/reports", label: "신고 처리" },
-    { href: "/internal/payments", label: "결제 분쟁" },
-    { href: "/internal/workers", label: "워커 관리" },
+    { href: "/internal/qa", label: "QA 큐" }, // P0
+    { href: "/internal/reports", label: "신고 처리" }, // P0
+    { href: "/internal/employers", label: "구인자 승인" }, // P1
+    { href: "/internal/workers", label: "워커 관리" }, // P1
+    { href: "/internal", label: "대시보드" }, // P1
     ...(admin.role === "super_admin"
-      ? [{ href: "/internal/audit", label: "감사 로그" }]
+      ? [
+          { href: "/internal/audit", label: "감사 로그" }, // P2
+          { href: "/internal/ads", label: "광고 (M18 dormant)" }, // ADR-011
+        ]
       : []),
   ];
 
@@ -138,9 +142,7 @@ export default async function InternalLayout({ children }: { children: ReactNode
       </aside>
 
       {/* 메인 콘텐츠 */}
-      <main style={{ flex: 1, padding: spacing.xl, overflow: "auto" }}>
-        {children}
-      </main>
+      <main style={{ flex: 1, padding: spacing.xl, overflow: "auto" }}>{children}</main>
     </div>
   );
 }
