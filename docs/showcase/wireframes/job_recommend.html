@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ko" data-mode="senior">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일감(ILGAM) · 오늘의 추천 — 와이어프레임</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+/* ============================================================
+   DESIGN TOKENS — 일감 랜딩 토큰 재사용 + 시니어 모드 오버레이
+   ============================================================ */
+:root {
+  --primary:        #6366F1;
+  --primary-dark:   #4F46E5;
+  --primary-light:  #E0E7FF;
+  --primary-soft:   #EEF2FF;
+  --accent:         #14B8A6;
+  --accent-dark:    #0D9488;
+  --accent-light:   #CCFBF1;
+  --amber:          #F59E0B;
+  --amber-light:    #FEF3C7;
+  --rose:           #E11D48;
+  --rose-light:     #FFE4E6;
+
+  --n900: #0F172A;
+  --n700: #334155;
+  --n500: #64748B;
+  --n400: #94A3B8;
+  --n300: #CBD5E1;
+  --n200: #E2E8F0;
+  --n100: #F1F5F9;
+  --n50:  #F8FAFC;
+  --white: #FFFFFF;
+
+  --radius-sm:  8px;
+  --radius-md:  16px;
+  --radius-lg:  24px;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-md: 0 4px 16px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.05);
+  --shadow-lg: 0 12px 32px rgba(15,23,42,.14);
+
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* SENIOR MODE: 20pt 고정 베이스라인 */
+:root[data-mode="senior"] {
+  --font-size-base: 20px;
+  --line-height: 1.85;
+  --btn-min-height: 56px;
+  --tap-target: 48px;
+  --card-padding: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  font-family: var(--font);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  color: var(--n900);
+  background: var(--n100);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+body { min-height: 100vh; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ============================================================
+   LAYOUT — 모바일 프레임(최대 420px), 데스크톱에서는 가운데 정렬
+   ============================================================ */
+.page-bg {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--n100) 0%, #E2E8F0 100%);
+  padding: 24px 12px 120px;
+}
+.page-title {
+  max-width: 420px;
+  margin: 0 auto 16px;
+  padding: 0 8px;
+  font-size: .72em;
+  color: var(--n500);
+  letter-spacing: .04em;
+}
+.phone-frame {
+  max-width: 420px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ============================================================
+   STICKY TOP BAR
+   ============================================================ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--white);
+  border-bottom: 1px solid var(--n200);
+  padding: 16px 20px 12px;
+}
+.topbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.topbar-title {
+  font-size: 1.2em;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+.topbar-loc {
+  font-size: .78em;
+  color: var(--n500);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--n100);
+  color: var(--n700);
+  font-size: .9em;
+}
+.icon-btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+  border-radius: 100px;
+  background: var(--n100);
+  color: var(--n700);
+  font-size: .85em;
+  font-weight: 600;
+  min-height: var(--tap-target);
+  display: flex;
+  align-items: center;
+  border: 2px solid transparent;
+  transition: .15s;
+}
+.chip[aria-selected="true"] {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  border-color: var(--primary);
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.feed { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--n200);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  box-shadow: var(--shadow-sm);
+  transition: .15s;
+}
+.card:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
+.card--top {
+  border: 2px solid var(--primary);
+  background: linear-gradient(180deg, var(--primary-soft) 0%, var(--white) 40%);
+}
+
+.card-head {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.cat-icon {
+  width: 48px; height: 48px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  font-weight: 800;
+}
+.cat-icon--clean { background: var(--accent-light); color: var(--accent-dark); }
+.cat-icon--guard { background: var(--primary-soft); color: var(--primary-dark); }
+.cat-icon--kitchen { background: var(--amber-light); color: #B45309; }
+
+.card-title-wrap { flex: 1; min-width: 0; }
+.card-title {
+  font-size: 1.1em;
+  font-weight: 800;
+  color: var(--n900);
+  letter-spacing: -.01em;
+  line-height: 1.35;
+}
+.card-sub {
+  font-size: .78em;
+  color: var(--n500);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* 매칭 점수 대표 숫자 */
+.score-big {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 0 12px;
+  border-top: 1px solid var(--n100);
+  border-bottom: 1px solid var(--n100);
+  margin-bottom: 12px;
+}
+.score-big-num {
+  font-size: 1.4em;
+  font-weight: 800;
+  color: var(--primary-dark);
+  letter-spacing: -.02em;
+}
+.score-big-unit {
+  font-size: .78em;
+  color: var(--n500);
+  font-weight: 600;
+}
+.score-big-label {
+  margin-left: auto;
+  font-size: .72em;
+  color: var(--n500);
+  font-weight: 600;
+}
+
+/* 추천 사유 불릿 */
+.reasons {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.reasons li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: .9em;
+  line-height: 1.5;
+  color: var(--n700);
+}
+.reasons li::before {
+  content: "";
+  width: 8px; height: 8px;
+  margin-top: 11px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.divider { height: 1px; background: var(--n100); margin: 4px 0 12px; }
+
+/* 시급/시간/일시 */
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.facts-wage {
+  font-size: 1em;
+  font-weight: 800;
+  color: var(--n900);
+}
+.facts-wage .won { color: var(--primary-dark); }
+.facts-time {
+  font-size: .85em;
+  color: var(--n700);
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.badge {
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: .72em;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+.badge--sameday { background: var(--amber-light); color: #B45309; }
+.badge--senior  { background: var(--accent-light); color: var(--accent-dark); }
+.badge--first   { background: var(--primary-soft); color: var(--primary-dark); }
+
+/* CTA */
+.cta-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 10px;
+}
+.rating {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  font-size: .85em;
+  font-weight: 700;
+  color: var(--n700);
+  background: var(--n100);
+  border-radius: 12px;
+  min-height: var(--btn-min-height);
+}
+.btn {
+  flex: 1;
+  min-height: var(--btn-min-height);
+  border-radius: 14px;
+  font-size: .95em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: .15s;
+}
+.btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.btn--secondary {
+  background: var(--white);
+  color: var(--n900);
+  border: 2px solid var(--n300);
+}
+.btn--secondary:hover { border-color: var(--n500); background: var(--n50); }
+.btn--primary {
+  background: var(--primary);
+  color: var(--white);
+}
+.btn--primary:hover { background: var(--primary-dark); }
+
+/* "왜 추천?" 토글 */
+.why-toggle {
+  width: 100%;
+  min-height: var(--tap-target);
+  background: var(--white);
+  border: 1px dashed var(--n300);
+  border-radius: 12px;
+  font-size: .82em;
+  font-weight: 600;
+  color: var(--n700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.why-toggle[aria-expanded="true"] { background: var(--n50); }
+.why-toggle .caret { transition: transform .2s; }
+.why-toggle[aria-expanded="true"] .caret { transform: rotate(180deg); }
+
+/* Score breakdown panel */
+.breakdown {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--n50);
+  border-radius: 12px;
+  display: none;
+}
+.breakdown.open { display: block; }
+.bd-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 54px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+}
+.bd-label { font-size: .78em; color: var(--n700); font-weight: 600; }
+.bd-meter {
+  height: 10px;
+  background: var(--n200);
+  border-radius: 100px;
+  overflow: hidden;
+  position: relative;
+}
+.bd-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 100px;
+}
+.bd-value {
+  font-size: .82em;
+  font-weight: 800;
+  color: var(--n900);
+  text-align: right;
+}
+.bd-hint {
+  font-size: .72em;
+  color: var(--n500);
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding-left: 80px;
+}
+
+/* ============================================================
+   EMPTY / LOCATION-DENIED / LOADING
+   ============================================================ */
+.skeleton {
+  background: var(--white);
+  border: 1px solid var(--n200);
+  border-radius: var(--radius-md);
+  padding: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sk-line {
+  height: 14px;
+  background: linear-gradient(90deg, var(--n100) 0%, var(--n200) 50%, var(--n100) 100%);
+  background-size: 200% 100%;
+  animation: sk 1.2s infinite;
+  border-radius: 4px;
+}
+.sk-line--title { height: 22px; width: 60%; }
+.sk-line--short { width: 40%; }
+@keyframes sk {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk-line { animation: none; background: var(--n200); }
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+}
+.empty-title {
+  font-size: 1.05em;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.empty-desc {
+  font-size: .85em;
+  color: var(--n500);
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   BOTTOM FIXED SUPPORT BAR (채널톡)
+   ============================================================ */
+.bottom-support {
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+  border-top: 1px solid var(--n200);
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.support-btn {
+  width: 100%;
+  min-height: var(--btn-min-height);
+  background: var(--n900);
+  color: var(--white);
+  border-radius: 14px;
+  font-size: .9em;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.support-btn:hover { background: var(--n700); }
+
+/* ============================================================
+   섹션 타이틀 (데모용)
+   ============================================================ */
+.demo-label {
+  max-width: 420px;
+  margin: 40px auto 12px;
+  padding: 0 20px;
+  font-size: .8em;
+  font-weight: 800;
+  color: var(--n500);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   접근성 — 포커스 링, 스크린리더 전용
+   ============================================================ */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="page-bg">
+
+  <div class="page-title">일감 · /job/recommend — 와이어프레임 v1.0 (2026-04-23)</div>
+
+  <!-- ========================================================
+       DEMO 1 — 정상 상태 (추천 3건, 1등 카드 breakdown 열림)
+       ======================================================== -->
+  <main class="phone-frame" aria-label="오늘의 추천 일자리">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-row">
+        <div>
+          <div class="topbar-title">오늘의 추천</div>
+          <div class="topbar-loc">
+            <span aria-hidden="true">●</span>
+            <span>부평구 산곡동 기준</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" aria-label="정렬">정렬</button>
+          <button class="icon-btn" aria-label="필터">필터</button>
+        </div>
+      </div>
+      <div class="filter-chips" role="tablist" aria-label="추천 필터">
+        <button class="chip" role="tab" aria-selected="true">전체</button>
+        <button class="chip" role="tab" aria-selected="false">오늘 시작</button>
+        <button class="chip" role="tab" aria-selected="false">걸어서 10분</button>
+        <button class="chip" role="tab" aria-selected="false">당일지급</button>
+        <button class="chip" role="tab" aria-selected="false">주휴수당</button>
+        <button class="chip" role="tab" aria-selected="false">동네 추천</button>
+      </div>
+    </header>
+
+    <!-- FEED -->
+    <section class="feed" aria-live="polite">
+
+      <!-- CARD 1 — 1위, 점수 breakdown 열림 -->
+      <article class="card card--top" tabindex="0"
+               aria-label="청소원 오피스 일자리, 매칭 92점, 시급 13,500원, 자세히 보기">
+        <div class="card-head">
+          <div class="cat-icon cat-icon--clean" aria-hidden="true">청</div>
+          <div class="card-title-wrap">
+            <div class="card-title">청소원 · 오피스</div>
+            <div class="card-sub">⊙ 부평동 제일빌딩 · 걸어서 18분 · ⭐4.7 (23)</div>
+          </div>
+        </div>
+
+        <div class="score-big">
+          <span class="score-big-num">92</span>
+          <span class="score-big-unit">점</span>
+          <span class="score-big-label">오늘 1위</span>
+        </div>
+
+        <ul class="reasons">
+          <li>집에서 걸어서 18분</li>
+          <li>평균 시급보다 2,000원 높음</li>
+          <li>우리 동네에서 자주 하시던 청소</li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <div class="facts">
+          <div class="facts-wage">시급 <span class="won">13,500원</span> · 3시간</div>
+          <div class="facts-time">2026.04.25 (토) 09:00 – 12:00</div>
+        </div>
+
+        <div class="badges">
+          <span class="badge badge--sameday">당일지급</span>
+          <span class="badge badge--senior">주휴수당</span>
+          <span class="badge badge--first">경력 환영</span>
+        </div>
+
+        <div class="cta-row">
+          <div class="rating" aria-label="평점 4.7점, 23건">
+            <span aria-hidden="true">★</span>
+            <span>4.7 (23)</span>
+          </div>
+          <button class="btn btn--secondary" aria-label="채널톡으로 문의하기">
+            채널톡 문의
+          </button>
+          <button class="btn btn--primary" aria-label="이 일자리에 지원하기">
+            지원하기
+          </button>
+        </div>
+
+        <button class="why-toggle" aria-expanded="true" aria-controls="bd-1">
+          <span>왜 추천됐나요?</span>
+          <span class="caret" aria-hidden="true">▼</span>
+        </button>
+
+        <div class="breakdown open" id="bd-1" role="region" aria-label="점수 분석">
+          <div class="bd-row">
+            <span class="bd-label">거리 40%</span>
+            <div class="bd-meter" role="meter" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100">
+              <div class="bd-meter-fill" style="width:95%"></div>
+            </div>
+            <span class="bd-value">95점</span>
+            <div class="bd-hint">걸어서 18분 · 우리 동네</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시급 25%</span>
+            <div class="bd-meter" role="meter" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100">
+              <div class="bd-meter-fill" style="width:88%"></div>
+            </div>
+            <span class="bd-value">88점</span>
+            <div class="bd-hint">청소 평균 대비 +2,000원</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시간 20%</span>
+            <div class="bd-meter" role="meter" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">
+              <div class="bd-meter-fill" style="width:90%"></div>
+            </div>
+            <span class="bd-value">90점</span>
+            <div class="bd-hint">선호 시간대 오전과 일치</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">직군 10%</span>
+            <div class="bd-meter" role="meter" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+              <div class="bd-meter-fill" style="width:65%"></div>
+            </div>
+            <span class="bd-value">65점</span>
+            <div class="bd-hint">청소 직군 지원 2회</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">지역 5%</span>
+            <div class="bd-meter" role="meter" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+              <div class="bd-meter-fill" style="width:100%"></div>
+            </div>
+            <span class="bd-value">100점</span>
+            <div class="bd-hint">부평 파일럿 지역 보너스</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- CARD 2 — 2위, breakdown 닫힘 -->
+      <article class="card" tabindex="0"
+               aria-label="경비원 아파트 일자리, 매칭 85점, 시급 11,500원, 자세히 보기">
+        <div class="card-head">
+          <div class="cat-icon cat-icon--guard" aria-hidden="true">경</div>
+          <div class="card-title-wrap">
+            <div class="card-title">경비원 · 아파트</div>
+            <div class="card-sub">⊙ 부평구 삼산동 한양아파트 · 걸어서 42분 · ⭐4.8 (41)</div>
+          </div>
+        </div>
+
+        <div class="score-big">
+          <span class="score-big-num">85</span>
+          <span class="score-big-unit">점</span>
+          <span class="score-big-label">오늘 2위</span>
+        </div>
+
+        <ul class="reasons">
+          <li>사업장까지 걸어서 42분</li>
+          <li>오후 시간대 선호와 일치</li>
+          <li>⭐4.8(41) · KYC 인증 사업장</li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <div class="facts">
+          <div class="facts-wage">시급 <span class="won">11,500원</span> · 6시간</div>
+          <div class="facts-time">2026.04.25 (토) 14:00 – 20:00</div>
+        </div>
+
+        <div class="badges">
+          <span class="badge badge--senior">주휴수당</span>
+          <span class="badge badge--first">경력 환영</span>
+        </div>
+
+        <div class="cta-row">
+          <div class="rating" aria-label="평점 4.8점, 41건">
+            <span aria-hidden="true">★</span>
+            <span>4.8 (41)</span>
+          </div>
+          <button class="btn btn--secondary">채널톡 문의</button>
+          <button class="btn btn--primary">지원하기</button>
+        </div>
+
+        <button class="why-toggle" aria-expanded="false" aria-controls="bd-2">
+          <span>왜 추천됐나요?</span>
+          <span class="caret" aria-hidden="true">▼</span>
+        </button>
+        <div class="breakdown" id="bd-2" role="region" aria-label="점수 분석">
+          <div class="bd-row">
+            <span class="bd-label">거리 40%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:72%"></div></div>
+            <span class="bd-value">72점</span>
+            <div class="bd-hint">걸어서 42분 또는 버스</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시급 25%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:60%"></div></div>
+            <span class="bd-value">60점</span>
+            <div class="bd-hint">경비 평균과 유사</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시간 20%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:85%"></div></div>
+            <span class="bd-value">85점</span>
+            <div class="bd-hint">오후 근무 · 선호와 일치</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">직군 10%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:30%"></div></div>
+            <span class="bd-value">30점</span>
+            <div class="bd-hint">경비 직군 지원 0회 · 프로필 태그 일치</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">지역 5%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:100%"></div></div>
+            <span class="bd-value">100점</span>
+            <div class="bd-hint">부평 파일럿 지역 보너스</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- CARD 3 — 3위 -->
+      <article class="card" tabindex="0"
+               aria-label="주방 보조 식당 일자리, 매칭 73점, 시급 12,000원, 자세히 보기">
+        <div class="card-head">
+          <div class="cat-icon cat-icon--kitchen" aria-hidden="true">주</div>
+          <div class="card-title-wrap">
+            <div class="card-title">주방 보조 · 식당</div>
+            <div class="card-sub">⊙ 계양구 효성동 한솥도시락 · 걸어서 52분 · ⭐4.5 (18)</div>
+          </div>
+        </div>
+
+        <div class="score-big">
+          <span class="score-big-num">73</span>
+          <span class="score-big-unit">점</span>
+          <span class="score-big-label">오늘 3위</span>
+        </div>
+
+        <ul class="reasons">
+          <li>오늘 근무 · 당일지급</li>
+          <li>초보 환영 · 교육 제공</li>
+          <li>⭐4.5(18) · 동네에서 편하게</li>
+        </ul>
+
+        <div class="divider"></div>
+
+        <div class="facts">
+          <div class="facts-wage">시급 <span class="won">12,000원</span> · 4시간</div>
+          <div class="facts-time">2026.04.23 (목) 11:00 – 15:00</div>
+        </div>
+
+        <div class="badges">
+          <span class="badge badge--sameday">당일지급</span>
+          <span class="badge badge--senior">주휴수당</span>
+          <span class="badge badge--first">초보 환영</span>
+        </div>
+
+        <div class="cta-row">
+          <div class="rating" aria-label="평점 4.5점, 18건">
+            <span aria-hidden="true">★</span>
+            <span>4.5 (18)</span>
+          </div>
+          <button class="btn btn--secondary">채널톡 문의</button>
+          <button class="btn btn--primary">지원하기</button>
+        </div>
+
+        <button class="why-toggle" aria-expanded="false" aria-controls="bd-3">
+          <span>왜 추천됐나요?</span>
+          <span class="caret" aria-hidden="true">▼</span>
+        </button>
+        <div class="breakdown" id="bd-3" role="region" aria-label="점수 분석">
+          <div class="bd-row">
+            <span class="bd-label">거리 40%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:59%"></div></div>
+            <span class="bd-value">59점</span>
+            <div class="bd-hint">걸어서 52분 또는 버스 12분</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시급 25%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:70%"></div></div>
+            <span class="bd-value">70점</span>
+            <div class="bd-hint">주방 평균 대비 +500원</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">시간 20%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:88%"></div></div>
+            <span class="bd-value">88점</span>
+            <div class="bd-hint">오늘 근무 · 즉시 매칭</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">직군 10%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:25%"></div></div>
+            <span class="bd-value">25점</span>
+            <div class="bd-hint">주방 직군 지원 이력 없음</div>
+          </div>
+          <div class="bd-row">
+            <span class="bd-label">지역 5%</span>
+            <div class="bd-meter"><div class="bd-meter-fill" style="width:100%"></div></div>
+            <span class="bd-value">100점</span>
+            <div class="bd-hint">계양 파일럿 지역 보너스</div>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- BOTTOM FIXED PHONE -->
+    <footer class="bottom-support">
+      <a href="#channeltalk" data-support="channeltalk" class="support-btn" aria-label="채널톡 상담 열기">
+        <span aria-hidden="true">☎</span>
+        <span>채널톡으로 문의하기</span>
+      </a>
+    </footer>
+
+  </main>
+
+
+  <!-- ========================================================
+       DEMO 2 — 로딩 스켈레톤
+       ======================================================== -->
+  <div class="demo-label">상태 — 로딩 스켈레톤</div>
+  <main class="phone-frame" aria-label="로딩 중">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div>
+          <div class="topbar-title">오늘의 추천</div>
+          <div class="topbar-loc">위치 확인 중</div>
+        </div>
+      </div>
+    </header>
+    <section class="feed" aria-busy="true">
+      <div class="skeleton">
+        <div class="sk-line sk-line--title"></div>
+        <div class="sk-line sk-line--short"></div>
+        <div class="sk-line"></div>
+        <div class="sk-line"></div>
+      </div>
+      <div class="skeleton">
+        <div class="sk-line sk-line--title"></div>
+        <div class="sk-line sk-line--short"></div>
+        <div class="sk-line"></div>
+        <div class="sk-line"></div>
+      </div>
+    </section>
+    <footer class="bottom-support">
+      <a href="#channeltalk" data-support="channeltalk" class="support-btn">
+        <span aria-hidden="true">☎</span>
+        <span>채널톡으로 문의하기</span>
+      </a>
+    </footer>
+  </main>
+
+
+  <!-- ========================================================
+       DEMO 3 — 빈 결과 상태
+       ======================================================== -->
+  <div class="demo-label">상태 — 빈 결과</div>
+  <main class="phone-frame" aria-label="추천 없음">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div>
+          <div class="topbar-title">오늘의 추천</div>
+          <div class="topbar-loc">부평구 산곡동 기준</div>
+        </div>
+      </div>
+    </header>
+    <section class="feed">
+      <div class="empty" role="status">
+        <div class="empty-title">걸어서 10분 안에는 지금 일자리가 없어요</div>
+        <div class="empty-desc">
+          반경을 넓혀볼까요? 공고가 올라오면<br>
+          카카오 알림톡으로 안내 (실패 시 SMS 폴백)드려요.
+        </div>
+        <button class="btn btn--primary" style="max-width:220px; margin:0 auto;">
+          카카오 알림 신청
+        </button>
+      </div>
+    </section>
+    <footer class="bottom-support">
+      <a href="#channeltalk" data-support="channeltalk" class="support-btn">
+        <span aria-hidden="true">☎</span>
+        <span>채널톡으로 문의하기</span>
+      </a>
+    </footer>
+  </main>
+
+
+  <!-- ========================================================
+       DEMO 4 — 위치 권한 거부 상태
+       ======================================================== -->
+  <div class="demo-label">상태 — 위치 권한 거부 (수동 선택)</div>
+  <main class="phone-frame" aria-label="위치 수동 선택">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div>
+          <div class="topbar-title">오늘의 추천</div>
+          <div class="topbar-loc">위치 권한 꺼짐</div>
+        </div>
+      </div>
+    </header>
+    <section class="feed">
+      <div class="empty" role="region" aria-label="위치 선택">
+        <div class="empty-title">어디서 일하고 싶으신가요?</div>
+        <div class="empty-desc">
+          정확한 거리 계산을 위해 위치 권한을 켜거나,<br>
+          시·군·구를 직접 선택해 주세요.
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; max-width:260px; margin:0 auto;">
+          <button class="btn btn--primary">위치 권한 켜기</button>
+          <button class="btn btn--secondary">시·군·구 직접 선택</button>
+        </div>
+      </div>
+    </section>
+    <footer class="bottom-support">
+      <a href="#channeltalk" data-support="channeltalk" class="support-btn">
+        <span aria-hidden="true">☎</span>
+        <span>채널톡으로 문의하기</span>
+      </a>
+    </footer>
+  </main>
+
+  <div class="page-title" style="margin-top:40px; text-align:center;">
+    컴포넌트 · CSS 변수 · 접근성 주석은 07_Wireframes/job_recommend_spec.md 참조
+  </div>
+
+</div>
+
+<script>
+// 간단한 인터랙션 — "왜 추천?" 토글
+(function(){
+  var toggles = document.querySelectorAll('.why-toggle');
+  toggles.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      var panel = document.getElementById(btn.getAttribute('aria-controls'));
+      if (panel) panel.classList.toggle('open', !expanded);
+    });
+  });
+  // 필터 칩 선택 토글
+  var chipGroups = document.querySelectorAll('[role="tablist"]');
+  chipGroups.forEach(function(group){
+    var chips = group.querySelectorAll('.chip');
+    chips.forEach(function(chip){
+      chip.addEventListener('click', function(){
+        chips.forEach(function(c){ c.setAttribute('aria-selected','false'); });
+        chip.setAttribute('aria-selected','true');
+      });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

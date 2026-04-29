@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm turbo run build --filter=@ilgam/admin-web",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/admin-web/.next",
+  "framework": "nextjs",
+  "ignoreCommand": "pnpm turbo-ignore @ilgam/admin-web",
+  "github": {
+    "silent": true,
+    "autoAlias": true
+  },
+  "regions": ["icn1"]
+}

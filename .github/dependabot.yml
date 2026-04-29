@@ -1,0 +1,50 @@
+# Dependabot — 1인 운영이라 매주 monday 자동 PR + minor/patch 그룹화로 PR 폭주 방지.
+# CVE 노출 평균 30→3일 (PII·결제 코드베이스이므로 보안 우선).
+
+version: 2
+updates:
+  # ─── npm (모노레포 root + workspaces) ──────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      types:
+        patterns:
+          - "@types/*"
+    labels:
+      - "deps"
+      - "auto"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # ─── GitHub Actions ────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 3
+    groups:
+      actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "ci"
+      - "deps"

@@ -1,0 +1,209 @@
+name: Deploy
+
+# 프로덕션 하네스 H1 배포 파이프라인 (ADR-012)
+# 트리거: PR open = preview / push to main = prod
+# 시크릿 (GH Repository Secrets, 도메인 연결 후 설정):
+#   VERCEL_TOKEN · VERCEL_ORG_ID · VERCEL_PROJECT_ID
+#   SUPABASE_ACCESS_TOKEN · SUPABASE_PROJECT_REF
+#   SLACK_WEBHOOK_DEPLOYS
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/admin-web/**"
+      - "packages/**"
+      - "vercel.json"
+      - ".github/workflows/deploy.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/admin-web/**"
+      - "packages/**"
+      - "supabase/migrations/**"
+      - "vercel.json"
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false # 배포는 취소 금지 (롤백 일관성)
+
+jobs:
+  # ─── Preview (PR) ───────────────────────────────────────
+  preview:
+    if: github.event_name == 'pull_request'
+    name: Preview · admin-web (Vercel)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel env (preview)
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Build (Vercel preview)
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=$VERCEL_TOKEN
+
+      - name: Deploy preview
+        id: deploy
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --token=$VERCEL_TOKEN)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Comment preview URL on PR
+        if: steps.deploy.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.url }}';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🟢 Vercel preview: ${url}\n\n⚠️ Preview는 Demo Mode가 활성된 환경. NEXT_PUBLIC_DEMO_MODE=1 자동 적용.`
+            });
+
+      - name: Skip notice (no Vercel creds yet)
+        if: env.VERCEL_TOKEN == ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: echo "::warning::VERCEL_TOKEN 미설정 — preview 배포 skip. 도메인 연결 시 secret 추가."
+
+  # ─── Production (main) ──────────────────────────────────
+  production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Production · admin-web + DB migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://ilgam.kr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+
+      # ─── DB 마이그레이션 (Supabase) ─────────────────────
+      - name: Apply DB migrations (staging first)
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          npx supabase@latest link --project-ref $SUPABASE_PROJECT_REF
+          npx supabase@latest db push
+
+      # ─── Vercel prod 배포 ───────────────────────────────
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel env (production)
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+
+      - name: Build prod
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --prod --token=$VERCEL_TOKEN
+
+      - name: Deploy prod
+        id: deploy_prod
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "$URL" > deploy_url.txt
+
+      # ─── Health check (배포 직후) ───────────────────────
+      - name: Health check (5 retries, 30s interval)
+        if: steps.deploy_prod.outputs.url != ''
+        run: |
+          set -e
+          URL="${{ steps.deploy_prod.outputs.url }}/api/healthz"
+          for i in 1 2 3 4 5; do
+            echo "Attempt $i: $URL"
+            if curl -fsS --max-time 10 "$URL"; then
+              echo "✅ Health OK"
+              exit 0
+            fi
+            echo "❌ Health fail, retry in 30s..."
+            sleep 30
+          done
+          echo "::error::Health check 실패 — 자동 롤백 트리거"
+          exit 1
+
+      # ─── Rollback (health 실패 시) ──────────────────────
+      - name: Auto-rollback on health failure
+        if: failure() && steps.deploy_prod.outputs.url != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "::warning::Auto-rollback 실행"
+          vercel rollback --yes --token=$VERCEL_TOKEN
+
+      # ─── Slack 통보 ─────────────────────────────────────
+      - name: Notify Slack
+        if: always() && env.SLACK_WEBHOOK_DEPLOYS != ''
+        env:
+          SLACK_WEBHOOK_DEPLOYS: ${{ secrets.SLACK_WEBHOOK_DEPLOYS }}
+        run: |
+          STATUS="${{ job.status }}"
+          SHA="${{ github.sha }}"
+          MSG="ILGAM prod deploy → $STATUS · $SHA"
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$MSG\"}" "$SLACK_WEBHOOK_DEPLOYS"
+
+      - name: Skip notice (no Vercel creds)
+        if: env.VERCEL_TOKEN == ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: echo "::warning::VERCEL_TOKEN 미설정 — prod 배포 skip. 도메인 연결 시 secret 14종 설정."
+
+  # ─── Edge Functions 배포 (별도) ─────────────────────────
+  edge-functions:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Edge Functions · Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy edge functions
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          npx supabase@latest link --project-ref $SUPABASE_PROJECT_REF
+          for fn in qa-classifier match-engine notify-dispatch payment-settle cx-triage healthz; do
+            echo "Deploying $fn..."
+            npx supabase@latest functions deploy "$fn" --no-verify-jwt
+          done

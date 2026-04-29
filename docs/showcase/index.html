@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일감(ILGAM) — 인력사무소 디지털화 + 시니어 단독 점유</title>
+<meta name="description" content="베이비부머 954만 + YOLD 1,200만을 위한 한국형 시니어 스폿워크 플랫폼. 5중 해자 + 단계화 수수료." />
+<meta property="og:title" content="일감(ILGAM) — 시니어가 시간을 고를 수 있게 한다" />
+<meta property="og:description" content="예순넷의 박씨는 오늘 두 시간을 골랐다. 끝나면 통장에 일당이 들어온다. 그것이 전부다." />
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+:root {
+  --navy-900:#0B1736; --navy-800:#142548; --navy-700:#1A2C4E;
+  --navy-600:#223A65; --navy-500:#2F4D82; --navy-400:#456AA3;
+  --navy-300:#6E8CB8; --navy-200:#A0B5D2; --navy-100:#D4DEEC; --navy-50:#EEF2F9;
+  --gray-900:#0F1417; --gray-800:#1C2328; --gray-700:#2E3740;
+  --gray-600:#4A5560; --gray-500:#6B7681; --gray-400:#98A1AA;
+  --gray-300:#C3CAD1; --gray-200:#DFE4E8; --gray-100:#EEF1F3; --gray-50:#F7F8FA;
+  --white:#FFFFFF; --black:#000000;
+  --amber:#F59E0B; --amber-light:#FEF3C7;
+  --success:#1E7A3D; --success-light:#DCFCE7;
+  --warning:#D98E00;
+  --danger:#C0392B;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-full:9999px;
+  --shadow-sm:0 1px 2px rgba(10,23,54,.06);
+  --shadow-md:0 4px 8px rgba(10,23,54,.08);
+  --shadow-lg:0 12px 24px rgba(10,23,54,.12);
+  --font:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --font-base:18px;
+  --max-w:1200px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:var(--font-base)}
+body{font-family:var(--font);color:var(--gray-900);line-height:1.5;background:var(--white);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font);cursor:pointer;border:none;background:none}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+.section{padding:96px 24px}
+.section-label{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--navy-700);background:var(--navy-50);padding:6px 14px;border-radius:var(--radius-full);margin-bottom:16px}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.2;color:var(--navy-800);margin-bottom:16px}
+.section-sub{font-size:1.05rem;color:var(--gray-600);max-width:640px;line-height:1.6}
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--gray-100);transition:box-shadow .2s}
+.nav.scrolled{box-shadow:var(--shadow-sm)}
+.nav-inner{max-width:var(--max-w);margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.nav-logo{font-size:1.4rem;font-weight:900;letter-spacing:-.04em;color:var(--navy-800)}
+.nav-logo span{color:var(--amber)}
+.nav-links{display:flex;align-items:center;gap:32px;list-style:none}
+.nav-links a{font-size:.95rem;font-weight:500;color:var(--gray-700);transition:color .15s;min-height:44px;display:inline-flex;align-items:center}
+.nav-links a:hover{color:var(--navy-700)}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:var(--radius-md);font-size:.95rem;font-weight:700;transition:all .18s;white-space:nowrap;min-height:48px}
+.btn-primary{background:var(--navy-700);color:var(--white)}
+.btn-primary:hover{background:var(--navy-800);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-amber{background:var(--amber);color:var(--navy-900)}
+.btn-amber:hover{background:#E08A00;transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-outline{border:1.5px solid var(--gray-300);color:var(--gray-700);background:var(--white)}
+.btn-outline:hover{border-color:var(--navy-700);color:var(--navy-700);background:var(--navy-50)}
+.btn-lg{padding:16px 32px;font-size:1rem;border-radius:var(--radius-lg);min-height:56px}
+.hamburger{display:none;flex-direction:column;gap:5px;padding:10px;cursor:pointer;border-radius:var(--radius-sm);min-height:44px;min-width:44px;justify-content:center}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy-800);transition:all .25s;border-radius:2px}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--white);border-bottom:1px solid var(--gray-100);padding:20px 24px 28px;z-index:999;box-shadow:var(--shadow-md)}
+.mobile-menu.open{display:block}
+.mobile-menu nav{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.mobile-menu nav a{font-size:1rem;font-weight:500;color:var(--gray-700);padding:14px 0;border-bottom:1px solid var(--gray-100);min-height:48px;display:flex;align-items:center}
+.mobile-menu-cta{display:flex;flex-direction:column;gap:10px}
+.mobile-menu-cta .btn{width:100%;justify-content:center}
+.hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(160deg,var(--navy-50) 0%,var(--white) 60%,var(--gray-50) 100%);padding:120px 24px 80px}
+.hero-inner{max-width:var(--max-w);margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--navy-100);border-radius:var(--radius-full);padding:8px 18px 8px 10px;font-size:.85rem;font-weight:600;color:var(--navy-700);margin-bottom:24px;box-shadow:var(--shadow-sm)}
+.hero-badge-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+.hero-title{font-size:clamp(2.2rem,4.8vw,3.6rem);font-weight:900;letter-spacing:-.04em;line-height:1.15;color:var(--navy-900);margin-bottom:20px}
+.hero-title .accent{color:var(--amber)}
+.hero-sub{font-size:1.15rem;color:var(--gray-700);margin-bottom:36px;line-height:1.65;max-width:520px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px}
+.hero-stats{display:flex;gap:32px}
+.hero-stat-num{font-size:1.7rem;font-weight:900;letter-spacing:-.03em;color:var(--navy-800);display:block}
+.hero-stat-label{font-size:.85rem;color:var(--gray-600);margin-top:4px}
+.hero-visual{position:relative}
+.hero-card{background:var(--white);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-lg);border:1px solid var(--navy-100)}
+.hero-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.hero-card-title{font-size:.9rem;font-weight:700;color:var(--gray-700)}
+.hero-card-badge{background:var(--success-light);color:var(--success);font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:var(--radius-full)}
+.hero-match-list{list-style:none;display:flex;flex-direction:column;gap:12px}
+.hero-match-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-50);border-radius:var(--radius-md);border:1px solid var(--gray-100)}
+.hero-match-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;flex-shrink:0;color:var(--navy-800)}
+.hero-match-info{flex:1;min-width:0}
+.hero-match-name{font-size:.95rem;font-weight:700;color:var(--navy-800)}
+.hero-match-role{font-size:.82rem;color:var(--gray-600);margin-top:2px}
+.hero-match-status{font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:var(--radius-full);white-space:nowrap}
+.status-matched{background:var(--success-light);color:var(--success)}
+.status-waiting{background:var(--amber-light);color:var(--warning)}
+.status-settle{background:var(--navy-50);color:var(--navy-700)}
+.hero-settle-box{margin-top:16px;background:linear-gradient(135deg,var(--navy-50),var(--amber-light));border-radius:var(--radius-md);padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.hero-settle-text{font-size:.9rem;font-weight:600;color:var(--gray-700)}
+.hero-settle-time{font-size:.95rem;font-weight:800;color:var(--navy-800)}
+.float-badge{position:absolute;background:var(--white);border-radius:var(--radius-md);padding:12px 18px;box-shadow:var(--shadow-md);font-size:.85rem;font-weight:700;border:1px solid var(--gray-100)}
+.float-badge-1{top:-20px;right:-16px;color:var(--amber)}
+.float-badge-2{bottom:-20px;left:-16px;color:var(--success)}
+.trust-bar{background:var(--navy-900);padding:48px 24px}
+.trust-bar-inner{max-width:var(--max-w);margin:0 auto;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px}
+.trust-stat{text-align:center;padding:16px 56px;border-right:1px solid rgba(255,255,255,.12);min-width:180px}
+.trust-stat:last-child{border-right:none}
+.trust-stat-num{font-size:2rem;font-weight:900;letter-spacing:-.03em;color:var(--white);display:block}
+.trust-stat-num .highlight{color:var(--amber)}
+.trust-stat-label{font-size:.85rem;color:rgba(255,255,255,.6);margin-top:6px}
+.why-tabs{display:flex;gap:4px;margin:40px 0 0;border-bottom:2px solid var(--gray-100);padding-bottom:0;flex-wrap:wrap}
+.why-tab{padding:16px 24px;font-size:1rem;font-weight:700;color:var(--gray-600);border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:all .18s;min-height:48px;background:transparent}
+.why-tab.active{color:var(--navy-700);border-bottom-color:var(--amber)}
+.why-tab:hover:not(.active){color:var(--navy-800);background:var(--gray-50)}
+.why-panels{margin-top:40px}
+.why-panel{display:none}
+.why-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.why-content-list{list-style:none;display:flex;flex-direction:column;gap:16px}
+.why-content-item{display:flex;gap:16px;padding:20px;border-radius:var(--radius-md);border:1px solid var(--gray-100);background:var(--white);transition:border-color .18s}
+.why-content-item:hover{border-color:var(--navy-300);box-shadow:var(--shadow-sm)}
+.why-icon-box{width:48px;height:48px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--navy-50);color:var(--navy-700);font-weight:800;font-size:1.05rem}
+.why-content-h{font-size:1.05rem;font-weight:700;color:var(--navy-800);margin-bottom:6px}
+.why-content-p{font-size:.92rem;color:var(--gray-600);line-height:1.6}
+.why-visual-card{background:var(--gray-50);border-radius:var(--radius-lg);padding:32px;border:1px solid var(--gray-100)}
+.why-step-label{font-size:.85rem;font-weight:700;color:var(--gray-600);letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
+.why-step-list{list-style:none;display:flex;flex-direction:column}
+.why-step{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid var(--gray-200);align-items:flex-start}
+.why-step:last-child{border-bottom:none}
+.why-step-num{width:40px;height:40px;border-radius:50%;background:var(--navy-700);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:800;flex-shrink:0}
+.why-step h4{font-size:1rem;font-weight:700;color:var(--navy-800);margin-bottom:6px}
+.why-step p{font-size:.9rem;color:var(--gray-600);line-height:1.55}
+.market{background:var(--gray-50)}
+.market-img{margin-top:32px;text-align:center}
+.market-img img{max-width:100%;border-radius:var(--radius-lg);box-shadow:var(--shadow-md)}
+.market-source{font-size:.82rem;color:var(--gray-500);margin-top:16px}
+.phase-list{display:grid;gap:14px;margin-top:48px}
+.phase-row{display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:stretch}
+.phase-tag{padding:14px;border-radius:var(--radius-md);text-align:center;font-weight:800;color:var(--white);display:flex;flex-direction:column;justify-content:center}
+.phase-tag.p0{background:var(--gray-700)}
+.phase-tag.m6{background:var(--amber);color:var(--navy-900)}
+.phase-tag.p1{background:var(--navy-700)}
+.phase-tag.p2{background:var(--navy-600)}
+.phase-tag small{font-size:.78rem;font-weight:500;opacity:.85;display:block;margin-top:2px}
+.phase-body{background:var(--white);padding:18px 22px;border-radius:var(--radius-md);border:1px solid var(--gray-100)}
+.phase-body strong{color:var(--navy-800);font-size:1.05rem;display:block;margin-bottom:4px}
+.phase-body p{color:var(--gray-600);font-size:.92rem;line-height:1.55}
+.economics-table{width:100%;border-collapse:collapse;margin-top:32px;background:var(--white);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)}
+.economics-table th{background:var(--navy-700);color:var(--white);padding:16px 18px;text-align:left;font-weight:700;font-size:.95rem}
+.economics-table td{padding:14px 18px;border-bottom:1px solid var(--gray-100);font-size:.95rem}
+.economics-table tr:last-child td{border-bottom:none}
+.economics-table .amber{color:var(--amber);font-weight:800}
+.economics-table .bep{background:var(--amber-light)}
+.wf{background:var(--gray-50)}
+.wf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:48px}
+.wf-card{display:block;background:var(--white);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);text-decoration:none;color:inherit;transition:all .2s;border:1px solid var(--gray-100)}
+.wf-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--navy-200)}
+.wf-card iframe{width:100%;height:380px;border:none;pointer-events:none;background:var(--white)}
+.wf-card .meta{padding:16px 20px}
+.wf-card .meta strong{color:var(--navy-800);display:block;margin-bottom:4px;font-size:1rem}
+.wf-card .meta small{color:var(--gray-600);font-size:.85rem}
+.docs-list{display:grid;gap:12px;margin-top:32px}
+.docs-list a{display:flex;gap:16px;padding:18px 22px;background:var(--white);border-radius:var(--radius-md);border:1px solid var(--gray-100);text-decoration:none;color:var(--navy-800);align-items:flex-start;min-height:56px;transition:all .18s}
+.docs-list a:hover{border-color:var(--navy-300);box-shadow:var(--shadow-sm);transform:translateX(2px)}
+.docs-list .icon{font-size:1.5rem;flex-shrink:0}
+.docs-list strong{display:block;font-size:1rem;font-weight:700;margin-bottom:4px}
+.docs-list small{display:block;color:var(--gray-600);font-size:.85rem;font-weight:400;line-height:1.5}
+.cta-section{background:linear-gradient(135deg,var(--navy-800),var(--navy-700));color:var(--white);text-align:center}
+.cta-section .section-title{color:var(--white)}
+.cta-section .section-sub{color:var(--navy-100);max-width:600px;margin:0 auto 32px}
+.cta-section .btn-amber{margin-top:8px}
+footer{background:var(--navy-900);color:rgba(255,255,255,.6);padding:48px 24px;text-align:center;font-size:.85rem;line-height:1.7}
+footer strong{color:var(--white)}
+@media (max-width:980px){
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  .hero-inner{grid-template-columns:1fr;gap:48px}
+  .why-panel.active{grid-template-columns:1fr}
+  .trust-stat{padding:12px 24px;border-right:none;border-bottom:1px solid rgba(255,255,255,.12);width:100%;max-width:none}
+  .trust-stat:last-child{border-bottom:none}
+  .phase-row{grid-template-columns:100px 1fr}
+}
+@media (max-width:560px){
+  .section{padding:64px 20px}
+  .hero{padding:100px 20px 60px}
+  .hero-stats{flex-wrap:wrap;gap:20px}
+  .why-tabs{gap:0}
+  .why-tab{padding:12px 16px;font-size:.92rem;flex:1;min-width:0;text-align:center}
+  .phase-row{grid-template-columns:1fr;gap:8px}
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-logo">일감<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#why-different">왜 우리는 다른가</a></li>
+      <li><a href="#moat">5중 해자</a></li>
+      <li><a href="#market">시장</a></li>
+      <li><a href="#roadmap">로드맵</a></li>
+      <li><a href="#wireframes">화면</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#docs" class="btn btn-outline">IR 자료</a>
+      <a href="https://github.com/ilgam-jtbd/ilgam/pull/14" target="_blank" rel="noopener" class="btn btn-primary">GitHub</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="메뉴 열기" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <nav>
+      <a href="#why-different">왜 우리는 다른가</a>
+      <a href="#moat">5중 해자</a>
+      <a href="#market">시장</a>
+      <a href="#roadmap">로드맵</a>
+      <a href="#wireframes">화면</a>
+      <a href="#docs">IR 자료</a>
+    </nav>
+    <div class="mobile-menu-cta">
+      <a href="https://github.com/ilgam-jtbd/ilgam/pull/14" target="_blank" rel="noopener" class="btn btn-primary">GitHub PR #14</a>
+      <a href="https://drive.google.com/drive/folders/1oslRprlS-0bSixespL3imqWQv-_YOpk8" target="_blank" rel="noopener" class="btn btn-outline">Drive 자료실</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Pre-Seed · 2027 법인 설립
+      </div>
+      <h1 class="hero-title">예순넷의 박씨는 오늘<br><span class="accent">두 시간을 골랐다.</span></h1>
+      <p class="hero-sub">
+        끝나면 통장에 일당이 들어온다. 그것이 전부다.<br>
+        우리는 시니어가 시간을 고를 수 있게 한다.
+      </p>
+      <div class="hero-cta">
+        <a href="#why-different" class="btn btn-primary btn-lg">거긴 왜 안 됐나 →</a>
+        <a href="#wireframes" class="btn btn-outline btn-lg">화면 보기</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num">고른다</span><span class="hero-stat-label">시간을 시니어가 정한다</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">간다</span><span class="hero-stat-label">정해진 시각에 도착</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">받는다</span><span class="hero-stat-label">통장에 일당이 들어온다</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hero-card-title">박씨가 골라 둔 시간</span>
+          <span class="hero-card-badge">3건</span>
+        </div>
+        <ul class="hero-match-list">
+          <li class="hero-match-item">
+            <div class="hero-match-avatar" style="background:var(--navy-100)">월</div>
+            <div class="hero-match-info">
+              <div class="hero-match-name">11:30 — 13:30</div>
+              <div class="hero-match-role">식당 점심 시간 · 두 시간</div>
+            </div>
+            <span class="hero-match-status status-matched">완료</span>
+          </li>
+          <li class="hero-match-item">
+            <div class="hero-match-avatar" style="background:var(--amber-light)">수</div>
+            <div class="hero-match-info">
+              <div class="hero-match-name">14:00 — 15:30</div>
+              <div class="hero-match-role">백화점 매대 정리 · 한 시간 반</div>
+            </div>
+            <span class="hero-match-status status-waiting">예정</span>
+          </li>
+          <li class="hero-match-item">
+            <div class="hero-match-avatar" style="background:var(--navy-50)">금</div>
+            <div class="hero-match-info">
+              <div class="hero-match-name">10:00 — 12:00</div>
+              <div class="hero-match-role">스타트업 자문 · 두 시간</div>
+            </div>
+            <span class="hero-match-status status-settle">예정</span>
+          </li>
+        </ul>
+        <div class="hero-settle-box">
+          <span class="hero-settle-text">월요일 일당</span>
+          <span class="hero-settle-time">₩24,000 · 통장 입금</span>
+        </div>
+      </div>
+      <div class="float-badge float-badge-1">★ 자기 결정</div>
+      <div class="float-badge float-badge-2">✓ 정확한 정산</div>
+    </div>
+  </div>
+</section>
+
+<!-- 박씨가 골라 둔 한 주 -->
+<section class="trust-bar">
+  <div class="trust-bar-inner" style="flex-direction:column;gap:24px;align-items:flex-start;text-align:left;max-width:880px;padding:0 24px">
+    <div style="font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber)">박씨가 골라 둔 한 주</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;width:100%">
+      <div><div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:6px">월</div><p style="color:var(--white);font-size:1.05rem;line-height:1.55">두 시간을 일했다.<br><span style="color:rgba(255,255,255,.55);font-size:.92rem">점심 시간 식당.</span></p></div>
+      <div><div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:6px">화</div><p style="color:var(--white);font-size:1.05rem;line-height:1.55">비워 두었다.<br><span style="color:rgba(255,255,255,.55);font-size:.92rem">손녀가 등원하는 날.</span></p></div>
+      <div><div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:6px">수</div><p style="color:var(--white);font-size:1.05rem;line-height:1.55">한 시간 반.<br><span style="color:rgba(255,255,255,.55);font-size:.92rem">백화점 매대 정리.</span></p></div>
+      <div><div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:6px">목</div><p style="color:var(--white);font-size:1.05rem;line-height:1.55">비워 두었다.<br><span style="color:rgba(255,255,255,.55);font-size:.92rem">병원에 가는 날.</span></p></div>
+      <div><div style="font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:6px">금</div><p style="color:var(--white);font-size:1.05rem;line-height:1.55">두 시간.<br><span style="color:rgba(255,255,255,.55);font-size:.92rem">스타트업 첫 자문.</span></p></div>
+    </div>
+    <div style="margin-top:8px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);width:100%;color:rgba(255,255,255,.7);font-size:1rem;line-height:1.6">
+      한 주는 시니어가 직접 짠다.<br><strong style="color:var(--white)">남이 정해 주는 시간이 아니라, 자기가 고른 시간이다.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US (선행 사례 비교) -->
+<section class="section" id="why-different">
+  <div class="container">
+    <span class="section-label">WHY US</span>
+    <h2 class="section-title">앞서 간 사람들이 멈춘 자리에서</h2>
+    <p class="section-sub" style="max-width:680px">
+      쑨은 명함을 모았고, 알바몬은 카테고리를 만들었고, 50플러스는 강의를 열었다.<br>
+      그러나 박씨가 두 시간을 골라 두는 일은, 어디에서도 일어나지 않았다.
+    </p>
+
+    <div style="margin-top:48px;background:var(--white);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--gray-100)">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--navy-700);color:var(--white)">
+            <th style="padding:16px;text-align:left;font-size:.92rem;font-weight:700">앞서 간 사람</th>
+            <th style="padding:16px;text-align:left;font-size:.92rem;font-weight:700">무엇을 시도했나</th>
+            <th style="padding:16px;text-align:left;font-size:.92rem;font-weight:700">왜 거긴 안 됐나</th>
+            <th style="padding:16px;text-align:left;font-size:.92rem;font-weight:700;color:var(--amber)">우리가 다른 한 가지</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:.92rem;color:var(--gray-700);line-height:1.55">
+          <tr style="border-bottom:1px solid var(--gray-100)">
+            <td style="padding:14px 16px;font-weight:700;color:var(--navy-800)">쑨 (Shun)</td>
+            <td style="padding:14px 16px">네이버 출신, 50+ 매칭 앱</td>
+            <td style="padding:14px 16px">처음부터 0% · 광고 모델 → 운영자본 소진</td>
+            <td style="padding:14px 16px;color:var(--navy-800);font-weight:600">단계화 수수료 (M0~M5 무료 → M6 법인 + 10%)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--gray-100)">
+            <td style="padding:14px 16px;font-weight:700;color:var(--navy-800)">시니어즈</td>
+            <td style="padding:14px 16px">50플러스 직영 일자리</td>
+            <td style="padding:14px 16px">공공 예산 의존 · 매칭 SLA 부재</td>
+            <td style="padding:14px 16px;color:var(--navy-800);font-weight:600">KORDI MOU + 자동 매칭 엔진</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--gray-100)">
+            <td style="padding:14px 16px;font-weight:700;color:var(--navy-800)">알바몬·천국 시니어 탭</td>
+            <td style="padding:14px 16px">청년 채널에 카테고리만 추가</td>
+            <td style="padding:14px 16px">청년 UI · 신원 검증 부재</td>
+            <td style="padding:14px 16px;color:var(--navy-800);font-weight:600">시니어 UX 베이스라인 (48dp · AAA · 18pt)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--gray-100)">
+            <td style="padding:14px 16px;font-weight:700;color:var(--navy-800)">어르신일자리 (공공)</td>
+            <td style="padding:14px 16px">월 30시간 저단가 일자리</td>
+            <td style="padding:14px 16px">시급 한계 · 민간 수요 단절</td>
+            <td style="padding:14px 16px;color:var(--navy-800);font-weight:600">최저시급 10,030원 + 민간 사업체 풀</td>
+          </tr>
+          <tr>
+            <td style="padding:14px 16px;font-weight:700;color:var(--navy-800)">인력사무소 (오프라인)</td>
+            <td style="padding:14px 16px">새벽 줄서기 · 구두 매칭</td>
+            <td style="padding:14px 16px">디지털 전환 0% · 사기 무방비</td>
+            <td style="padding:14px 16px;color:var(--navy-800);font-weight:600">4-Tier 컨텐츠 QA + 디지털 신뢰 인프라</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:40px;padding:32px;background:var(--navy-50);border-radius:var(--radius-lg);border-left:4px solid var(--amber)">
+      <p style="font-size:1.15rem;color:var(--navy-800);line-height:1.65;margin:0">
+        우리는 명함도 카테고리도 강의도 만들지 않는다.<br>
+        <strong>두 시간을 고를 수 있게 한다. 그 시간이 그 시각에 시작되도록 한다. 끝나면 통장에 들어오게 한다.</strong><br>
+        시니어가 자기 시간을 정하는, 그 단단한 동작을 우리가 받친다.
+      </p>
+    </div>
+
+    <p style="margin-top:24px;font-size:.95rem;color:var(--gray-600);line-height:1.6;text-align:center">
+      <strong>한 줄:</strong> 그들은 시니어를 '청년 모델의 하위 집합'으로 다뤘다.<br>
+      우리는 시니어가 시간을 고르는 행위 — 공공 신뢰·UX·사기 방어·수익 시점 — 를 처음부터 다시 설계한다.
+    </p>
+  </div>
+</section>
+
+<!-- PROBLEM 6 cards (보조) -->
+<section class="section" id="problem" style="background:var(--gray-50)">
+  <div class="container">
+    <span class="section-label">SIX GAPS</span>
+    <h2 class="section-title">박씨가 두 시간을<br>고를 수 없었던 자리들</h2>
+    <p class="section-sub">통계로 보면 6개의 구조적 공백.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:32px">
+      <div class="why-content-item"><div class="why-icon-box">01</div><div><div class="why-content-h">기존 알바 플랫폼</div><p class="why-content-p">시니어 전담 UX 부재. 큰 글씨·48dp 터치 미지원</p></div></div>
+      <div class="why-content-item"><div class="why-icon-box">02</div><div><div class="why-content-h">인력사무소 오프라인</div><p class="why-content-p">전국 ~3만곳 · 수수료 10% 표준. 디지털 전환 0%</p></div></div>
+      <div class="why-content-item"><div class="why-icon-box">03</div><div><div class="why-content-h">사기·악성 공고</div><p class="why-content-p">시니어 표적 (성인·도박·MLM·고액일당)</p></div></div>
+      <div class="why-content-item"><div class="why-icon-box">04</div><div><div class="why-content-h">앱 이탈률</div><p class="why-content-p">60~74세 60~70% 이탈 (정보화진흥원 실증)</p></div></div>
+      <div class="why-content-item" style="border-color:var(--amber);background:var(--amber-light)"><div class="why-icon-box" style="background:var(--amber);color:var(--navy-900)">05</div><div><div class="why-content-h">YOLD 경험 사장 ★</div><p class="why-content-p">대기업·CEO·전문가 출신이 단순 시급 노동에 갇힘</p></div></div>
+      <div class="why-content-item"><div class="why-icon-box">06</div><div><div class="why-content-h">공공형 노인일자리</div><p class="why-content-p">월 30~60시간 고정 · 저단가</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section market" id="market">
+  <div class="container">
+    <span class="section-label">MARKET</span>
+    <h2 class="section-title"><span style="color:var(--amber)">Blue Ocean</span> 단독 점유</h2>
+    <p class="section-sub">무료 + 시니어 전담 + AI 디지털 + 단계화 = 경쟁사 어디에도 없는 4축 결합</p>
+    <div class="market-img">
+      <img src="assets/ILGAM_Competitive_Map_v3_1.png" alt="ILGAM 경쟁 매트릭스 v3.1" loading="lazy">
+      <p class="market-source">출처: 각사 IR 2023~2024 · KB경영연구소 2025 · WEF 2024 · 인력사무소 업계 평균 10%</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="moat">
+  <div class="container">
+    <span class="section-label">5 MOATS</span>
+    <h2 class="section-title">다섯은 약속이다.<br>어긋나지 않게 잡는다.</h2>
+    <p class="section-sub">박씨가 고른 두 시간이 그 시각에 시작되도록.<br>끝난 일당이 정확히 통장에 들어오도록.<br>다섯은 따로 서지 않는다.</p>
+    <div class="why-tabs" role="tablist">
+      <button class="why-tab active" data-tab="m1" role="tab">① 단계화 수수료</button>
+      <button class="why-tab" data-tab="m2" role="tab">② 시니어 UX</button>
+      <button class="why-tab" data-tab="m3" role="tab">③ 공공 MOU</button>
+      <button class="why-tab" data-tab="m4" role="tab">④ 컨텐츠 QA</button>
+      <button class="why-tab" data-tab="m5" role="tab">★ YOLD 자문</button>
+    </div>
+    <div class="why-panels">
+
+      <div class="why-panel active" data-panel="m1">
+        <ul class="why-content-list">
+          <li class="why-content-item"><div class="why-icon-box">0%</div><div><div class="why-content-h">Phase 0 (M0~M5) 무료 검증</div><p class="why-content-p">양측 수수료 0% · 신뢰 자산 + 데이터 축적</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">10%</div><div><div class="why-content-h">M6 법인 설립 + 10% 도입</div><p class="why-content-p">인력사무소 오프라인 표준과 동일 단가 → 거부감 최소화. 워커 영구 0%</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">+α</div><div><div class="why-content-h">M18 광고·자문 멤버십 부가</div><p class="why-content-p">메인 수수료 위에 4종 매출. M22 BEP 월 ₩3억</p></div></li>
+        </ul>
+        <div class="why-visual-card">
+          <div class="why-step-label">왜 단계화인가</div>
+          <ul class="why-step-list">
+            <li class="why-step"><div class="why-step-num">1</div><div><h4>처음 5개월 = 신뢰 자산</h4><p>"수수료 떼는 곳" 인식 차단 → 시니어 락인</p></div></li>
+            <li class="why-step"><div class="why-step-num">2</div><div><h4>법인 + 10% = 자연스러움</h4><p>인력사무소 표준 채택 프레임 → 거부감 최소</p></div></li>
+            <li class="why-step"><div class="why-step-num">3</div><div><h4>광고는 메인이 아닌 부가</h4><p>수수료 메인 → BEP 4개월 단축 (M22)</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="why-panel" data-panel="m2">
+        <ul class="why-content-list">
+          <li class="why-content-item"><div class="why-icon-box">18</div><div><div class="why-content-h">18pt 기본 / 48dp 터치</div><p class="why-content-p">ADR-003 시니어 베이스라인. 75~79세 200% 확대 호환</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">7:1</div><div><div class="why-content-h">WCAG AAA 7:1 대비</div><p class="why-content-p">노안 대응 · 색 단독 의미 전달 금지</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">↶</div><div><div class="why-content-h">2초 Undo 토스트</div><p class="why-content-p">손떨림 미스탭 회복 · Optimistic Delay</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">✆</div><div><div class="why-content-h">SMS + 오프라인 폴백</div><p class="why-content-p">디지털 실패 시 동네지사 + 알림톡 SMS</p></div></li>
+        </ul>
+        <div class="why-visual-card">
+          <div class="why-step-label">시니어 UX 우선순위</div>
+          <ul class="why-step-list">
+            <li class="why-step"><div class="why-step-num">1</div><div><h4>되돌릴 수 없는 액션 = 0</h4><p>모든 종단 액션 24h 내 1탭 롤백</p></div></li>
+            <li class="why-step"><div class="why-step-num">2</div><div><h4>다음 행동 불명확한 화면 = 0</h4><p>모든 상태에 단일 다음 행동 명시</p></div></li>
+            <li class="why-step"><div class="why-step-num">3</div><div><h4>전화하고 싶은 순간 = 0</h4><p>채널톡·알림톡·지사 3중 UX</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="why-panel" data-panel="m3">
+        <ul class="why-content-list">
+          <li class="why-content-item"><div class="why-icon-box">①</div><div><div class="why-content-h">한국노인인력개발원 (KORDI)</div><p class="why-content-p">산하 1,500개소 · MOU 진행 중</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">②</div><div><div class="why-content-h">서울시 50플러스재단</div><p class="why-content-p">중장년 일자리·재교육 거버넌스</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">③</div><div><div class="why-content-h">동네지사 (강서·송파·성북)</div><p class="why-content-p">디지털 폴백 거점</p></div></li>
+        </ul>
+        <div class="why-visual-card">
+          <div class="why-step-label">채널 배분 (CAC ₩12,000)</div>
+          <ul class="why-step-list">
+            <li class="why-step"><div class="why-step-num">45%</div><div><h4>공공 MOU</h4><p>CAC 8~12천원 · 신뢰 자산</p></div></li>
+            <li class="why-step"><div class="why-step-num">20%</div><div><h4>동네지사</h4><p>오프라인 폴백 · 高 전환율</p></div></li>
+            <li class="why-step"><div class="why-step-num">20%</div><div><h4>알림톡 + SMS</h4><p>90초 온보딩</p></div></li>
+            <li class="why-step"><div class="why-step-num">15%</div><div><h4>지인 + ESG</h4><p>YOLD 입소문 + 기업 협찬</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="why-panel" data-panel="m4">
+        <ul class="why-content-list">
+          <li class="why-content-item"><div class="why-icon-box">T1</div><div><div class="why-content-h">자동 룰 (Postgres)</div><p class="why-content-p">키워드·URL 블랙리스트 + 시급 외삽 (consulting 면제)</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">T2</div><div><div class="why-content-h">Claude Haiku 분류</div><p class="why-content-p">≥0.85 자동 / 0.6~0.85 운영자 / <0.6 반려 · 월 ₩7만</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">T3</div><div><div class="why-content-h">운영자 검토</div><p class="why-content-p">분당 5~10건 · operator_actions 자동 기록</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">T4</div><div><div class="why-content-h">외부 신고 (24h SLA)</div><p class="why-content-p">즉시 shadow hide → 24시간 판정</p></div></li>
+        </ul>
+        <div class="why-visual-card">
+          <div class="why-step-label">차단 카테고리</div>
+          <ul class="why-step-list">
+            <li class="why-step"><div class="why-step-num">!</div><div><h4>성인·유흥</h4><p>노래주점 · 룸 서비스</p></div></li>
+            <li class="why-step"><div class="why-step-num">!</div><div><h4>도박·사기</h4><p>토토 환전 · 보증금 요구</p></div></li>
+            <li class="why-step"><div class="why-step-num">!</div><div><h4>MLM·다단계</h4><p>지인 추천 · 사업자 유도</p></div></li>
+            <li class="why-step"><div class="why-step-num">!</div><div><h4>고액일당 사기</h4><p>비합리 시급 · 신분증 요구</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="why-panel" data-panel="m5">
+        <ul class="why-content-list">
+          <li class="why-content-item" style="border-color:var(--amber)"><div class="why-icon-box" style="background:var(--amber);color:var(--navy-900)">★</div><div><div class="why-content-h">대기업 임원·CEO 출신</div><p class="why-content-p">50~64세 YOLD · 경영·기술·재무 경험 자산</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">$</div><div><div class="why-content-h">시급 ₩50,000~300,000</div><p class="why-content-p">consulting 카테고리 신규 · QA 외삽 면제</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">B2B</div><div><div class="why-content-h">스타트업·중견 매칭</div><p class="why-content-p">시드~시리즈B + 매출 50~500억 중견</p></div></li>
+          <li class="why-content-item"><div class="why-icon-box">멤버</div><div><div class="why-content-h">M18 자문 멤버십</div><p class="why-content-p">월 ₩50~200만 구독 · Phase 2 핵심 매출</p></div></li>
+        </ul>
+        <div class="why-visual-card">
+          <div class="why-step-label">왜 YOLD 트랙이 핵심인가</div>
+          <ul class="why-step-list">
+            <li class="why-step"><div class="why-step-num">①</div><div><h4>경험 ≫ 단순 시급</h4><p>1,200만 YOLD 단순 노동 갇힘 = 공백</p></div></li>
+            <li class="why-step"><div class="why-step-num">②</div><div><h4>B2B 광고 핵심 풀</h4><p>Phase 2 자문 멤버십 = 검증된 YOLD 풀</p></div></li>
+            <li class="why-step"><div class="why-step-num">③</div><div><h4>입소문 + ESG</h4><p>YOLD 자체 네트워크 + 기업 ESG 협찬</p></div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="roadmap" style="background:var(--gray-50)">
+  <div class="container">
+    <span class="section-label">ROADMAP</span>
+    <h2 class="section-title">다섯 달을 익히고,<br>그 다음 한 해를 정착한다</h2>
+    <p class="section-sub">M0~M5 무료 검증 · M6 법인 + 10% (인력사무소 표준) · M18~M30 광고·자문 부가 · BEP M22</p>
+    <div class="phase-list">
+      <div class="phase-row"><div class="phase-tag p0">Phase 0<small>M0~M5</small></div><div class="phase-body"><strong>무료 검증 (2026.10~2027.02, 5개월)</strong><p>양측 0% · 워커 5,000명 + 검증 공고 5,000건 · MVP 부평·강서 · KORDI MOU 본 체결 추진</p></div></div>
+      <div class="phase-row"><div class="phase-tag m6">★ M6<small>2027.04</small></div><div class="phase-body"><strong>법인 설립 + 10% 수수료 도입 (인력사무소 표준)</strong><p>구인자 10% · 워커 영구 0% · PortOne 에스크로 정산 부활 · YOLD 자문 트랙 출시</p></div></div>
+      <div class="phase-row"><div class="phase-tag p1">M7~M12</div><div class="phase-body"><strong>Phase 1 안정화</strong><p>KORDI MOU 본 체결 · 워커 50K · 월 매출 ~₩4,000만 · 정부과제 ₩5천만</p></div></div>
+      <div class="phase-row"><div class="phase-tag p2">M13~M18</div><div class="phase-body"><strong>Phase 2 진입 — 광고 + 자문 멤버십</strong><p>수도권 확장 · MAU 15만 · ARPU ~₩900 · 4종 매출 라인</p></div></div>
+      <div class="phase-row"><div class="phase-tag p2">M19~M22</div><div class="phase-body"><strong>BEP 도달 · TIPS ₩10억 진입</strong><p>월 ₩3억 · 손익분기 · MAU 30만</p></div></div>
+      <div class="phase-row"><div class="phase-tag p2">M23~M30</div><div class="phase-body"><strong>전국 확장 · 흑자 안정</strong><p>MAU 80만 · 월 ~₩9.6억 · Pre-A ₩10~15억 라운드</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="economics">
+  <div class="container">
+    <span class="section-label">UNIT ECONOMICS</span>
+    <h2 class="section-title">단계별 매출 곡선</h2>
+    <p class="section-sub">CPC ₩250 · 전환율 0.5% · 노출 비율 5% (보수). M22 BEP 월 ₩3억</p>
+    <table class="economics-table">
+      <thead><tr><th>단계</th><th>시점</th><th>MAU</th><th>ARPU(월)</th><th>월 매출</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 0</td><td>M0~M5</td><td>0 → 5K</td><td>₩0</td><td>₩0</td><td>무료 검증</td></tr>
+        <tr><td>법인</td><td>M6</td><td>10K</td><td>~₩600</td><td class="amber">~₩600만</td><td>10% 수수료</td></tr>
+        <tr><td>확장</td><td>M12</td><td>50K</td><td>~₩800</td><td class="amber">~₩4,000만</td><td>GMV ₩4억 × 10%</td></tr>
+        <tr><td>광고+자문</td><td>M18</td><td>150K</td><td>~₩900</td><td class="amber">~₩1.35억</td><td>4종 매출</td></tr>
+        <tr class="bep"><td><strong>BEP</strong></td><td>M22</td><td>300K</td><td>~₩1,000</td><td class="amber">~₩3억</td><td>손익분기</td></tr>
+        <tr><td>수익</td><td>M30</td><td>800K</td><td>~₩1,200</td><td class="amber">~₩9.6억</td><td>흑자 안정</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section wf" id="wireframes">
+  <div class="container">
+    <span class="section-label">PRODUCT</span>
+    <h2 class="section-title">고르고, 가고, 받는다</h2>
+    <p class="section-sub">두 시간을 고른다. 정해진 시각에 도착한다. 끝나면 통장에 들어온다.<br>18pt · 48dp · WCAG AAA — 시니어의 시야와 손에 맞춘 화면.</p>
+    <div class="wf-grid">
+      <a class="wf-card" href="wireframes/jobs.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/jobs.html" loading="lazy" tabindex="-1" aria-hidden="true" title="일감 리스트"></iframe>
+        <div class="meta"><strong>일감 리스트</strong><small>오늘 일감 / 카테고리 칩 / 즉시정산 뱃지</small></div>
+      </a>
+      <a class="wf-card" href="wireframes/jobs_detail.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/jobs_detail.html" loading="lazy" tabindex="-1" aria-hidden="true" title="일감 상세"></iframe>
+        <div class="meta"><strong>일감 상세</strong><small>시급·시간·예상 수령액 + 안전존 CTA</small></div>
+      </a>
+      <a class="wf-card" href="wireframes/apply.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/apply.html" loading="lazy" tabindex="-1" aria-hidden="true" title="지원 확정"></iframe>
+        <div class="meta"><strong>지원 확정</strong><small>2초 Undo 토스트 · 미스탭 회복</small></div>
+      </a>
+      <a class="wf-card" href="wireframes/job_recommend.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/job_recommend.html" loading="lazy" tabindex="-1" aria-hidden="true" title="매칭 추천"></iframe>
+        <div class="meta"><strong>매칭 추천</strong><small>거리·시급·시간 가중합</small></div>
+      </a>
+      <a class="wf-card" href="wireframes/my.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/my.html" loading="lazy" tabindex="-1" aria-hidden="true" title="내 근무"></iframe>
+        <div class="meta"><strong>내 근무</strong><small>월 누적 + 근무 이력 + 입금 상태</small></div>
+      </a>
+      <a class="wf-card" href="wireframes/00_Investor_Showcase.html" target="_blank" rel="noopener">
+        <iframe src="wireframes/00_Investor_Showcase.html" loading="lazy" tabindex="-1" aria-hidden="true" title="투자자 쇼케이스"></iframe>
+        <div class="meta"><strong>투자자 쇼케이스</strong><small>전체 흐름 한 페이지 요약</small></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="docs">
+  <div class="container">
+    <span class="section-label">DOCUMENTS</span>
+    <h2 class="section-title">IR 자료 · 코드 검토</h2>
+    <p class="section-sub">투자자·파트너 검토용 자료. 권한 필요한 링크는 ilgam.jtbd@gmail.com 으로 요청</p>
+    <div class="docs-list">
+      <a href="https://github.com/ilgam-jtbd/ilgam/pull/14" target="_blank" rel="noopener">
+        <span class="icon">💻</span>
+        <div><strong>GitHub PR #14 · 코드 검토</strong><small>30+ 커밋 · 130+ 파일 · CI 4/4 green · ADR 11개 · DB 마이그레이션 6개</small></div>
+      </a>
+      <a href="https://drive.google.com/drive/folders/1oslRprlS-0bSixespL3imqWQv-_YOpk8" target="_blank" rel="noopener">
+        <span class="icon">📂</span>
+        <div><strong>Google Drive · IR Deck + Summary + Financial Model</strong><small>pptx 17 슬라이드 / docx 1p / xlsx 7시트 / 와이어프레임 / 백업</small></div>
+      </a>
+      <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/ir/handoff.md" target="_blank" rel="noopener">
+        <span class="icon">📑</span>
+        <div><strong>v3.1 Handoff · 핵심 결정 5건 + 코드 매핑</strong><small>Cowork 산출 인덱스 · 후속 PR 큐 · M0~M30</small></div>
+      </a>
+      <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/decisions/ADR-002-product-nsm-mvp.md" target="_blank" rel="noopener">
+        <span class="icon">📐</span>
+        <div><strong>ADR-002 v2.2 · NSM + 5중 해자</strong><small>NSM = MAVJ × MAU × TrustScore · 단계화 수수료</small></div>
+      </a>
+      <a href="https://github.com/ilgam-jtbd/ilgam/blob/claude/nice-mcnulty-3c12ab/docs/product/PRD.md" target="_blank" rel="noopener">
+        <span class="icon">📋</span>
+        <div><strong>PRD v3.1 · Product Requirements</strong><small>해결 가설 · 워커 3트랙 · 의도 배제 5건</small></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section cta-section">
+  <div class="container">
+    <span class="section-label" style="background:rgba(255,255,255,.15);color:var(--white)">한 줄</span>
+    <h2 class="section-title">두 시간을 고르려는 사람을<br>같이 보고 있다면</h2>
+    <p class="section-sub">
+      예순넷이 골라 둔 화요일 오전이,<br>
+      이 도시 어딘가에서 단단하게 흘러가길 바라는 분이 있다면,<br>
+      한 줄을 남겨 주세요.
+    </p>
+    <a href="mailto:ilgam.jtbd@gmail.com" class="btn btn-amber btn-lg">한 줄 메일 보내기 →</a>
+    <p style="margin-top:16px;font-size:.85rem;color:var(--navy-100)">
+      Pre-Seed ₩2~3억 · 정부과제 ₩5천만 · TIPS ₩10억 트랙 · 2027 법인 설립
+    </p>
+  </div>
+</section>
+
+<footer>
+  <strong>일감 (ILGAM)</strong> · v3.1 Pivot · Confidential · 2026-04-28<br>
+  김연재 (PO) · ilgam.jtbd@gmail.com · 비공개 · 내부·파트너 검토 전용
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
+
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', open);
+});
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  mobileMenu.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+}));
+
+document.querySelectorAll('.why-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.tab;
+    document.querySelectorAll('.why-tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.querySelectorAll('.why-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === id));
+  });
+});
+</script>
+
+</body>
+</html>

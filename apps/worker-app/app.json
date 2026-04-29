@@ -6,21 +6,38 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#EE8019"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "kr.ilgam.worker",
       "buildNumber": "1",
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "출근·퇴근 인증을 위해 위치 정보가 필요합니다.",
-        "NSCameraUsageDescription": "본인 확인 셀카 촬영을 위해 카메라 권한이 필요합니다."
+        "NSCameraUsageDescription": "본인 확인 셀카 촬영을 위해 카메라 권한이 필요합니다.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "kr.ilgam.worker",
       "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#EE8019"
+      },
       "permissions": ["ACCESS_FINE_LOCATION", "CAMERA", "POST_NOTIFICATIONS"]
     },
     "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
       "eas": { "projectId": "TBD" }
     }
