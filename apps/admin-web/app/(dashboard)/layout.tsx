@@ -1,21 +1,76 @@
 import type { ReactNode } from "react";
-import { colors } from "@ilgam/design-tokens";
 
 export const dynamic = "force-dynamic";
 
+const NAV_ITEMS = [
+  { href: "/jobs", label: "공고 관리" },
+  { href: "/workers", label: "지원자" },
+  { href: "/shifts", label: "근무 현황" },
+  { href: "/payments", label: "정산" },
+];
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div style={{ minHeight: "100vh", background: colors.gray[50] }}>
+    <div style={{ minHeight: "100vh", background: "#f7f5f0" }}>
       <nav
         style={{
-          padding: 16,
-          background: colors.navy[700],
-          color: colors.white,
+          background: "#0d1b2a",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          padding: "0 2.5rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "2rem",
+          height: "56px",
         }}
       >
-        일감 어드민
+        <span
+          style={{
+            fontFamily: "'DM Serif Display', serif",
+            fontSize: "1.2rem",
+            color: "#c9a84c",
+            letterSpacing: "0.02em",
+          }}
+        >
+          일감
+        </span>
+        <span
+          style={{
+            width: "1px",
+            height: "16px",
+            background: "rgba(255,255,255,0.15)",
+          }}
+        />
+        {NAV_ITEMS.map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              textDecoration: "none",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.72rem",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              transition: "color 0.15s",
+            }}
+          >
+            {item.label}
+          </a>
+        ))}
+        <div style={{ flex: 1 }} />
+        <span
+          style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: "0.62rem",
+            color: "#2dd4bf",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+          }}
+        >
+          ADMIN
+        </span>
       </nav>
-      <div style={{ padding: 24 }}>{children}</div>
+      <div style={{ padding: "2.5rem 3rem" }}>{children}</div>
     </div>
   );
 }
