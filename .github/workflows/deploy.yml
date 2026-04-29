@@ -1,0 +1,96 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/admin-web/**'
+      - 'packages/**'
+      - 'supabase/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy-web:
+    name: Vercel Production Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      sha: ${{ steps.deployment.outputs.sha }}
+      url: ${{ steps.deployment.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run lint typecheck --filter=@ilgam/admin-web
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+      - name: Pull Vercel env
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy
+        id: deployment
+        run: |
+          URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+  verify:
+    needs: deploy-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: sleep 30
+      - name: Verify healthz
+        run: |
+          for i in 1 2 3; do
+            CODE=$(curl -s -o /tmp/resp -w "%{http_code}" https://ilgam.kr/api/healthz)
+            if [ "$CODE" = "200" ]; then cat /tmp/resp; exit 0; fi
+            echo "Attempt $i failed (HTTP $CODE)"; sleep 10
+          done
+          echo "::error::healthz failed after 3 attempts"; exit 1
+      - name: Verify SSL
+        run: echo | openssl s_client -servername ilgam.kr -connect ilgam.kr:443 2>/dev/null | openssl x509 -noout -dates
+      - name: Run verify script
+        run: bash scripts/verify_deployment.sh ilgam.kr
+
+  notify:
+    needs: [deploy-web, verify]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify success
+        if: needs.verify.result == 'success'
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"text\":\":white_check_mark: ILGAM prod deploy *${{ needs.deploy-web.outputs.sha }}* → ${{ needs.deploy-web.outputs.url }}\"}" \
+            ${{ secrets.SLACK_WEBHOOK_DEPLOYS }}
+      - name: Notify failure
+        if: needs.verify.result != 'success'
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"text\":\":rotating_light: ILGAM deploy FAILED. Run vercel rollback or Vercel Dashboard → Promote previous.\"}" \
+            ${{ secrets.SLACK_WEBHOOK_DEPLOYS }}
+
+  edge-functions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: contains(github.event.head_commit.modified, 'supabase/functions/') || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g supabase
+      - env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: bash scripts/deploy_edge_functions.sh ${{ secrets.SUPABASE_PROJECT_REF }}
