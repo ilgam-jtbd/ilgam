@@ -73,24 +73,26 @@ export const typography = {
   },
   baseSize: 18,
   ratio: 1.2,
+  // 숫자 단위 (React Native dp, CSS px 공통)
   sizes: {
-    xs:   "0.62rem",   // 9px — DM Mono 레이블
-    sm:   "0.72rem",   // 10px
-    base: "0.82rem",   // 12px
-    md:   "1rem",      // 14px
-    lg:   "1.2rem",    // 17px
-    xl:   "1.5rem",    // 21px
-    xxl:  "2rem",      // 28px
-    // React Native (dp)
-    rn: {
-      xs:   14,
-      sm:   16,
-      base: 18,
-      md:   20,
-      lg:   24,
-      xl:   30,
-      xxl:  36,
-    },
+    xs:   14,
+    sm:   16,
+    base: 18,
+    md:   20,
+    lg:   24,
+    xl:   30,
+    xxl:  36,
+  },
+  // CSS rem 단위 (web 전용 — DM Mono 레이블·섹션 타이틀 등)
+  cssSizes: {
+    label:   "0.62rem",
+    mono:    "0.72rem",
+    caption: "0.82rem",
+    body:    "1rem",
+    subhead: "1.2rem",
+    title:   "1.5rem",
+    display: "2rem",
+    hero:    "clamp(1.8rem, 6vw, 3rem)",
   },
   weights: {
     light:   300,

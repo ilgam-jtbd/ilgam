@@ -48,7 +48,7 @@ const STATUS_TEXT: Record<string, string> = {
 };
 
 async function fetchJobs(): Promise<JobRow[]> {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -70,7 +70,8 @@ async function fetchJobs(): Promise<JobRow[]> {
     return [];
   }
 
-  return (data ?? []).map((row: any) => ({
+  type RawRow = JobRow & { job_applications?: { count: number }[] };
+  return (data ?? []).map((row: RawRow) => ({
     ...row,
     applicant_count: row.job_applications?.[0]?.count ?? 0,
   }));

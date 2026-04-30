@@ -1,4 +1,20 @@
 import type { ReactNode } from "react";
+import { DM_Serif_Display, DM_Mono } from "next/font/google";
+
+const dmSerif = DM_Serif_Display({
+  weight: ["400"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  weight: ["400", "500"],
+  subsets: ["latin"],
+  variable: "--font-dm-mono",
+  display: "swap",
+});
 
 export const metadata = {
   title: "일감 어드민 | 시니어 스팟워크 플랫폼",
@@ -7,25 +23,20 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko">
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
-        <style>{`
-          @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-            background: #f7f5f0;
-            color: #0d1b2a;
-            font-family: 'Pretendard', -apple-system, sans-serif;
-            font-size: 14px;
-            line-height: 1.65;
-          }
-        `}</style>
-      </head>
-      <body>{children}</body>
+    <html lang="ko" className={`${dmSerif.variable} ${dmMono.variable}`}>
+      <body
+        style={{
+          margin: 0,
+          padding: 0,
+          background: "#f7f5f0",
+          color: "#0d1b2a",
+          fontFamily: "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif",
+          fontSize: "14px",
+          lineHeight: "1.65",
+        }}
+      >
+        {children}
+      </body>
     </html>
   );
 }
