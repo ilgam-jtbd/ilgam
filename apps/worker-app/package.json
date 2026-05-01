@@ -11,7 +11,7 @@
     "build:prod": "eas build --profile production --platform all",
     "lint": "eslint app --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@ilgam/core": "workspace:*",

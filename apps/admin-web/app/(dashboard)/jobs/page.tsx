@@ -70,7 +70,7 @@ async function fetchJobs(): Promise<JobRow[]> {
     return [];
   }
 
-  type RawRow = JobRow & { job_applications?: { count: number }[] };
+  type RawRow = Omit<JobRow, "applicant_count"> & { job_applications?: { count: number }[] };
   return (data ?? []).map((row: RawRow) => ({
     ...row,
     applicant_count: row.job_applications?.[0]?.count ?? 0,
