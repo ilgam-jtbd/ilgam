@@ -31,15 +31,22 @@ interface MatchedJob {
   score: number;
 }
 
+const KST_TZ = "Asia/Seoul";
+
 function formatTime(iso: string) {
-  const d = new Date(iso);
-  return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: KST_TZ, hour: "2-digit", minute: "2-digit", hour12: false,
+  });
 }
 
 function formatDate(iso: string) {
   const d = new Date(iso);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  return `${d.getMonth() + 1}/${d.getDate()}(${days[d.getDay()]})`;
+  const kstStr = d.toLocaleString("ko-KR", { timeZone: KST_TZ });
+  const kstDate = new Date(kstStr);
+  const m = d.toLocaleString("ko-KR", { timeZone: KST_TZ, month: "numeric" });
+  const day = d.toLocaleString("ko-KR", { timeZone: KST_TZ, day: "numeric" });
+  return `${m}/${day}(${days[kstDate.getDay()]})`;
 }
 
 function formatKRW(n: number) {

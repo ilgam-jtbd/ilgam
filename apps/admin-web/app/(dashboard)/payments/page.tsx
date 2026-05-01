@@ -1,5 +1,6 @@
 // 어드민 — 정산 현황 페이지 (RSC)
 // PortOne 결제 내역 + GMV·수수료·지급액 요약
+// 시간 표시: KST(Asia/Seoul) 기준
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
@@ -9,7 +10,7 @@ interface PaymentRow {
   shift_id: string | null;
   gross_amount_krw: number;
   platform_fee_krw: number;
-  worker_payout_krw: number;
+  worker_net_krw: number;
   status: string;
   settled_at: string | null;
   portone_imp_uid: string | null;
@@ -22,12 +23,14 @@ interface PaymentRow {
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  pending:   { label: "대기",   color: "#718096" },
-  paid:      { label: "완료",   color: "#4ade80" },
-  failed:    { label: "실패",   color: "#f87171" },
-  refunded:  { label: "환불",   color: "#fb923c" },
-  disputed:  { label: "분쟁",   color: "#a78bfa" },
+  pending:       { label: "대기",   color: "#718096" },
+  authorized:    { label: "승인",   color: "#a78bfa" },
+  paid:          { label: "완료",   color: "#4ade80" },
+  failed:        { label: "실패",   color: "#f87171" },
+  refunded:      { label: "환불",   color: "#fb923c" },
 };
+
+const KST_TZ = "Asia/Seoul";
 
 function krw(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}백만`;
@@ -35,10 +38,13 @@ function krw(n: number) {
   return n.toLocaleString("ko-KR");
 }
 
-function fmt(iso: string | null) {
+function fmtKST(iso: string | null) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: KST_TZ,
+    month: "numeric", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
 }
 
 export default async function PaymentsPage() {
@@ -54,7 +60,7 @@ export default async function PaymentsPage() {
   const { data: payments } = await supabase
     .from("payments")
     .select(`
-      id, shift_id, gross_amount_krw, platform_fee_krw, worker_payout_krw,
+      id, shift_id, gross_amount_krw, platform_fee_krw, worker_net_krw,
       status, settled_at, portone_imp_uid,
       shifts (
         matches (
@@ -73,7 +79,7 @@ export default async function PaymentsPage() {
   const summary = {
     gmv: paid.reduce((s, r) => s + r.gross_amount_krw, 0),
     fee: paid.reduce((s, r) => s + r.platform_fee_krw, 0),
-    payout: paid.reduce((s, r) => s + r.worker_payout_krw, 0),
+    payout: paid.reduce((s, r) => s + r.worker_net_krw, 0),
     count: paid.length,
   };
 
@@ -81,7 +87,7 @@ export default async function PaymentsPage() {
     <div>
       <div style={{ marginBottom: "2rem" }}>
         <div style={{ fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#2dd4bf", marginBottom: "0.4rem" }}>
-          Payments · 최근 30일
+          Payments · 최근 30일 · KST
         </div>
         <h1 style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: "1.8rem", color: "#0d1b2a" }}>
           정산 현황
@@ -120,7 +126,7 @@ export default async function PaymentsPage() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
-              {["정산일시", "워커", "공고", "총액", "수수료", "지급액", "상태"].map((h) => (
+              {["정산일시 (KST)", "워커", "공고", "총액", "수수료", "지급액", "상태"].map((h) => (
                 <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", color: "#718096", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 500 }}>
                   {h}
                 </th>
@@ -141,7 +147,7 @@ export default async function PaymentsPage() {
               const st = STATUS_LABEL[row.status] ?? { label: row.status, color: "#718096" };
               return (
                 <tr key={row.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8rem", color: "#4a5568" }}>{fmt(row.settled_at)}</td>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.8rem", color: "#4a5568" }}>{fmtKST(row.settled_at)}</td>
                   <td style={{ padding: "0.75rem 1rem", fontSize: "0.875rem", fontWeight: 600, color: "#0d1b2a" }}>
                     {profile?.display_name ?? "—"}
                   </td>
@@ -155,7 +161,7 @@ export default async function PaymentsPage() {
                     {row.platform_fee_krw.toLocaleString()}원
                   </td>
                   <td style={{ padding: "0.75rem 1rem", fontSize: "0.8rem", color: "#4ade80" }}>
-                    {row.worker_payout_krw.toLocaleString()}원
+                    {row.worker_net_krw.toLocaleString()}원
                   </td>
                   <td style={{ padding: "0.75rem 1rem" }}>
                     <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: "20px", background: `${st.color}20`, color: st.color, fontSize: "0.72rem", fontFamily: "var(--font-dm-mono), monospace", letterSpacing: "0.05em" }}>

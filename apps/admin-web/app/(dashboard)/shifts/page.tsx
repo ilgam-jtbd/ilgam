@@ -28,10 +28,15 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   disputed:    { label: "분쟁",   color: "#fb923c" },
 };
 
+const KST_TZ = "Asia/Seoul";
+
 function fmt(iso: string | null) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: KST_TZ,
+    month: "numeric", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
 }
 
 function calcHours(start: string | null, end: string | null): string {
@@ -77,7 +82,7 @@ export default async function ShiftsPage() {
     <div>
       <div style={{ marginBottom: "2rem" }}>
         <div style={{ fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#2dd4bf", marginBottom: "0.4rem" }}>
-          Shifts · 최근 7일
+          Shifts · 최근 7일 · KST
         </div>
         <h1 style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: "1.8rem", color: "#0d1b2a" }}>
           근무 현황

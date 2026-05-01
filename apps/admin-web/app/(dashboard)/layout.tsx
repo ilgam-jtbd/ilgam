@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 export const dynamic = "force-dynamic";
 
 const NAV_ITEMS = [
-  { href: "/jobs", label: "공고 관리" },
+  { href: "/jobs",       label: "공고 관리" },
   { href: "/applicants", label: "지원자" },
-  { href: "/shifts", label: "근무 현황" },
-  { href: "/payments", label: "정산" },
+  { href: "/employers",  label: "구인자 심사" },
+  { href: "/shifts",     label: "근무 현황" },
+  { href: "/payments",   label: "정산" },
 ];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

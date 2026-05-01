@@ -43,8 +43,11 @@ const PAY_CFG: Record<string, { label: string; color: string }> = {
 
 function fmt(iso: string | null) {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
 }
 
 function calcHours(start: string | null, end: string | null): string {
