@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 const NAV_ITEMS = [
   { href: "/jobs", label: "공고 관리" },
-  { href: "/workers", label: "지원자" },
+  { href: "/applicants", label: "지원자" },
   { href: "/shifts", label: "근무 현황" },
   { href: "/payments", label: "정산" },
 ];
