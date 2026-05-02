@@ -24,9 +24,10 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen name="jobs" options={{ title: "오늘 일감" }} />
-      <Tabs.Screen name="mine" options={{ title: "내 근무" }} />
+      <Tabs.Screen name="jobs"    options={{ title: "오늘 일감" }} />
+      <Tabs.Screen name="mine"    options={{ title: "내 근무" }} />
       <Tabs.Screen name="support" options={{ title: "지원 현황" }} />
+      <Tabs.Screen name="profile" options={{ title: "내 정보" }} />
     </Tabs>
   );
 }
