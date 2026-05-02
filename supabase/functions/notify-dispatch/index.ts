@@ -2,7 +2,6 @@
 // 알림톡 1순위 → 실패 시 SMS 폴백 (ADR-004, ADR-008)
 // 템플릿 ID: ILGAM_M001~M006 (kakao_alimtalk_templates_v1.md)
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 interface NotifyJob {
@@ -135,7 +134,7 @@ async function persistNotification(
 // Bizppurio 재시도 트리거 에러 코드 목록
 const ALIMTALK_FALLBACK_CODES = new Set(["R001", "R002", "T001", "E001", "E999"]);
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("method not allowed", { status: 405 });
   }

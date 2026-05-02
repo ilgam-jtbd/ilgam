@@ -1,7 +1,6 @@
 // supabase/functions/cx-triage/index.ts
 // CX 인입 트리아지 (ADR-008): Claude intent 분류 + 라우팅
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const AUTO_THRESHOLD = 0.85;
@@ -95,7 +94,7 @@ async function persistTicket(
   });
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("method not allowed", { status: 405 });
   }

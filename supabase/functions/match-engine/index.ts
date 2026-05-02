@@ -2,7 +2,6 @@
 // 매칭 랭킹 (ADR-004): RPC 1차 필터 + Deno에서 2차 재랭킹 정리
 // LLM 미사용 (시니어 UX 레이턴시 요건)
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 interface MatchRequest {
@@ -10,7 +9,7 @@ interface MatchRequest {
   limit?: number;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("method", { status: 405 });
   const { worker_id, limit = 20 } = (await req.json()) as MatchRequest;
 

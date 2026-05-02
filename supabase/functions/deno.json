@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window", "esnext"],
+    "strict": false,
+    "noImplicitAny": false
+  },
+  "nodeModulesDir": false
+}

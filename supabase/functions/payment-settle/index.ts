@@ -2,10 +2,7 @@
 // PortOne 웹훅 수신 → payments.status 갱신 (ADR-004)
 // 필드: portone_imp_uid (0004 마이그에서 payments 테이블에 추가)
 
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { crypto } from "https://deno.land/std@0.224.0/crypto/mod.ts";
-import { encodeHex } from "https://deno.land/std@0.224.0/encoding/hex.ts";
 
 type PaymentStatus = "pending" | "authorized" | "paid" | "failed" | "refunded";
 
@@ -17,21 +14,26 @@ interface PortOneWebhook {
   amount: number;
 }
 
+function toHex(buf: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function verifyHmacSha256(
   secret: string,
   body: string,
   signature: string,
 ): Promise<boolean> {
-  const key = await crypto.subtle.importKey(
+  const key = await globalThis.crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
   );
-  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
-  const computed = encodeHex(new Uint8Array(mac));
-  // 타이밍 공격 방어: 길이 다르면 false
+  const mac = await globalThis.crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body));
+  const computed = toHex(mac);
   if (computed.length !== signature.length) return false;
   let diff = 0;
   for (let i = 0; i < computed.length; i++) {
@@ -50,7 +52,7 @@ async function notifyP0Slack(message: string): Promise<void> {
   }).catch((err) => console.error("slack notify failed", err));
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("method not allowed", { status: 405 });
   }
