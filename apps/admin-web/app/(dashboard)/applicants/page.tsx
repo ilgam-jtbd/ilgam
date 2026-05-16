@@ -51,7 +51,9 @@ async function fetchApplicants(): Promise<Applicant[]> {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString("ko-KR", {
-    month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit",
+    timeZone: "Asia/Seoul",
+    month: "numeric", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
   });
 }
 

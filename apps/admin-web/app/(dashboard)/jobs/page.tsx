@@ -16,10 +16,10 @@ function formatKRW(n: number) {
 }
 
 function formatDatetime(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("ko-KR", {
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
     month: "numeric", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
   });
 }
 
