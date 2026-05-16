@@ -133,7 +133,14 @@ export default async function ApplicantsPage() {
                   지원 {formatDate(a.created_at)}
                 </div>
               </div>
-              <ApplicantActions applicationId={a.id} workerId={a.worker_id} jobId={a.job_id} />
+              <ApplicantActions
+                applicationId={a.id}
+                workerId={a.worker_id}
+                jobId={a.job_id}
+                workerPhone={a.workers?.profiles?.phone_e164 ?? ""}
+                jobTitle={a.jobs?.title ?? ""}
+                shiftStartAt={a.jobs?.shift_start_at ?? ""}
+              />
             </div>
           );
         })}

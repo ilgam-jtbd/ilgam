@@ -7,9 +7,28 @@ interface Props {
   applicationId: string;
   workerId: string;
   jobId: string;
+  workerPhone: string;
+  jobTitle: string;
+  shiftStartAt: string;
 }
 
-export default function ApplicantActions({ applicationId, workerId, jobId }: Props) {
+function fmtKSTDate(iso: string) {
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric", day: "numeric",
+  });
+}
+
+function fmtKSTTime(iso: string) {
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  });
+}
+
+export default function ApplicantActions({
+  applicationId, workerId, workerPhone, jobTitle, shiftStartAt,
+}: Props) {
   const [status, setStatus] = useState<"idle" | "accepting" | "rejecting" | "done">("idle");
   const [result, setResult] = useState<"accepted" | "rejected" | null>(null);
 
@@ -20,14 +39,37 @@ export default function ApplicantActions({ applicationId, workerId, jobId }: Pro
 
   async function accept() {
     setStatus("accepting");
+
     const { error } = await supabase
       .from("job_applications")
       .update({ status: "accepted" })
       .eq("id", applicationId);
-    if (!error) {
-      // matches 생성은 Edge Function / DB 트리거에서 처리
-      setResult("accepted");
+
+    if (!error && workerPhone) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+      // Fire-and-forget: 알림톡 발송 실패가 승인 UX를 막으면 안 됨
+      fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/notify-dispatch`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          templateId: "ILGAM_M001",
+          userId: workerId,
+          phoneE164: workerPhone,
+          variables: {
+            work_date: fmtKSTDate(shiftStartAt),
+            work_time: fmtKSTTime(shiftStartAt),
+            work_address: jobTitle,
+          },
+        }),
+      }).catch((e) => console.warn("notify-dispatch failed", e));
     }
+
+    if (!error) setResult("accepted");
     setStatus("done");
   }
 
