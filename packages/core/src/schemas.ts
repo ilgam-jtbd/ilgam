@@ -22,13 +22,15 @@ export const WorkerPreferencesSchema = z.object({
   preferred_verticals: z.array(z.enum(["logistics", "retail", "fnb"])),
 });
 
-export const ClockInSchema = z.object({
-  shift_id: z.string().uuid(),
+// clock Edge Function 인터페이스 기준 (action + match_id)
+export const ClockActionSchema = z.object({
+  action: z.enum(["in", "out"]),
+  match_id: z.string().uuid(),
   lat: z.number().min(-90).max(90),
   lng: z.number().min(-180).max(180),
-  selfie_storage_path: z.string().min(1),
+  selfie_storage_path: z.string().min(1).optional(),
 });
 
 export type JobCreate = z.infer<typeof JobCreateSchema>;
 export type WorkerPreferences = z.infer<typeof WorkerPreferencesSchema>;
-export type ClockIn = z.infer<typeof ClockInSchema>;
+export type ClockAction = z.infer<typeof ClockActionSchema>;

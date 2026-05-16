@@ -2,7 +2,7 @@
 // 매칭·알림·결제 핵심 경계값 검증
 
 import { describe, it, expect } from "vitest";
-import { JobCreateSchema, WorkerPreferencesSchema, ClockInSchema, PhoneE164 } from "./schemas";
+import { JobCreateSchema, WorkerPreferencesSchema, ClockActionSchema, PhoneE164 } from "./schemas";
 
 describe("PhoneE164", () => {
   it("올바른 한국 번호 통과", () => {
@@ -74,24 +74,36 @@ describe("WorkerPreferencesSchema", () => {
   });
 });
 
-describe("ClockInSchema", () => {
-  const valid = {
-    shift_id: "00000000-0000-0000-0000-000000000001",
+describe("ClockActionSchema", () => {
+  const validIn = {
+    action: "in" as const,
+    match_id: "00000000-0000-0000-0000-000000000001",
     lat: 37.5665,
     lng: 126.9780,
-    selfie_storage_path: "workers/abc/selfie.jpg",
   };
 
-  it("유효한 출근 체크 통과", () => {
-    expect(ClockInSchema.safeParse(valid).success).toBe(true);
+  it("유효한 출근 체크 통과 (selfie 선택)", () => {
+    expect(ClockActionSchema.safeParse(validIn).success).toBe(true);
+  });
+
+  it("유효한 퇴근 체크 통과", () => {
+    expect(ClockActionSchema.safeParse({ ...validIn, action: "out" }).success).toBe(true);
+  });
+
+  it("잘못된 action 거부", () => {
+    expect(ClockActionSchema.safeParse({ ...validIn, action: "pause" }).success).toBe(false);
   });
 
   it("위도 범위 초과 거부", () => {
-    expect(ClockInSchema.safeParse({ ...valid, lat: 91 }).success).toBe(false);
-    expect(ClockInSchema.safeParse({ ...valid, lat: -91 }).success).toBe(false);
+    expect(ClockActionSchema.safeParse({ ...validIn, lat: 91 }).success).toBe(false);
+    expect(ClockActionSchema.safeParse({ ...validIn, lat: -91 }).success).toBe(false);
   });
 
-  it("selfie_path 빈 문자열 거부", () => {
-    expect(ClockInSchema.safeParse({ ...valid, selfie_storage_path: "" }).success).toBe(false);
+  it("match_id UUID 아니면 거부", () => {
+    expect(ClockActionSchema.safeParse({ ...validIn, match_id: "not-a-uuid" }).success).toBe(false);
+  });
+
+  it("selfie_path 빈 문자열 거부 (제공 시)", () => {
+    expect(ClockActionSchema.safeParse({ ...validIn, selfie_storage_path: "" }).success).toBe(false);
   });
 });

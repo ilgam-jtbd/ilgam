@@ -3,10 +3,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import {
-  View, Text, FlatList,
+  View, Text, FlatList, TouchableOpacity,
   ActivityIndicator, RefreshControl, StyleSheet,
 } from "react-native";
 import { createClient } from "@supabase/supabase-js";
+import { router } from "expo-router";
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "",
@@ -15,6 +16,7 @@ const supabase = createClient(
 
 interface ShiftRecord {
   id: string;
+  match_id: string;
   clock_in_at: string | null;
   clock_out_at: string | null;
   status: string;
@@ -69,7 +71,7 @@ export default function MineScreen() {
     const { data } = await supabase
       .from("shifts")
       .select(`
-        id, clock_in_at, clock_out_at, status,
+        id, match_id, clock_in_at, clock_out_at, status,
         matches (
           jobs ( title, shift_start_at, hourly_wage_krw ),
           payments ( gross_amount_krw, status )
@@ -219,6 +221,33 @@ export default function MineScreen() {
                   )}
                 </View>
               )}
+
+              {/* 출퇴근 체크 버튼 */}
+              {(item.status === "pending" || item.status === "clocked_in") && (
+                <TouchableOpacity
+                  style={[
+                    styles.clockBtn,
+                    item.status === "clocked_in" && styles.clockBtnOut,
+                  ]}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/clock",
+                      params: {
+                        matchId: item.match_id,
+                        jobTitle: job?.title ?? "근무",
+                        shiftStatus: item.status,
+                      },
+                    })
+                  }
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel={item.status === "clocked_in" ? "퇴근 체크" : "출근 체크"}
+                >
+                  <Text style={styles.clockBtnText}>
+                    {item.status === "clocked_in" ? "퇴근 체크하기" : "출근 체크하기"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           );
         }}
@@ -263,4 +292,10 @@ const styles = StyleSheet.create({
   wageRow: { flexDirection: "row", alignItems: "center", gap: 4, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 10 },
   wageLabel: { fontSize: 12, color: "#718096" },
   wageValue: { fontSize: 14, fontWeight: "700", color: "#0d1b2a" },
+  clockBtn: {
+    marginTop: 12, backgroundColor: "#c9a84c", borderRadius: 10,
+    paddingVertical: 12, alignItems: "center", minHeight: 48,
+  },
+  clockBtnOut: { backgroundColor: "#2dd4bf" },
+  clockBtnText: { fontSize: 15, fontWeight: "700", color: "#0d1b2a" },
 });
