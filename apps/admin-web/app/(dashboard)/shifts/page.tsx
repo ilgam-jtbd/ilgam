@@ -3,6 +3,7 @@
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { ShiftApproveButton } from "./ShiftApproveButton";
 
 interface ShiftRow {
   id: string;
@@ -12,6 +13,7 @@ interface ShiftRow {
   status: string;
   selfie_in_path: string | null;
   selfie_out_path: string | null;
+  employer_approved_at: string | null;
   matches: {
     job_id: string;
     worker_id: string;
@@ -58,7 +60,7 @@ export default async function ShiftsPage() {
   const { data: shifts } = await supabase
     .from("shifts")
     .select(`
-      id, match_id, clock_in_at, clock_out_at, status, selfie_in_path, selfie_out_path,
+      id, match_id, clock_in_at, clock_out_at, status, selfie_in_path, selfie_out_path, employer_approved_at,
       matches (
         job_id, worker_id,
         jobs ( title, shift_start_at, shift_end_at, hourly_wage_krw ),
@@ -109,7 +111,7 @@ export default async function ShiftsPage() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
-              {["워커", "공고", "예정 시간", "출근", "퇴근", "실 근무", "상태"].map((h) => (
+              {["워커", "공고", "예정 시간", "출근", "퇴근", "실 근무", "상태", "구인자 승인"].map((h) => (
                 <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", color: "#718096", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 500 }}>
                   {h}
                 </th>
@@ -119,7 +121,7 @@ export default async function ShiftsPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ padding: "2rem", textAlign: "center", color: "#718096", fontSize: "0.875rem" }}>
+                <td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#718096", fontSize: "0.875rem" }}>
                   최근 7일 근무 데이터가 없습니다
                 </td>
               </tr>
@@ -156,6 +158,11 @@ export default async function ShiftsPage() {
                     <span style={{ display: "inline-block", padding: "2px 10px", borderRadius: "20px", background: `${st.color}20`, color: st.color, fontSize: "0.72rem", fontFamily: "var(--font-dm-mono), monospace", letterSpacing: "0.05em" }}>
                       {st.label}
                     </span>
+                  </td>
+                  <td style={{ padding: "0.75rem 1rem" }}>
+                    {row.status === "clocked_out"
+                      ? <ShiftApproveButton shiftId={row.id} approvedAt={row.employer_approved_at} />
+                      : <span style={{ fontSize: "0.72rem", color: "#cbd5e0" }}>—</span>}
                   </td>
                 </tr>
               );

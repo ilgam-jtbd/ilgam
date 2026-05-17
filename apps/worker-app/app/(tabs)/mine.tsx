@@ -40,9 +40,10 @@ const STATUS_CFG: Record<string, { label: string; color: string }> = {
 };
 
 const PAY_CFG: Record<string, { label: string; color: string }> = {
-  pending:  { label: "입금 대기", color: "#718096" },
-  paid:     { label: "입금 완료", color: "#4ade80" },
-  failed:   { label: "입금 실패", color: "#f87171" },
+  pending:    { label: "입금 대기", color: "#718096" },
+  authorized: { label: "승인됨",   color: "#a78bfa" },
+  paid:       { label: "입금 완료", color: "#4ade80" },
+  failed:     { label: "입금 실패", color: "#f87171" },
 };
 
 function fmt(iso: string | null) {
