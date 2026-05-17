@@ -7,6 +7,20 @@ const AUTO_THRESHOLD = 0.85;
 const CONFIRM_LOW = 0.6;
 const ESCALATE_INTENTS = new Set(["신고", "급여미지급", "사기"]);
 
+// 자동 답변 템플릿 (intent → 한국어 FAQ 답변)
+const AUTO_ANSWERS: Record<string, string> = {
+  급여문의:
+    "안녕하세요! 일감입니다 😊\n\n급여는 근무 완료 후 3영업일 이내에 등록하신 계좌로 입금됩니다.\n앱 > 내 근무 탭에서 정산 내역과 입금 예정일을 확인하실 수 있습니다.\n\n추가 문의는 채널톡으로 남겨주세요.",
+  공고문의:
+    "안녕하세요! 일감입니다 😊\n\n맞춤 일감은 앱 > 오늘 일감 탭에서 확인하실 수 있습니다.\n선호 동네·요일·업종을 설정하시면 더 많은 공고가 표시됩니다.\n\n공고 신청 후 확정 시 알림톡으로 안내드립니다.",
+  출퇴근문의:
+    "안녕하세요! 일감입니다 😊\n\n출근 체크는 현장 500m 이내에서 앱 > 내 근무 탭의 '출근 체크하기' 버튼을 눌러 진행합니다.\nGPS 정확도를 위해 실외에서 체크해 주세요.\n\n이미 현장에 계신데 안 된다면 채널톡으로 알려주세요!",
+  앱오류:
+    "안녕하세요! 일감입니다 😊\n\n앱을 완전히 종료 후 다시 실행해 주세요.\n그래도 오류가 계속되면 채널톡으로 ① 기기 종류 ② 오류 화면 캡처를 보내주시면 빠르게 도와드리겠습니다.",
+  온보딩:
+    "안녕하세요, 일감에 오신 것을 환영합니다! 🎉\n\n앱 다운로드 → 전화번호 인증 → 기본 정보 입력 순으로 가입하실 수 있습니다.\n가입 후 온보딩에서 선호 동네와 업종을 설정하시면 바로 일감을 확인하실 수 있어요.",
+};
+
 const SYSTEM_PROMPT = `당신은 시니어 스팟워크 플랫폼 "일감"의 고객지원 분류 AI입니다.
 사용자 메시지를 분석해 intent와 confidence를 JSON으로만 응답하세요.
 
@@ -83,6 +97,7 @@ async function persistTicket(
   intent: string,
   confidence: number,
   action: string,
+  aiAnswer: string | null,
 ): Promise<void> {
   await supa.from("cx_tickets").insert({
     profile_id: ticket.profile_id,
@@ -90,6 +105,7 @@ async function persistTicket(
     intent,
     intent_confidence: confidence,
     ai_answered: action === "auto_answer",
+    ai_answer: aiAnswer,
     escalated_at: action === "escalate_human" ? new Date().toISOString() : null,
   });
 }
@@ -121,11 +137,13 @@ Deno.serve(async (req) => {
     action = "confirm_card";
   }
 
+  const aiAnswer = action === "auto_answer" ? (AUTO_ANSWERS[intent] ?? null) : null;
+
   const supa = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
-  await persistTicket(supa, ticket, intent, confidence, action);
+  await persistTicket(supa, ticket, intent, confidence, action, aiAnswer);
 
-  return Response.json({ action, intent, confidence });
+  return Response.json({ action, intent, confidence, ...(aiAnswer ? { answer: aiAnswer } : {}) });
 });
