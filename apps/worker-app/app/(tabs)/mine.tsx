@@ -28,6 +28,8 @@ interface ShiftRecord {
     } | null;
     payments: { gross_amount_krw: number; status: string }[];
   } | null;
+  // 리뷰 작성 여부: worker가 이미 리뷰를 남겼는지 확인
+  reviews?: { id: string; author_role: string }[];
 }
 
 const STATUS_CFG: Record<string, { label: string; color: string }> = {
@@ -75,7 +77,8 @@ export default function MineScreen() {
         matches (
           jobs ( title, shift_start_at, hourly_wage_krw ),
           payments ( gross_amount_krw, status )
-        )
+        ),
+        reviews ( id, author_role )
       `)
       .eq("matches.worker_id", wid)
       .gte("created_at", since30d)
@@ -164,6 +167,7 @@ export default function MineScreen() {
           const job = item.matches?.jobs;
           const pay = item.matches?.payments?.[0];
           const shiftSt = STATUS_CFG[item.status] ?? { label: item.status, color: "#718096" };
+          const hasWorkerReview = item.reviews?.some((r) => r.author_role === "worker");
           const paySt = pay ? (PAY_CFG[pay.status] ?? { label: pay.status, color: "#718096" }) : null;
 
           return (
@@ -220,6 +224,24 @@ export default function MineScreen() {
                     </>
                   )}
                 </View>
+              )}
+
+              {/* 리뷰 버튼: 완료된 근무, 아직 리뷰 안 남긴 경우 */}
+              {item.status === "clocked_out" && !hasWorkerReview && (
+                <TouchableOpacity
+                  style={styles.reviewBtn}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/review",
+                      params: { shiftId: item.id, jobTitle: job?.title ?? "근무" },
+                    })
+                  }
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="리뷰 남기기"
+                >
+                  <Text style={styles.reviewBtnText}>★ 리뷰 남기기</Text>
+                </TouchableOpacity>
               )}
 
               {/* 출퇴근 체크 버튼 */}
@@ -298,4 +320,10 @@ const styles = StyleSheet.create({
   },
   clockBtnOut: { backgroundColor: "#2dd4bf" },
   clockBtnText: { fontSize: 15, fontWeight: "700", color: "#0d1b2a" },
+  reviewBtn: {
+    marginTop: 10, borderWidth: 1, borderColor: "rgba(201,168,76,0.35)",
+    borderRadius: 10, paddingVertical: 10, alignItems: "center",
+    backgroundColor: "rgba(201,168,76,0.06)",
+  },
+  reviewBtnText: { fontSize: 14, fontWeight: "600", color: "#c9a84c" },
 });
