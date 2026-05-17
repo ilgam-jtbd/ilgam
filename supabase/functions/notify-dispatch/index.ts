@@ -1,5 +1,5 @@
 // supabase/functions/notify-dispatch/index.ts
-// 알림톡 1순위 → 실패 시 SMS 폴백 (ADR-004, ADR-008)
+// 알림톡 1순위 → 실패 시 SMS 폴백 + Expo 푸시 병행 (ADR-004, ADR-008)
 // 템플릿 ID: ILGAM_M001~M006 (kakao_alimtalk_templates_v1.md)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -131,6 +131,51 @@ async function persistNotification(
   });
 }
 
+// Expo 푸시 알림 (device_tokens 테이블 경유, fire-and-forget)
+const PUSH_TEMPLATES: Record<string, (v: Record<string, string | number>) => { title: string; body: string }> = {
+  ILGAM_M001: (v) => ({ title: "매칭 확정 🎉", body: `${v.work_date} ${v.work_time} 근무가 확정됐습니다.` }),
+  ILGAM_M002: (v) => ({ title: "근무 시작 알림", body: `${v.work_start_time} 근무 시작 전 체크인하세요.` }),
+  ILGAM_M003: (v) => ({ title: "급여 입금 완료", body: `${v.net_amount}원이 입금됐습니다.` }),
+  ILGAM_M004: (v) => ({ title: "신규 지원자", body: `${v.job_title}에 ${v.applicant_count}명이 지원했습니다.` }),
+  ILGAM_M005: (v) => ({ title: "근무 승인 요청", body: `${v.worker_name} 워커의 근무 승인을 확인해 주세요.` }),
+  ILGAM_M006: (v) => ({ title: "문의 처리 완료", body: `문의 ${v.ticket_id}가 처리됐습니다.` }),
+};
+
+async function sendExpoPush(
+  supa: ReturnType<typeof createClient>,
+  job: NotifyJob,
+): Promise<void> {
+  const { data: tokens } = await supa
+    .from("device_tokens")
+    .select("token")
+    .eq("profile_id", job.userId)
+    .in("platform", ["ios", "android"]);
+
+  if (!tokens || tokens.length === 0) return;
+
+  const tpl = PUSH_TEMPLATES[job.templateId];
+  if (!tpl) return;
+
+  const { title, body } = tpl(job.variables);
+  const messages = tokens.map((row: { token: string }) => ({
+    to: row.token,
+    title,
+    body,
+    data: { templateId: job.templateId },
+    sound: "default",
+  }));
+
+  try {
+    await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(messages),
+    });
+  } catch (err) {
+    console.warn("expo push failed", err);
+  }
+}
+
 // Bizppurio 재시도 트리거 에러 코드 목록
 const ALIMTALK_FALLBACK_CODES = new Set(["R001", "R002", "T001", "E001", "E999"]);
 
@@ -154,6 +199,9 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  // Expo 푸시: 알림톡/SMS와 무관하게 병행 발송 (fire-and-forget)
+  sendExpoPush(supa, job).catch((e) => console.warn("sendExpoPush error", e));
 
   // 1순위: 알림톡
   const at = await sendAlimtalk(job);
