@@ -10,10 +10,14 @@ const BIZ_TYPES = ["제조업", "도소매업", "음식점업", "운수·물류�
 
 type Step = "form" | "done";
 
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+const MAX_SIZE_MB = 5;
+
 export function EmployerSignupForm() {
   const [step, setStep] = useState<Step>("form");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
 
   const [form, setForm] = useState({
     email: "",
@@ -27,6 +31,23 @@ export function EmployerSignupForm() {
 
   function set(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function handleDocChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) { setDocFile(null); return; }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError("PDF, JPG, PNG 파일만 업로드 가능합니다.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setError(`파일 크기는 ${MAX_SIZE_MB}MB 이하여야 합니다.`);
+      e.target.value = "";
+      return;
+    }
+    setError(null);
+    setDocFile(file);
   }
 
   function normalizePhone(input: string): string {
@@ -83,7 +104,23 @@ export function EmployerSignupForm() {
 
     if (!userId) { setError("인증 오류가 발생했습니다."); setSaving(false); return; }
 
-    // 2) employer_applications INSERT
+    // 2) 사업자등록증 파일 업로드 (있을 경우)
+    let bizRegDocPath: string | null = null;
+    if (docFile) {
+      const ext = docFile.name.split(".").pop() ?? "pdf";
+      const storagePath = `${userId}/biz_reg.${ext}`;
+      const { data: uploadData, error: uploadErr } = await supabase.storage
+        .from("employer-docs")
+        .upload(storagePath, docFile, { upsert: true });
+      if (uploadErr) {
+        setError(`파일 업로드 실패: ${uploadErr.message}`);
+        setSaving(false);
+        return;
+      }
+      bizRegDocPath = uploadData.path;
+    }
+
+    // 3) employer_applications INSERT
     const e164 = normalizePhone(form.contact_phone);
     const { error: appErr } = await supabase.from("employer_applications").insert({
       profile_id: userId,
@@ -92,6 +129,7 @@ export function EmployerSignupForm() {
       contact_name: form.contact_name,
       contact_phone_e164: e164,
       biz_type: form.biz_type || null,
+      biz_reg_doc_path: bizRegDocPath,
       status: "pending",
     });
 
@@ -174,6 +212,30 @@ export function EmployerSignupForm() {
             <option value="">선택 안 함</option>
             {BIZ_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
+        </div>
+        <div style={fld}>
+          <label style={lbl}>사업자등록증 (PDF·JPG·PNG, 최대 5MB)</label>
+          <label style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            background: "#0d1b2a", border: "1px dashed rgba(255,255,255,0.2)", borderRadius: "10px",
+            padding: "14px 16px", cursor: "pointer",
+          }}>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              style={{ display: "none" }}
+              onChange={handleDocChange}
+            />
+            <span style={{ fontSize: "1.2rem" }}>📄</span>
+            <span style={{ fontSize: "0.85rem", color: docFile ? "#4ade80" : "rgba(255,255,255,0.5)" }}>
+              {docFile ? docFile.name : "파일 선택 (선택 사항)"}
+            </span>
+          </label>
+          {docFile && (
+            <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", marginTop: "4px", marginLeft: "4px" }}>
+              {(docFile.size / 1024).toFixed(0)} KB
+            </div>
+          )}
         </div>
       </div>
 
