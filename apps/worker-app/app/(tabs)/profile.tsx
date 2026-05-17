@@ -22,6 +22,7 @@ interface WorkerProfile {
   created_at: string;
   preferred_weekdays: number[] | null;
   preferred_verticals: string[] | null;
+  cert_codes: string[] | null;
 }
 
 const WEEKDAY_LABEL = ["일", "월", "화", "수", "목", "금", "토"];
@@ -29,6 +30,14 @@ const VERTICAL_LABEL: Record<string, string> = {
   logistics: "물류·배송",
   retail: "유통·매장",
   fnb: "식음료",
+};
+const CERT_LABEL: Record<string, string> = {
+  FOOD_HYGIENE: "식품위생교육",
+  COOK_BASIC:   "한식조리기능사",
+  FORKLIFT:     "지게차 운전기능사",
+  DRIVING_1T:   "1톤 화물 운전",
+  SECURITY:     "경비원 교육이수",
+  ELDER_CARE:   "요양보호사",
 };
 
 export default function ProfileScreen() {
@@ -49,7 +58,7 @@ export default function ProfileScreen() {
 
       const { data: prefs } = await supabase
         .from("worker_preferences")
-        .select("preferred_weekdays, preferred_verticals")
+        .select("preferred_weekdays, preferred_verticals, cert_codes")
         .eq("worker_id", w.id)
         .single();
 
@@ -61,6 +70,7 @@ export default function ProfileScreen() {
         created_at: p?.created_at ?? "",
         preferred_weekdays: prefs?.preferred_weekdays ?? null,
         preferred_verticals: prefs?.preferred_verticals ?? null,
+        cert_codes: prefs?.cert_codes ?? null,
       });
       setLoading(false);
     })();
@@ -166,6 +176,19 @@ export default function ProfileScreen() {
                   </View>
                 ))
               : <Text style={styles.prefEmpty}>미설정</Text>}
+          </View>
+        </View>
+
+        <View style={styles.prefRow}>
+          <Text style={styles.prefLabel}>보유 자격증</Text>
+          <View style={styles.chipRow}>
+            {profile.cert_codes && profile.cert_codes.length > 0
+              ? profile.cert_codes.map((c) => (
+                  <View key={c} style={styles.chip}>
+                    <Text style={styles.chipText}>{CERT_LABEL[c] ?? c}</Text>
+                  </View>
+                ))
+              : <Text style={styles.prefEmpty}>미등록</Text>}
           </View>
         </View>
       </View>
