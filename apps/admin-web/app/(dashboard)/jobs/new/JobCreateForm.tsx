@@ -13,6 +13,15 @@ const VERTICALS = [
   { value: "fnb",       label: "식음료" },
 ];
 
+const CERT_OPTIONS = [
+  { value: "FOOD_HYGIENE", label: "식품위생교육" },
+  { value: "COOK_BASIC",   label: "한식조리기능사" },
+  { value: "FORKLIFT",     label: "지게차 운전기능사" },
+  { value: "DRIVING_1T",   label: "1톤 화물 운전" },
+  { value: "SECURITY",     label: "경비원 교육이수" },
+  { value: "ELDER_CARE",   label: "요양보호사" },
+];
+
 const MIN_WAGE = 10030; // 2026 최저임금
 
 export function JobCreateForm() {
@@ -30,9 +39,16 @@ export function JobCreateForm() {
     headcount: "1",
     vertical: "",
   });
+  const [requiredCerts, setRequiredCerts] = useState<string[]>([]);
 
   function set(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function toggleCert(v: string) {
+    setRequiredCerts((prev) =>
+      prev.includes(v) ? prev.filter((c) => c !== v) : [...prev, v],
+    );
   }
 
   function validate(): string | null {
@@ -87,6 +103,7 @@ export function JobCreateForm() {
       hourly_wage_krw: Number(form.hourly_wage_krw),
       headcount: Number(form.headcount),
       vertical: form.vertical || null,
+      required_cert_codes: requiredCerts,
       status: "open",
     });
 
@@ -138,6 +155,36 @@ export function JobCreateForm() {
               <option value="">선택 안 함</option>
               {VERTICALS.map((v) => <option key={v.value} value={v.value}>{v.label}</option>)}
             </select>
+          </div>
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle}>필수 자격증 (선택) — 해당 자격 보유 워커만 매칭</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "4px" }}>
+            {CERT_OPTIONS.map((c) => {
+              const active = requiredCerts.includes(c.value);
+              return (
+                <label
+                  key={c.value}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "6px",
+                    padding: "6px 12px", borderRadius: "20px", cursor: "pointer",
+                    border: `1px solid ${active ? "#c9a84c" : "#e2e8f0"}`,
+                    background: active ? "rgba(201,168,76,0.1)" : "#fff",
+                    fontSize: "0.8rem", color: active ? "#92400e" : "#4a5568",
+                    fontWeight: active ? 600 : 400, transition: "all 0.15s",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={active}
+                    onChange={() => toggleCert(c.value)}
+                    style={{ display: "none" }}
+                  />
+                  {active ? "✓ " : ""}{c.label}
+                </label>
+              );
+            })}
           </div>
         </div>
 
