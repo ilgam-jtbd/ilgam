@@ -1,7 +1,8 @@
 // 워커 앱 — 오늘 일감 탭
 // match-engine Edge Function 호출 → 결과 렌더 → 원탭 지원 (PRD M1)
+// 클라이언트 사이드 업종 필터 + 시급 정렬
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -53,6 +54,14 @@ function formatKRW(n: number) {
   return n.toLocaleString();
 }
 
+const VERTICAL_LABEL: Record<string, string> = {
+  logistics: "물류·배송",
+  retail:    "유통·매장",
+  fnb:       "식음료",
+};
+
+type SortMode = "score" | "wage";
+
 async function fetchMatchedJobs(workerId: string): Promise<MatchedJob[]> {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return [];
@@ -85,6 +94,8 @@ export default function JobsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [applying, setApplying] = useState<string | null>(null);
   const [workerId, setWorkerId] = useState<string | null>(null);
+  const [filterVertical, setFilterVertical] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>("score");
 
   const loadJobs = useCallback(async (wid: string) => {
     const result = await fetchMatchedJobs(wid);
@@ -138,6 +149,21 @@ export default function JobsScreen() {
     [workerId],
   );
 
+  const availableVerticals = useMemo(() => {
+    const vs = new Set(jobs.map((j) => j.vertical).filter(Boolean) as string[]);
+    return Array.from(vs);
+  }, [jobs]);
+
+  const displayedJobs = useMemo(() => {
+    let list = filterVertical
+      ? jobs.filter((j) => j.vertical === filterVertical)
+      : jobs;
+    if (sortMode === "wage") {
+      list = [...list].sort((a, b) => b.hourly_wage_krw - a.hourly_wage_krw);
+    }
+    return list;
+  }, [jobs, filterVertical, sortMode]);
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -149,7 +175,7 @@ export default function JobsScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={jobs}
+        data={displayedJobs}
         keyExtractor={(item) => item.job_id}
         contentContainerStyle={styles.list}
         refreshControl={
@@ -167,6 +193,49 @@ export default function JobsScreen() {
               <Text style={styles.headerSub}>
                 맞춤 공고 {jobs.length}건 — 거리·시급·요일 기준
               </Text>
+            )}
+
+            {/* 필터 + 정렬 */}
+            {jobs.length > 0 && (
+              <View style={styles.filterRow}>
+                {/* 업종 필터 */}
+                <TouchableOpacity
+                  style={[styles.filterChip, filterVertical === null && styles.filterChipActive]}
+                  onPress={() => setFilterVertical(null)}
+                  accessibilityRole="button"
+                  accessibilityLabel="전체"
+                >
+                  <Text style={[styles.filterChipText, filterVertical === null && styles.filterChipTextActive]}>전체</Text>
+                </TouchableOpacity>
+                {availableVerticals.map((v) => (
+                  <TouchableOpacity
+                    key={v}
+                    style={[styles.filterChip, filterVertical === v && styles.filterChipActive]}
+                    onPress={() => setFilterVertical(filterVertical === v ? null : v)}
+                    accessibilityRole="button"
+                    accessibilityLabel={VERTICAL_LABEL[v] ?? v}
+                  >
+                    <Text style={[styles.filterChipText, filterVertical === v && styles.filterChipTextActive]}>
+                      {VERTICAL_LABEL[v] ?? v}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+
+                {/* 구분선 */}
+                <View style={styles.filterDivider} />
+
+                {/* 정렬 토글 */}
+                <TouchableOpacity
+                  style={styles.sortBtn}
+                  onPress={() => setSortMode((m) => m === "score" ? "wage" : "score")}
+                  accessibilityRole="button"
+                  accessibilityLabel={sortMode === "score" ? "시급순으로 정렬" : "추천순으로 정렬"}
+                >
+                  <Text style={styles.sortBtnText}>
+                    {sortMode === "score" ? "추천순 ↕" : "시급순 ↕"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         }
@@ -341,6 +410,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e2e8f0",
     marginTop: 24,
+  },
+  filterRow: {
+    flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12, alignItems: "center",
+  },
+  filterChip: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
+    borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#fff",
+  },
+  filterChipActive: {
+    backgroundColor: "#0d1b2a", borderColor: "#0d1b2a",
+  },
+  filterChipText: {
+    fontSize: 12, color: "#718096", fontWeight: "500",
+  },
+  filterChipTextActive: {
+    color: "#c9a84c",
+  },
+  filterDivider: {
+    width: 1, height: 20, backgroundColor: "#e2e8f0", marginHorizontal: 2,
+  },
+  sortBtn: {
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20,
+    borderWidth: 1, borderColor: "rgba(45,212,191,0.3)", backgroundColor: "rgba(45,212,191,0.06)",
+  },
+  sortBtnText: {
+    fontSize: 12, color: "#0f766e", fontFamily: "DM Mono",
   },
   emptyTitle: {
     fontSize: 17,

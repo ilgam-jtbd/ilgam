@@ -59,6 +59,18 @@ export default async function EmployersPage() {
 
   const rows = (apps ?? []) as unknown as ApplicationRow[];
 
+  // 서명된 문서 URL 생성 (private 버킷, 유효 1시간)
+  const docUrls: Record<string, string> = {};
+  const withDocs = rows.filter((r) => r.biz_reg_doc_path);
+  if (withDocs.length > 0) {
+    const { data: signed } = await supabase.storage
+      .from("employer-docs")
+      .createSignedUrls(withDocs.map((r) => r.biz_reg_doc_path!), 3600);
+    (signed ?? []).forEach((s, i) => {
+      if (s.signedUrl) docUrls[withDocs[i].id] = s.signedUrl;
+    });
+  }
+
   const pending = rows.filter((r) => r.status === "pending");
   const approved = rows.filter((r) => r.status === "approved");
   const rejected = rows.filter((r) => r.status === "rejected");
@@ -97,7 +109,7 @@ export default async function EmployersPage() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
             {pending.map((app) => (
-              <ApplicationCard key={app.id} app={app} fmtKST={fmtKST} showActions />
+              <ApplicationCard key={app.id} app={app} fmtKST={fmtKST} showActions docUrl={docUrls[app.id]} />
             ))}
           </div>
         </div>
@@ -158,7 +170,14 @@ export default async function EmployersPage() {
   );
 }
 
-function ApplicationCard({ app, fmtKST, showActions }: { app: ApplicationRow; fmtKST: (s: string | null) => string; showActions?: boolean }) {
+function ApplicationCard({
+  app, fmtKST, showActions, docUrl,
+}: {
+  app: ApplicationRow;
+  fmtKST: (s: string | null) => string;
+  showActions?: boolean;
+  docUrl?: string;
+}) {
   return (
     <div style={{ background: "#fff", borderRadius: "12px", padding: "1.2rem 1.4rem", border: "1px solid #e2e8f0", borderLeft: "3px solid #c9a84c" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -168,7 +187,31 @@ function ApplicationCard({ app, fmtKST, showActions }: { app: ApplicationRow; fm
             사업자번호: {app.biz_reg_no} · {app.contact_name} · {app.contact_phone_e164}
           </div>
           {app.biz_type && <div style={{ fontSize: "0.72rem", color: "#718096", marginTop: "2px" }}>업종: {app.biz_type}</div>}
-          <div style={{ fontSize: "0.72rem", color: "#718096", marginTop: "4px" }}>신청: {fmtKST(app.created_at)}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "6px" }}>
+            <span style={{ fontSize: "0.72rem", color: "#718096" }}>신청: {fmtKST(app.created_at)}</span>
+            {docUrl
+              ? (
+                <a
+                  href={docUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "0.72rem", color: "#2dd4bf",
+                    fontFamily: "var(--font-dm-mono), monospace",
+                    letterSpacing: "0.06em", textDecoration: "none",
+                    border: "1px solid rgba(45,212,191,0.3)", borderRadius: "6px",
+                    padding: "2px 8px",
+                  }}
+                >
+                  📄 서류 보기
+                </a>
+              )
+              : (
+                <span style={{ fontSize: "0.72rem", color: "#a0aec0", fontFamily: "var(--font-dm-mono), monospace" }}>
+                  서류 미첨부
+                </span>
+              )}
+          </div>
         </div>
         {showActions && <EmployerApprovalActions applicationId={app.id} />}
       </div>
