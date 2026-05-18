@@ -141,6 +141,13 @@ const PUSH_TEMPLATES: Record<string, (v: Record<string, string | number>) => { t
   ILGAM_M006: (v) => ({ title: "문의 처리 완료", body: `문의 ${v.ticket_id}가 처리됐습니다.` }),
 };
 
+// 알림 탭 시 이동할 워커 앱 화면 (addNotificationResponseReceivedListener 와 매핑)
+const PUSH_SCREEN: Record<string, string> = {
+  ILGAM_M001: "mine",   // 매칭 확정 → 내 근무
+  ILGAM_M002: "mine",   // 근무 시작 → 내 근무
+  ILGAM_M003: "mine",   // 급여 입금 → 내 근무
+};
+
 async function sendExpoPush(
   supa: ReturnType<typeof createClient>,
   job: NotifyJob,
@@ -157,11 +164,12 @@ async function sendExpoPush(
   if (!tpl) return;
 
   const { title, body } = tpl(job.variables);
+  const screen = PUSH_SCREEN[job.templateId];
   const messages = tokens.map((row: { token: string }) => ({
     to: row.token,
     title,
     body,
-    data: { templateId: job.templateId },
+    data: { templateId: job.templateId, ...(screen ? { screen } : {}) },
     sound: "default",
   }));
 
