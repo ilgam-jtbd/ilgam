@@ -1,3 +1,12 @@
+export interface ExpertYouTube {
+  channelUrl: string;
+  channelName: string;
+  subscribers: string;       // e.g. "12.4만"
+  videoCount: number;
+  latestVideo: string;       // title
+  thumbnailColor: string;    // CSS color for placeholder
+}
+
 export interface Expert {
   id: string;
   name: string;
@@ -18,6 +27,7 @@ export interface Expert {
   completedProjects: number;
   badge?: "TOP" | "NEW" | "VERIFIED";
   responseTime: string;      // e.g. "2h"
+  youtube?: ExpertYouTube;   // optional YouTube presence
 }
 
 export interface Project {

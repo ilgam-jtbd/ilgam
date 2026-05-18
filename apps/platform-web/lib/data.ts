@@ -19,6 +19,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 43,
     badge: "TOP",
     responseTime: "2h",
+    youtube: {
+      channelUrl: "https://youtube.com/@kimjaewon-shipbuilding",
+      channelName: "김재원의 조선 인사이트",
+      subscribers: "8.2만",
+      videoCount: 134,
+      latestVideo: "LNG선 수주 전쟁 — 한국 조선소가 유리한 이유",
+      thumbnailColor: "#1e3a5f",
+    },
   },
   {
     id: "e2",
@@ -38,6 +46,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 61,
     badge: "TOP",
     responseTime: "1h",
+    youtube: {
+      channelUrl: "https://youtube.com/@suyeon-pm",
+      channelName: "박수연의 AI 프로덕트",
+      subscribers: "24.7만",
+      videoCount: 218,
+      latestVideo: "GPT-5 시대의 B2B SaaS 전략 — 어떻게 살아남을까",
+      thumbnailColor: "#1a1a2e",
+    },
   },
   {
     id: "e3",
@@ -58,6 +74,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 29,
     badge: "VERIFIED",
     responseTime: "4h",
+    youtube: {
+      channelUrl: "https://youtube.com/@hyunjin-bio",
+      channelName: "바이오 규제 연구소",
+      subscribers: "3.1만",
+      videoCount: 67,
+      latestVideo: "FDA 510(k) 제출 전 꼭 확인해야 할 7가지",
+      thumbnailColor: "#0d3b2b",
+    },
   },
   {
     id: "e4",
@@ -77,6 +101,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 38,
     badge: "TOP",
     responseTime: "3h",
+    youtube: {
+      channelUrl: "https://youtube.com/@donghoon-ib",
+      channelName: "최동훈 IB 클래스",
+      subscribers: "18.3만",
+      videoCount: 156,
+      latestVideo: "2026 코스닥 상장 전략 — VC가 보는 밸류에이션",
+      thumbnailColor: "#1c1c0d",
+    },
   },
   {
     id: "e5",
@@ -96,6 +128,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 22,
     badge: "VERIFIED",
     responseTime: "6h",
+    youtube: {
+      channelUrl: "https://youtube.com/@mina-china-biz",
+      channelName: "정민아의 중국비즈",
+      subscribers: "5.6만",
+      videoCount: 89,
+      latestVideo: "2026 중국 진출 체크리스트 — 실패하는 기업의 공통점",
+      thumbnailColor: "#3b0a0a",
+    },
   },
   {
     id: "e6",
@@ -115,6 +155,14 @@ export const EXPERTS: Expert[] = [
     completedProjects: 51,
     badge: "TOP",
     responseTime: "2h",
+    youtube: {
+      channelUrl: "https://youtube.com/@byungchul-ai",
+      channelName: "강병철의 AI 전략실",
+      subscribers: "41.2만",
+      videoCount: 312,
+      latestVideo: "AI 전환 실패하는 기업들의 공통점 — CTO 시각",
+      thumbnailColor: "#0a0a2e",
+    },
   },
 ];
 
