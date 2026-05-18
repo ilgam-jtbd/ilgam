@@ -5,6 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Job } from "@ilgam/core";
 import RepostButton from "./RepostButton";
+import CloseJobButton from "./CloseJobButton";
 
 type JobRow = Pick<
   Job,
@@ -258,9 +259,12 @@ export default async function JobsPage() {
               </div>
             </div>
 
-            {/* 재게시 버튼 (open 공고에만 표시) */}
+            {/* 재게시 / 마감 버튼 (open 공고에만 표시) */}
             {job.status === "open" && (
-              <RepostButton jobId={job.id} />
+              <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+                <RepostButton jobId={job.id} />
+                <CloseJobButton jobId={job.id} />
+              </div>
             )}
           </div>
         ))}
