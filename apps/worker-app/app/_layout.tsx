@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Notifications from "expo-notifications";
 import { createClient } from "@supabase/supabase-js";
@@ -52,6 +52,27 @@ async function registerPushToken() {
 export default function RootLayout() {
   useEffect(() => {
     registerPushToken().catch((e) => console.warn("push token registration failed", e));
+
+    // Check existing session — redirect logged-in users past the login screen
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from("workers").select("id").eq("profile_id", session.user.id).single()
+          .then(({ data: worker }) => {
+            if (!worker) { router.replace("/"); return; }
+            supabase.from("worker_preferences").select("worker_id").eq("worker_id", worker.id).single()
+              .then(({ data: prefs }) => {
+                router.replace(prefs ? "/(tabs)/jobs" : "/onboarding");
+              });
+          });
+      }
+    });
+
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as Record<string, string> | undefined;
+      if (data?.screen === "mine") router.push("/(tabs)/mine");
+      else if (data?.screen === "jobs") router.push("/(tabs)/jobs");
+    });
+    return () => sub.remove();
   }, []);
 
   return (
