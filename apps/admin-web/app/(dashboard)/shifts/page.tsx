@@ -4,6 +4,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { ShiftApproveButton } from "./ShiftApproveButton";
+import { ShiftNoShowButton } from "./ShiftNoShowButton";
 
 interface ShiftRow {
   id: string;
@@ -111,7 +112,7 @@ export default async function ShiftsPage() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
-              {["워커", "공고", "예정 시간", "출근", "퇴근", "실 근무", "상태", "구인자 승인"].map((h) => (
+              {["워커", "공고", "예정 시간", "출근", "퇴근", "실 근무", "상태", "구인자 승인", ""].map((h) => (
                 <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", color: "#718096", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 500 }}>
                   {h}
                 </th>
@@ -121,7 +122,7 @@ export default async function ShiftsPage() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#718096", fontSize: "0.875rem" }}>
+                <td colSpan={9} style={{ padding: "2rem", textAlign: "center", color: "#718096", fontSize: "0.875rem" }}>
                   최근 7일 근무 데이터가 없습니다
                 </td>
               </tr>
@@ -163,6 +164,11 @@ export default async function ShiftsPage() {
                     {row.status === "clocked_out"
                       ? <ShiftApproveButton shiftId={row.id} approvedAt={row.employer_approved_at} />
                       : <span style={{ fontSize: "0.72rem", color: "#cbd5e0" }}>—</span>}
+                  </td>
+                  <td style={{ padding: "0.75rem 1rem" }}>
+                    {(row.status === "pending" || row.status === "clocked_in")
+                      ? <ShiftNoShowButton shiftId={row.id} />
+                      : null}
                   </td>
                 </tr>
               );

@@ -9,6 +9,7 @@ interface DashMetrics {
   matches_30d: number;
   open_jobs: number;
   pending_applicants: number;
+  pending_employers: number;
   active_workers: number;
 }
 
@@ -22,13 +23,15 @@ async function fetchMetrics(): Promise<DashMetrics> {
 
   const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [payments, matches, openJobs, pendingApps, activeWorkers] = await Promise.all([
+  const [payments, matches, openJobs, pendingApps, pendingEmployers, activeWorkers] = await Promise.all([
     supabase.from("payments").select("gross_amount_krw, platform_fee_krw")
       .eq("status", "paid").gte("settled_at", since30d),
     supabase.from("matches").select("id", { count: "exact", head: true })
       .gte("created_at", since30d),
     supabase.from("jobs").select("id", { count: "exact", head: true }).eq("status", "open"),
     supabase.from("job_applications").select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
+    supabase.from("employer_applications").select("id", { count: "exact", head: true })
       .eq("status", "pending"),
     supabase.from("workers").select("id", { count: "exact", head: true })
       .gt("no_show_count", -1),
@@ -43,6 +46,7 @@ async function fetchMetrics(): Promise<DashMetrics> {
     matches_30d: matches.count ?? 0,
     open_jobs: openJobs.count ?? 0,
     pending_applicants: pendingApps.count ?? 0,
+    pending_employers: pendingEmployers.count ?? 0,
     active_workers: activeWorkers.count ?? 0,
   };
 }
@@ -57,9 +61,10 @@ const METRICS = [
   { key: "gmv_30d",           label: "30일 GMV",       unit: "원",  accent: "#c9a84c" },
   { key: "fee_30d",           label: "30일 수수료",     unit: "원",  accent: "#2dd4bf" },
   { key: "matches_30d",       label: "30일 완료 매칭",  unit: "건",  accent: "#4ade80" },
-  { key: "open_jobs",         label: "모집 중 공고",    unit: "건",  accent: "#c9a84c" },
-  { key: "pending_applicants",label: "대기 지원자",     unit: "명",  accent: "#f87171" },
-  { key: "active_workers",    label: "등록 워커",       unit: "명",  accent: "#2dd4bf" },
+  { key: "open_jobs",          label: "모집 중 공고",    unit: "건",  accent: "#c9a84c" },
+  { key: "pending_applicants", label: "대기 지원자",     unit: "명",  accent: "#f87171" },
+  { key: "pending_employers",  label: "구인자 심사 대기", unit: "건",  accent: "#fb923c" },
+  { key: "active_workers",     label: "등록 워커",       unit: "명",  accent: "#2dd4bf" },
 ] as const;
 
 export default async function DashboardHomePage() {
@@ -133,6 +138,22 @@ export default async function DashboardHomePage() {
             재게시로 워커를 빠르게 확보
           </div>
         </a>
+        {m.pending_employers > 0 && (
+          <a href="/employers" style={{
+            background: "#ffffff", border: "1px solid #e2e8f0", borderLeft: "3px solid #fb923c",
+            borderRadius: "12px", padding: "1.4rem", textDecoration: "none", display: "block",
+          }}>
+            <div style={{ fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", color: "#c2410c", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>
+              ACTION REQUIRED
+            </div>
+            <div style={{ fontWeight: 600, color: "#0d1b2a", fontSize: "0.92rem" }}>
+              구인자 심사 대기 {m.pending_employers}건
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "#718096", marginTop: "0.3rem" }}>
+              사업자 서류 확인 후 승인/반려
+            </div>
+          </a>
+        )}
       </div>
     </div>
   );

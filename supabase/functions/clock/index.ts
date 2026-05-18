@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
         employer_id: (match as { employer_id?: string }).employer_id,
         clock_in_at: nowIso,
         clock_in_geog: makePoint(lat, lng),
-        clock_in_selfie_path: selfie_storage_path ?? null,
+        selfie_in_path: selfie_storage_path ?? null,
         status: "clocked_in",
       })
       .select("id")
@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
     .update({
       clock_out_at: nowIso,
       clock_out_geog: makePoint(lat, lng),
-      clock_out_selfie_path: selfie_storage_path ?? null,
+      selfie_out_path: selfie_storage_path ?? null,
       status: "clocked_out",
     })
     .eq("id", shift.id);

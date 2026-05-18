@@ -10,11 +10,24 @@ import {
 } from "react-native";
 import { createClient } from "@supabase/supabase-js";
 import { router } from "expo-router";
+import * as Notifications from "expo-notifications";
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "",
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "",
 );
+
+async function registerPushToken(profileId: string) {
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== "granted") return;
+  const { data: token } = await Notifications.getExpoPushTokenAsync();
+  if (!token) return;
+  const platform = Platform.OS === "ios" ? "ios" : Platform.OS === "android" ? "android" : "web";
+  await supabase.from("device_tokens").upsert(
+    { profile_id: profileId, token, platform, updated_at: new Date().toISOString() },
+    { onConflict: "profile_id,token" },
+  );
+}
 
 function normalizePhone(input: string): string {
   const digits = input.replace(/\D/g, "");
@@ -75,6 +88,9 @@ export default function LandingScreen() {
 
     const { data: prefs } = await supabase
       .from("worker_preferences").select("worker_id").eq("worker_id", worker.id).single();
+
+    // 푸시 토큰 등록 (fire-and-forget)
+    registerPushToken(user.id).catch(() => {});
 
     if (prefs) {
       router.replace("/(tabs)/jobs");
