@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: "Inter", system-ui, sans-serif;
+    --font-dm-mono: "DM Mono", monospace;
+  }
+
+  * { @apply border-slate-200; }
+  body { @apply bg-white text-slate-900 antialiased; }
+
+  h1, h2, h3, h4 { @apply font-semibold tracking-tight; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .glass {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
