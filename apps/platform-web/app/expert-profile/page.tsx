@@ -382,7 +382,7 @@ export default function ExpertProfilePage() {
                         <div className="text-xs text-slate-400 mt-0.5">{r.date}</div>
                       </div>
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed">"{r.text}"</p>
+                    <p className="text-sm text-slate-600 leading-relaxed">&ldquo;{r.text}&rdquo;</p>
                   </div>
                 ))}
               </motion.div>
