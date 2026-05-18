@@ -416,7 +416,7 @@ function HeroSection() {
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-xs mt-0.5 truncate">{expert.title.split("/")[0].trim()}</p>
+                    <p className="text-slate-400 text-xs mt-0.5 truncate">{(expert.title.split("/")[0] ?? "").trim()}</p>
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className="text-yellow-400"><IconStar filled /></span>
                       <span className="text-white text-xs font-medium">{expert.rating}</span>

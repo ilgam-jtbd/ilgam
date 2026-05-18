@@ -98,7 +98,7 @@ function Stars({ rating }: { rating: number }) {
 // ─── Expert Profile Page ──────────────────────────────────────────────────────
 export default function ExpertProfilePage() {
   const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "portfolio">("overview");
-  const [selectedExpert, setSelectedExpert] = useState<Expert>(EXPERTS[0]);
+  const [selectedExpert, setSelectedExpert] = useState<Expert>(EXPERTS[0]!);
 
   const TABS = [
     { key: "overview", label: "프로필" },
