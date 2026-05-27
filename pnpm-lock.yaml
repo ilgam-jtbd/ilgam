@@ -87,6 +87,12 @@ importers:
 
   apps/platform-web:
     dependencies:
+      '@supabase/ssr':
+        specifier: ^0.5.0
+        version: 0.5.2(@supabase/supabase-js@2.105.1)
+      '@supabase/supabase-js':
+        specifier: ^2.45.0
+        version: 2.105.1
       clsx:
         specifier: ^2
         version: 2.1.1

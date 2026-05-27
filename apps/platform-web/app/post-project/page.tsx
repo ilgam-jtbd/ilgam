@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createBrowserClient } from "@supabase/ssr";
 import { EXPERTS } from "@/lib/data";
-import { INDUSTRY_LABELS, EXPERTISE_LABELS } from "@/lib/types";
+import { INDUSTRY_LABELS } from "@/lib/types";
 
 // ─── Nav ─────────────────────────────────────────────────────────────────────
 
@@ -187,7 +188,7 @@ function AIPreviewPanel({
   industry,
   projectType,
   selectedSkills,
-  budget,
+  budget: _budget,
   urgent,
 }: PreviewPanelProps) {
   const filled = (industry ? 1 : 0) + (projectType ? 1 : 0) + (selectedSkills.length > 0 ? 1 : 0);
@@ -267,6 +268,14 @@ function AIPreviewPanel({
 // ─── Step 1 ────────────────────────────────────────────────────────────────────
 
 interface Step1Props {
+  companyName: string;
+  onCompanyName: (v: string) => void;
+  contactName: string;
+  onContactName: (v: string) => void;
+  contactEmail: string;
+  onContactEmail: (v: string) => void;
+  contactPhone: string;
+  onContactPhone: (v: string) => void;
   title: string;
   onTitle: (v: string) => void;
   industry: string;
@@ -281,6 +290,10 @@ interface Step1Props {
 }
 
 function Step1Form({
+  companyName, onCompanyName,
+  contactName, onContactName,
+  contactEmail, onContactEmail,
+  contactPhone, onContactPhone,
   title, onTitle,
   industry, onIndustry,
   projectType, onProjectType,
@@ -289,10 +302,65 @@ function Step1Form({
   onNext,
 }: Step1Props) {
   const descLen = description.length;
-  const canNext = title.trim().length >= 5 && industry && projectType && descLen >= 100;
+  const canNext = companyName.trim().length >= 2 && title.trim().length >= 5 && industry && projectType && descLen >= 100;
 
   return (
     <div className="space-y-6">
+      {/* Company info */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            기업명 <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={companyName}
+            onChange={(e) => onCompanyName(e.target.value)}
+            placeholder="예: STX조선해양"
+            className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 placeholder:text-slate-400 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            담당자명
+          </label>
+          <input
+            type="text"
+            value={contactName}
+            onChange={(e) => onContactName(e.target.value)}
+            placeholder="홍길동 부장"
+            className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 placeholder:text-slate-400 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            이메일
+          </label>
+          <input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => onContactEmail(e.target.value)}
+            placeholder="hong@company.com"
+            className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 placeholder:text-slate-400 transition"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+            연락처
+          </label>
+          <input
+            type="tel"
+            value={contactPhone}
+            onChange={(e) => onContactPhone(e.target.value)}
+            placeholder="010-0000-0000"
+            className="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 placeholder:text-slate-400 transition"
+          />
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-slate-100" />
+
       {/* Project title */}
       <div>
         <label className="block text-sm font-semibold text-slate-700 mb-1.5">
@@ -580,6 +648,8 @@ interface Step3Props {
   onStartDate: (v: string) => void;
   onSubmit: () => void;
   onBack: () => void;
+  submitting: boolean;
+  submitError: string;
 }
 
 function Step3Form({
@@ -588,8 +658,9 @@ function Step3Form({
   durationUnit, onDurationUnit,
   startDate, onStartDate,
   onSubmit, onBack,
+  submitting, submitError,
 }: Step3Props) {
-  const canSubmit = budget && durationValue && startDate;
+  const canSubmit = budget && durationValue && startDate && !submitting;
 
   return (
     <div className="space-y-6">
@@ -662,12 +733,20 @@ function Step3Form({
         />
       </div>
 
+      {/* Error message */}
+      {submitError && (
+        <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-sm text-red-600">
+          {submitError}
+        </div>
+      )}
+
       {/* Navigation + Submit */}
       <div className="flex gap-3 pt-2">
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 py-3 text-sm font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+          disabled={submitting}
+          className="flex-1 py-3 text-sm font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors"
         >
           ← 이전
         </button>
@@ -677,7 +756,7 @@ function Step3Form({
           disabled={!canSubmit}
           className="flex-[2] py-3 text-sm font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] transition-all duration-150 shadow-sm"
         >
-          AI 매칭 시작하기 →
+          {submitting ? "제출 중…" : "AI 매칭 시작하기 →"}
         </button>
       </div>
     </div>
@@ -722,11 +801,24 @@ function SuccessOverlay({ onReset }: { onReset: () => void }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+const BUDGET_KRW: Record<string, number> = {
+  under100: 100,
+  "100to500": 300,
+  "500to1000": 750,
+  over1000: 1500,
+};
+
 export default function PostProjectPage() {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  // Step 1
+  // Step 1 — contact + project info
+  const [companyName, setCompanyName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [title, setTitle] = useState("");
   const [industry, setIndustry] = useState("");
   const [projectType, setProjectType] = useState<ProjectTypeKey | "">("");
@@ -751,13 +843,46 @@ export default function PostProjectPage() {
     );
   }
 
-  function handleSubmit() {
-    setSubmitted(true);
+  async function handleSubmit() {
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      );
+      const { error } = await supabase.from("b2b_inquiries").insert({
+        company_name: companyName.trim(),
+        contact_name: contactName.trim() || null,
+        contact_email: contactEmail.trim() || null,
+        contact_phone: contactPhone.trim() || null,
+        industry: industry || null,
+        project_title: title.trim(),
+        description: description.trim(),
+        budget_krw: budget ? (BUDGET_KRW[budget] ?? null) : null,
+        duration: durationValue ? `${durationValue}${durationUnit}` : null,
+        skills: selectedSkills,
+        urgent,
+        nda_required: nda,
+        status: "new",
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "제출 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function handleReset() {
     setStep(1);
     setSubmitted(false);
+    setSubmitError("");
+    setCompanyName("");
+    setContactName("");
+    setContactEmail("");
+    setContactPhone("");
     setTitle("");
     setIndustry("");
     setProjectType("");
@@ -809,6 +934,14 @@ export default function PostProjectPage() {
                         transition={{ duration: 0.2 }}
                       >
                         <Step1Form
+                          companyName={companyName}
+                          onCompanyName={setCompanyName}
+                          contactName={contactName}
+                          onContactName={setContactName}
+                          contactEmail={contactEmail}
+                          onContactEmail={setContactEmail}
+                          contactPhone={contactPhone}
+                          onContactPhone={setContactPhone}
                           title={title}
                           onTitle={setTitle}
                           industry={industry}
@@ -864,6 +997,8 @@ export default function PostProjectPage() {
                           onStartDate={setStartDate}
                           onSubmit={handleSubmit}
                           onBack={() => setStep(2)}
+                          submitting={submitting}
+                          submitError={submitError}
                         />
                       </motion.div>
                     )}
