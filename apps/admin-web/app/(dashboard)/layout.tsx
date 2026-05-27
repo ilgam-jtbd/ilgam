@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/employers",  label: "구인자 심사" },
   { href: "/shifts",     label: "근무 현황" },
   { href: "/payments",   label: "정산" },
+  { href: "/matching",   label: "매칭 운영" },
 ];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {

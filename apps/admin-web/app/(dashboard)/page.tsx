@@ -11,6 +11,8 @@ interface DashMetrics {
   pending_applicants: number;
   pending_employers: number;
   active_workers: number;
+  b2b_gmv: number;
+  b2b_active: number;
 }
 
 async function fetchMetrics(): Promise<DashMetrics> {
@@ -23,7 +25,7 @@ async function fetchMetrics(): Promise<DashMetrics> {
 
   const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [payments, matches, openJobs, pendingApps, pendingEmployers, activeWorkers] = await Promise.all([
+  const [payments, matches, openJobs, pendingApps, pendingEmployers, activeWorkers, b2bInquiries] = await Promise.all([
     supabase.from("payments").select("gross_amount_krw, platform_fee_krw")
       .eq("status", "paid").gte("settled_at", since30d),
     supabase.from("matches").select("id", { count: "exact", head: true })
@@ -35,10 +37,16 @@ async function fetchMetrics(): Promise<DashMetrics> {
       .eq("status", "pending"),
     supabase.from("workers").select("id", { count: "exact", head: true })
       .gt("no_show_count", -1),
+    supabase.from("b2b_inquiries").select("status, contract_amount_krw"),
   ]);
 
   const gmv = (payments.data ?? []).reduce((s, r) => s + (r.gross_amount_krw ?? 0), 0);
   const fee = (payments.data ?? []).reduce((s, r) => s + (r.platform_fee_krw ?? 0), 0);
+  const b2bData = (b2bInquiries.data ?? []) as { status: string; contract_amount_krw: number | null }[];
+  const b2bGmv = b2bData
+    .filter((r) => ["contracted", "completed"].includes(r.status))
+    .reduce((s, r) => s + (r.contract_amount_krw ?? 0), 0);
+  const b2bActive = b2bData.filter((r) => !["completed", "closed"].includes(r.status)).length;
 
   return {
     gmv_30d: gmv,
@@ -48,6 +56,8 @@ async function fetchMetrics(): Promise<DashMetrics> {
     pending_applicants: pendingApps.count ?? 0,
     pending_employers: pendingEmployers.count ?? 0,
     active_workers: activeWorkers.count ?? 0,
+    b2b_gmv: b2bGmv,
+    b2b_active: b2bActive,
   };
 }
 
@@ -58,6 +68,8 @@ function krw(n: number) {
 }
 
 const METRICS = [
+  { key: "b2b_gmv",            label: "B2B 계약 GMV",   unit: "만원", accent: "#c9a84c" },
+  { key: "b2b_active",         label: "B2B 진행중",     unit: "건",  accent: "#f97316" },
   { key: "gmv_30d",           label: "30일 GMV",       unit: "원",  accent: "#c9a84c" },
   { key: "fee_30d",           label: "30일 수수료",     unit: "원",  accent: "#2dd4bf" },
   { key: "matches_30d",       label: "30일 완료 매칭",  unit: "건",  accent: "#4ade80" },
