@@ -7,7 +7,7 @@ export async function GET() {
   const sha = process.env.VERCEL_GIT_COMMIT_SHA?.substring(0, 7) || 'local';
   return NextResponse.json({
     ok: true,
-    service: 'ilgam-admin-web',
+    service: 'velor-admin-web',
     sha,
     env: process.env.VERCEL_ENV || 'development',
     region: process.env.VERCEL_REGION || 'unknown',
