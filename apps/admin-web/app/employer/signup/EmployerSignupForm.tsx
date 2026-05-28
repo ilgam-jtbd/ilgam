@@ -185,7 +185,7 @@ export function EmployerSignupForm() {
         <div style={fld}>
           <label style={lbl}>사업체명 *</label>
           <input style={inp} value={form.biz_name} onChange={(e) => set("biz_name", e.target.value)}
-            placeholder="예) (주)일감물류" required />
+            placeholder="예) (주)한국물류" required />
         </div>
         <div style={fld}>
           <label style={lbl}>사업자등록번호 * (10자리)</label>
