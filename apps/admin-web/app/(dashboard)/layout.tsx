@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             letterSpacing: "0.02em",
           }}
         >
-          일감
+          VELOR
         </span>
         <span
           style={{

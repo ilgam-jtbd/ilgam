@@ -160,7 +160,7 @@ export default function MineScreen() {
           <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>근무 내역이 없습니다</Text>
             <Text style={styles.emptySub}>
-              일감 탭에서 공고에 지원하고{"\n"}매칭이 확정되면 여기에 표시됩니다.
+              일자리 탭에서 공고에 지원하고{"\n"}매칭이 확정되면 여기에 표시됩니다.
             </Text>
           </View>
         }

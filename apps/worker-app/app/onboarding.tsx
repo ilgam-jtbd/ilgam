@@ -155,7 +155,7 @@ export default function OnboardingScreen() {
         {step === 1 && (
           <View>
             <Text style={styles.title}>주로 일하고 싶은{"\n"}동네를 알려주세요</Text>
-            <Text style={styles.sub}>가까운 곳의 일감을 우선으로 보여드립니다</Text>
+            <Text style={styles.sub}>가까운 곳의 일자리를 우선으로 보여드립니다</Text>
 
             <Text style={styles.inputLabel}>동네 이름으로 검색</Text>
             <TextInput
@@ -283,7 +283,7 @@ export default function OnboardingScreen() {
         {step === 4 && (
           <View>
             <Text style={styles.title}>보유하신 자격증이{"\n"}있으신가요?</Text>
-            <Text style={styles.sub}>자격증이 있으면 맞는 일감을 더 많이 받을 수 있어요 (선택 안 해도 됩니다)</Text>
+            <Text style={styles.sub}>자격증이 있으면 맞는 일자리를 더 많이 받을 수 있어요 (선택 안 해도 됩니다)</Text>
             <View style={styles.certGrid}>
               {CERT_OPTIONS.map((c) => {
                 const active = selectedCerts.includes(c.value);

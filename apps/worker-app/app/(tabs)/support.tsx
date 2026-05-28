@@ -163,7 +163,7 @@ export default function SupportScreen() {
         ListEmptyComponent={
           <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>지원 내역이 없습니다</Text>
-            <Text style={styles.emptySub}>일감 탭에서 공고에 지원해 보세요.</Text>
+            <Text style={styles.emptySub}>일자리 탭에서 공고에 지원해 보세요.</Text>
           </View>
         }
         renderItem={({ item }) => {

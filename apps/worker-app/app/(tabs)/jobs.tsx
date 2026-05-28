@@ -188,7 +188,7 @@ export default function JobsScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.headerLabel}>TODAY'S JOBS</Text>
-            <Text style={styles.headerTitle}>오늘 할 수 있는 일감</Text>
+            <Text style={styles.headerTitle}>오늘 할 수 있는 일자리</Text>
             {jobs.length > 0 && (
               <Text style={styles.headerSub}>
                 맞춤 공고 {jobs.length}건 — 거리·시급·요일 기준

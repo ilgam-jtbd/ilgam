@@ -164,9 +164,9 @@ export default function LandingScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.label}>SENIOR SPOTWORK</Text>
-        <Text style={styles.title}>일감</Text>
+        <Text style={styles.title}>VELOR</Text>
         <Text style={styles.sub}>
-          오늘 할 수 있는 일감을{"\n"}빠르게 찾아드립니다
+          가까운 곳의 일자리를{"\n"}빠르게 찾아드립니다
         </Text>
       </View>
 

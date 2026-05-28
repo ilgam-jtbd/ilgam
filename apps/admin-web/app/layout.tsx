@@ -17,8 +17,8 @@ const dmMono = DM_Mono({
 });
 
 export const metadata = {
-  title: "일감 어드민 | 시니어 스팟워크 플랫폼",
-  description: "일감 구인자 어드민 — 공고 등록·지원자 관리·정산",
+  title: "VELOR 어드민 | 시니어 전문가 플랫폼",
+  description: "VELOR 어드민 — 공고 등록·지원자 관리·정산 | JTBD",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

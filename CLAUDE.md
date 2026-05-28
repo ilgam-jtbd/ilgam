@@ -1,4 +1,4 @@
-# CLAUDE.md — 일감(ILGAM) v3.2
+# CLAUDE.md — VELOR v3.3
 
 > Claude Code 세션 진입 시 자동 로드. 모든 에이전트·세션 공유 권위 파일.
 
@@ -6,8 +6,9 @@
 
 ## 1. 프로젝트 개요
 
-**일감(ILGAM)** — 베이비부머(50~64세) 대상 시니어 스폿워크 AI 매칭 플랫폼  
-PO/단독 운영: 김연재 | 조직: ilgam-jtbd | 리포: ilgam-jtbd/ilgam
+**VELOR** — 베이비부머(50~64세) 대상 시니어 전문가 AI 매칭 플랫폼  
+브랜드: VELOR | 운영사: JTBD | PO: 김연재 | 도메인: velor.kr  
+조직: ilgam-jtbd | 리포: ilgam-jtbd/ilgam → 최종: ilgam-jtbd/velor
 
 | 항목 | 값 |
 |---|---|

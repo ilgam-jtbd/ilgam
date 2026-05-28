@@ -42,7 +42,7 @@ export default function MarketingHome() {
             marginBottom: "0.8rem",
           }}
         >
-          일감
+          VELOR
         </h1>
         <p
           style={{
@@ -52,8 +52,8 @@ export default function MarketingHome() {
             maxWidth: "480px",
           }}
         >
-          베이비부머 2차(1964~1974년생, 954만 명)를 위한 한국형 스팟워크 플랫폼.
-          수수료 15~20% · 공공 MOU · SMS 3중 UX.
+          검증된 시니어 전문가 네트워크 — JTBD 운영.<br />
+          2,400+ 전문가 · 850+ 기업 · 프로젝트/원포인트/인재추천.
         </p>
 
         {/* 지표 */}

@@ -108,9 +108,9 @@ export default function CompanyDashboardPage() {
         <div className="px-6 py-5 border-b border-slate-800">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">IL</span>
+              <span className="text-white text-xs font-bold">VE</span>
             </div>
-            <span className="text-white font-semibold text-sm tracking-wide">ILGAM</span>
+            <span className="text-white font-semibold text-sm tracking-wide">VELOR</span>
           </div>
           <p className="text-slate-500 text-xs mt-1">Company Portal</p>
         </div>

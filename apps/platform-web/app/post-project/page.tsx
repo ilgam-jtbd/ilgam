@@ -13,7 +13,7 @@ function Nav() {
     <header className="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         <a href="/" className="font-bold text-xl tracking-tight text-indigo-600">
-          ILGAM
+          VELOR
         </a>
         <nav className="flex items-center gap-1 text-sm font-medium text-slate-600">
           <a

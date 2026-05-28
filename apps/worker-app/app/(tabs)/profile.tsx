@@ -198,7 +198,7 @@ export default function ProfileScreen() {
         <Text style={styles.logoutText}>로그아웃</Text>
       </TouchableOpacity>
 
-      <Text style={styles.version}>ILGAM v0.1 · 문의: support@ilgam.kr</Text>
+      <Text style={styles.version}>VELOR v0.1 · 문의: support@velor.kr · JTBD</Text>
     </ScrollView>
   );
 }

@@ -10,10 +10,10 @@ export default function EmployerSignupPage() {
         {/* 헤더 */}
         <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
           <div style={{ fontFamily: "var(--font-dm-mono), monospace", fontSize: "0.62rem", letterSpacing: "0.2em", color: "#2dd4bf", marginBottom: "0.6rem" }}>
-            ILGAM · 구인자 신청
+            VELOR · 구인자 신청
           </div>
           <h1 style={{ fontFamily: "var(--font-dm-serif), serif", fontSize: "2rem", color: "#c9a84c", marginBottom: "0.5rem" }}>
-            일감에 공고를 올리세요
+            VELOR에 공고를 올리세요
           </h1>
           <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.9rem", lineHeight: "1.6" }}>
             사업자 정보를 입력하면 1영업일 이내 승인해 드립니다.<br />
@@ -24,7 +24,7 @@ export default function EmployerSignupPage() {
         <EmployerSignupForm />
 
         <p style={{ textAlign: "center", fontSize: "0.75rem", color: "rgba(255,255,255,0.3)", marginTop: "1.5rem" }}>
-          문의: recruit@ilgam.kr
+          문의: recruit@velor.kr
         </p>
       </div>
     </div>
