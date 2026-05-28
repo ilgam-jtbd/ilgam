@@ -1,14 +1,40 @@
 import type { ReactNode } from "react";
+import { DM_Serif_Display, DM_Mono } from "next/font/google";
+
+const dmSerif = DM_Serif_Display({
+  weight: ["400"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  weight: ["400", "500"],
+  subsets: ["latin"],
+  variable: "--font-dm-mono",
+  display: "swap",
+});
 
 export const metadata = {
-  title: "일감 | 한국형 시니어 스팟워크",
-  description: "베이비부머 2차 세대를 위한 유연근무 플랫폼",
+  title: "VELOR 어드민 | 시니어 전문가 플랫폼",
+  description: "VELOR 어드민 — 공고 등록·지원자 관리·정산 | JTBD",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko">
-      <body style={{ margin: 0, fontFamily: "Pretendard, -apple-system, sans-serif" }}>
+    <html lang="ko" className={`${dmSerif.variable} ${dmMono.variable}`}>
+      <body
+        style={{
+          margin: 0,
+          padding: 0,
+          background: "#f7f5f0",
+          color: "#0d1b2a",
+          fontFamily: "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif",
+          fontSize: "14px",
+          lineHeight: "1.65",
+        }}
+      >
         {children}
       </body>
     </html>

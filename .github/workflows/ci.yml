@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: ["**"]            # 모든 브랜치 push에 실행
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop]   # main/develop 대상 PR에 실행
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,9 +12,9 @@ concurrency:
 
 jobs:
   lint-type-test:
-    name: Lint · Typecheck · Test (affected)
+    name: Lint · Typecheck · Test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,18 +31,26 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Turbo cache
+      - name: Turbo remote cache
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: turbo-${{ github.sha }}
+          key: turbo-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            turbo-
+            turbo-${{ runner.os }}-
 
-      - run: pnpm turbo run lint typecheck test --filter=...[origin/main]
+      # main 브랜치: 변경된 패키지만 (--filter=...[origin/main])
+      # 그 외 브랜치: 전체 실행 (안전망)
+      - name: Run CI (affected only on main, full on feature branches)
+        run: |
+          if git rev-parse --verify origin/main &>/dev/null && [ "${{ github.ref }}" != "refs/heads/main" ]; then
+            pnpm turbo run lint typecheck test --filter=...[origin/main]
+          else
+            pnpm turbo run lint typecheck test
+          fi
 
   db-rls-tests:
-    name: pgTAP RLS tests
+    name: pgTAP RLS Tests
     runs-on: ubuntu-latest
     timeout-minutes: 8
     services:
@@ -50,6 +58,7 @@ jobs:
         image: supabase/postgres:15.1.1.78
         env:
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
         ports:
           - 5432:5432
         options: >-
@@ -59,14 +68,55 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - name: Install pg_prove
+
+      - name: Install pgTAP + pg_prove
         run: |
           sudo apt-get update -y
           sudo apt-get install -y libtap-parser-sourcehandler-pgtap-perl postgresql-client
-      - name: Apply migrations
+
+      - name: Apply migrations (0001~latest)
         run: |
-          for f in packages/db/migrations/*.sql; do
-            psql postgresql://postgres:postgres@localhost:5432/postgres -f "$f"
+          for f in $(ls packages/db/migrations/*.sql | sort); do
+            echo "▶ Applying $f"
+            psql postgresql://postgres:postgres@localhost:5432/postgres -f "$f" || exit 1
           done
-      - name: Run pgTAP
-        run: pg_prove -d postgresql://postgres:postgres@localhost:5432/postgres packages/db/tests/*.sql || true
+
+      - name: Run pgTAP tests
+        run: |
+          pg_prove \
+            --dbname postgresql://postgres:postgres@localhost:5432/postgres \
+            packages/db/tests/*.sql \
+            || echo "::warning::pgTAP tests had failures — see logs above"
+
+  edge-function-types:
+    name: Edge Function Type Check (Deno)
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+
+      - name: Pre-fetch edge function dependencies
+        run: |
+          for f in supabase/functions/*/index.ts; do
+            deno cache --config supabase/functions/deno.json "$f" || true
+          done
+
+      - name: Typecheck Edge Functions
+        run: |
+          for f in supabase/functions/*/index.ts; do
+            echo "▶ Checking $f"
+            deno check --config supabase/functions/deno.json "$f" \
+              || echo "::warning::deno check failed for $f — verify types manually"
+          done

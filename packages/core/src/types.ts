@@ -34,6 +34,34 @@ export interface Employer {
   suspended_at: string | null;
 }
 
+export interface EmployerMember {
+  employer_id: string;
+  profile_id: string;
+  role: "owner" | "member";
+  created_at: string;
+}
+
+export type ApplicationStatus = "pending" | "accepted" | "rejected";
+
+export interface JobApplication {
+  id: string;
+  job_id: string;
+  worker_id: string;
+  status: ApplicationStatus;
+  created_at: string;
+}
+
+export type MatchStatus = "confirmed" | "cancelled" | "no_show";
+
+export interface Match {
+  id: string;
+  job_id: string;
+  worker_id: string;
+  employer_id: string;
+  status: MatchStatus;
+  created_at: string;
+}
+
 export type JobStatus = "open" | "matched" | "in_progress" | "completed" | "cancelled";
 
 export interface Job {

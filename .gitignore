@@ -24,6 +24,8 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+# Claude Code
+.claude/
 # logs
 *.log
 npm-debug.log*
@@ -32,3 +34,5 @@ coverage/
 # Supabase
 supabase/.branches/
 supabase/.temp/
+tsconfig.tsbuildinfo
+next-env.d.ts

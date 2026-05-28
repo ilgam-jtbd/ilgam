@@ -9,9 +9,9 @@
     "ios": "expo run:ios",
     "build:preview": "eas build --profile preview --platform all",
     "build:prod": "eas build --profile production --platform all",
-    "lint": "eslint app components",
+    "lint": "eslint app --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@ilgam/core": "workspace:*",

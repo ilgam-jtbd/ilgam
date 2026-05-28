@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # verify_deployment.sh — DNS·SSL·healthz·Supabase 검증
 set -euo pipefail
-DOMAIN="${1:-ilgam.kr}"
+DOMAIN="${1:-velor.kr}"
 SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-}"
 EXIT_CODE=0
 
@@ -10,7 +10,7 @@ green(){ echo -e "\033[32m$*\033[0m"; }
 red(){ echo -e "\033[31m$*\033[0m"; }
 
 cyan "============================================"
-cyan " ILGAM Deployment Verification: $DOMAIN"
+cyan " VELOR Deployment Verification: $DOMAIN"
 cyan "============================================"
 
 cyan "[1/5] DNS A record"

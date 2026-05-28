@@ -1,0 +1,25 @@
+{
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@ilgam/platform-web",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "regions": ["icn1"],
+  "alias": ["velor.kr", "www.velor.kr"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@platform-web-supabase-url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@platform-web-supabase-anon-key",
+    "NEXT_PUBLIC_VWO_ACCOUNT_ID": "@platform-web-vwo-account-id",
+    "NEXT_PUBLIC_POSTHOG_KEY": "@platform-web-posthog-key"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}
