@@ -45,7 +45,7 @@ fi
 
 # ─── main 브랜치로 푸시 ─────────────────────────────────────
 cyan "[4/5] ilgam-jtbd/velor main 으로 푸시"
-git push velor "$CURRENT_BRANCH:main" --force-with-lease 2>&1 || {
+git push velor "main:main" --force-with-lease 2>&1 || {
   red "  push 실패 — ilgam-jtbd/velor 리포가 존재하는지 확인하세요"
   yellow "  https://github.com/ilgam-jtbd/velor 에서 리포 생성 후 재시도"
   exit 1
