@@ -92,3 +92,40 @@ export const EXPERTISE_LABELS: Record<string, string> = {
   regulatory:  "인허가·규제",
   global:      "해외사업",
 };
+
+export type ServiceType = "project" | "onepoint" | "scout";
+
+export interface ServiceOption {
+  type: ServiceType;
+  label: string;
+  description: string;
+  priceFrom: string;
+  duration: string;
+  badge?: string;
+}
+
+export const SERVICE_OPTIONS: ServiceOption[] = [
+  {
+    type: "project",
+    label: "프로젝트 자문",
+    description: "1주~3개월 단기 전문가 계약",
+    priceFrom: "200만원~",
+    duration: "1주~3개월",
+  },
+  {
+    type: "onepoint",
+    label: "원포인트 자문",
+    description: "1~2시간 화상 긴급 자문",
+    priceFrom: "30만원~/시간",
+    duration: "1~2시간",
+    badge: "빠른 연결",
+  },
+  {
+    type: "scout",
+    label: "인재추천 · 스카웃",
+    description: "임원급 전문가 채용 추천",
+    priceFrom: "성공 수수료",
+    duration: "3일 내 후보 제안",
+    badge: "신규",
+  },
+];

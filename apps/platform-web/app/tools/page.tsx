@@ -4,6 +4,44 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { EXPERTS } from "@/lib/data";
 
+// ─── Nav ─────────────────────────────────────────────────────────────────────
+
+function Nav() {
+  return (
+    <header
+      className="sticky top-0 z-50 border-b border-white/[0.06] backdrop-blur-md"
+      style={{ backgroundColor: "rgba(6,13,24,0.9)" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        <a href="/" className="font-bold text-xl tracking-tight text-white">
+          VE<span style={{ color: "#c9a84c" }}>LOR</span>
+        </a>
+        <nav className="flex items-center gap-1 text-sm font-medium">
+          <a
+            href="/marketplace"
+            className="px-3 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+          >
+            전문가 찾기
+          </a>
+          <a
+            href="/tools"
+            className="px-3 py-1.5 rounded-lg font-semibold text-white"
+            style={{ backgroundColor: "#4f46e5" }}
+          >
+            툴 & 혜택
+          </a>
+          <a
+            href="/login"
+            className="ml-2 px-4 py-1.5 rounded-lg border border-white/[0.12] text-white/70 hover:border-white/30 hover:text-white transition-colors"
+          >
+            로그인
+          </a>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface Tool {
@@ -257,23 +295,44 @@ function ToolCard({ tool }: { tool: Tool }) {
   return (
     <motion.div
       variants={fadeInUp}
-      className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-lg hover:border-indigo-200 transition-all duration-200 flex flex-col gap-4 relative overflow-hidden"
+      className="rounded-2xl p-6 flex flex-col gap-4 relative overflow-hidden transition-all duration-200"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 24px rgba(79,70,229,0.2), 0 4px 12px rgba(0,0,0,0.4)";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(79,70,229,0.3)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.08)";
+      }}
     >
+      {/* Gold discount badge — top-left corner */}
+      <div
+        className="absolute top-0 left-0 px-2.5 py-1 rounded-br-xl text-xs font-black"
+        style={{ backgroundColor: "#c9a84c", color: "#060d18" }}
+      >
+        -{tool.discount}%
+      </div>
+
       {tool.badge && (
         <span
-          className={`absolute top-4 right-4 text-xs font-bold px-2 py-0.5 rounded-full ${
+          className="absolute top-3 right-4 text-xs font-bold px-2 py-0.5 rounded-full"
+          style={
             tool.badge === "인기"
-              ? "bg-indigo-100 text-indigo-700"
+              ? { backgroundColor: "rgba(79,70,229,0.2)", color: "#a5b4fc", border: "1px solid rgba(79,70,229,0.3)" }
               : tool.badge === "신규"
-              ? "bg-emerald-100 text-emerald-700"
-              : "bg-amber-100 text-amber-700"
-          }`}
+              ? { backgroundColor: "rgba(45,212,191,0.15)", color: "#2dd4bf", border: "1px solid rgba(45,212,191,0.25)" }
+              : { backgroundColor: "rgba(201,168,76,0.15)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.25)" }
+          }
         >
           {tool.badge}
         </span>
       )}
 
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 mt-4">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
           style={{ backgroundColor: tool.logoColor }}
@@ -281,15 +340,15 @@ function ToolCard({ tool }: { tool: Tool }) {
           {tool.logo}
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">{tool.name}</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{tool.tagline}</p>
+          <h3 className="font-semibold text-white">{tool.name}</h3>
+          <p className="text-xs text-white/40 mt-0.5">{tool.tagline}</p>
         </div>
       </div>
 
       <ul className="space-y-1.5">
         {tool.features.map((f) => (
-          <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-            <svg className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+          <li key={f} className="flex items-center gap-2 text-sm text-white/60">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" style={{ color: "#2dd4bf" }}>
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
             {f}
@@ -297,32 +356,40 @@ function ToolCard({ tool }: { tool: Tool }) {
         ))}
       </ul>
 
-      <div className="mt-auto pt-4 border-t border-slate-100">
+      <div className="mt-auto pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-end justify-between mb-3">
           <div>
-            <span className="text-xs text-slate-400 line-through">{tool.originalPrice}</span>
-            <div className="text-lg font-bold text-slate-900">{tool.discountedPrice}</div>
+            <span className="text-xs text-white/30 line-through">{tool.originalPrice}</span>
+            <div className="text-lg font-bold text-white">{tool.discountedPrice}</div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-black text-indigo-600">{tool.discount}%</div>
-            <div className="text-xs text-slate-500">할인</div>
+            <div className="text-2xl font-black" style={{ color: "#c9a84c" }}>{tool.discount}%</div>
+            <div className="text-xs text-white/40">할인</div>
           </div>
         </div>
 
         <div className="flex gap-2">
           <button
             onClick={copyCoupon}
-            className="flex-1 text-sm font-mono font-semibold px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-center"
+            className="flex-1 text-sm font-mono font-semibold px-3 py-2 rounded-lg transition-colors text-center"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: copied ? "#2dd4bf" : "rgba(255,255,255,0.7)",
+            }}
           >
             {copied ? "✓ 복사됨" : tool.couponCode}
           </button>
-          <button className="flex-1 text-sm font-semibold px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-center">
+          <button
+            className="flex-1 text-sm font-semibold px-3 py-2 rounded-lg text-white transition-colors text-center hover:opacity-90"
+            style={{ backgroundColor: "#4f46e5" }}
+          >
             쿠폰 받기
           </button>
         </div>
 
-        <p className="text-xs text-slate-400 mt-2 text-center">
-          일감 회원 {tool.usersCount}명 이용 중
+        <p className="text-xs text-white/30 mt-2 text-center">
+          VELOR 회원 {tool.usersCount}명 이용 중
         </p>
       </div>
     </motion.div>
@@ -339,14 +406,28 @@ function LectureCard({ lecture }: { lecture: ExpertLecture }) {
   return (
     <motion.div
       variants={fadeInUp}
-      className={`bg-white rounded-2xl border p-6 flex flex-col gap-4 hover:shadow-lg transition-all duration-200 ${
-        lecture.featured
-          ? "border-indigo-300 ring-1 ring-indigo-100"
-          : "border-slate-200"
-      }`}
+      className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200"
+      style={{
+        backgroundColor: "rgba(255,255,255,0.04)",
+        border: lecture.featured
+          ? "1px solid rgba(45,212,191,0.3)"
+          : "1px solid rgba(255,255,255,0.08)",
+        boxShadow: lecture.featured ? "0 0 20px rgba(45,212,191,0.08)" : undefined,
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 24px rgba(45,212,191,0.15), 0 4px 12px rgba(0,0,0,0.4)";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(45,212,191,0.4)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.boxShadow = lecture.featured ? "0 0 20px rgba(45,212,191,0.08)" : "none";
+        (e.currentTarget as HTMLDivElement).style.borderColor = lecture.featured ? "rgba(45,212,191,0.3)" : "rgba(255,255,255,0.08)";
+      }}
     >
       {lecture.featured && (
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full w-fit">
+        <div
+          className="flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full w-fit"
+          style={{ backgroundColor: "rgba(45,212,191,0.12)", color: "#2dd4bf", border: "1px solid rgba(45,212,191,0.2)" }}
+        >
           <svg className="w-3 h-3" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
@@ -355,20 +436,27 @@ function LectureCard({ lecture }: { lecture: ExpertLecture }) {
       )}
 
       <div className="flex items-start gap-3">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold flex-shrink-0">
+        <div
+          className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+          style={{ background: "linear-gradient(135deg, #4f46e5, #2dd4bf)" }}
+        >
           {expert.name.slice(0, 2)}
         </div>
         <div>
-          <p className="text-xs text-indigo-600 font-medium">{expert.name}</p>
-          <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{expert.title}</p>
+          <p className="text-xs font-medium" style={{ color: "#2dd4bf" }}>{expert.name}</p>
+          <p className="text-xs text-white/40 mt-0.5 line-clamp-1">{expert.title}</p>
         </div>
       </div>
 
-      <h3 className="font-semibold text-slate-900 leading-snug line-clamp-2">{lecture.title}</h3>
+      <h3 className="font-semibold text-white leading-snug line-clamp-2">{lecture.title}</h3>
 
       <div className="flex flex-wrap gap-1.5">
         {lecture.tags.map((tag) => (
-          <span key={tag} className="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
+          <span
+            key={tag}
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ backgroundColor: "rgba(79,70,229,0.15)", color: "#a5b4fc", border: "1px solid rgba(79,70,229,0.2)" }}
+          >
             #{tag}
           </span>
         ))}
@@ -376,48 +464,60 @@ function LectureCard({ lecture }: { lecture: ExpertLecture }) {
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <p className="text-xs text-slate-400">형식</p>
-          <p className="font-medium text-slate-700 mt-0.5">{lecture.format}</p>
+          <p className="text-xs text-white/30">형식</p>
+          <p className="font-medium text-white/80 mt-0.5">{lecture.format}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-400">총 시간</p>
-          <p className="font-medium text-slate-700 mt-0.5">{lecture.duration}</p>
+          <p className="text-xs text-white/30">총 시간</p>
+          <p className="font-medium text-white/80 mt-0.5">{lecture.duration}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-400">다음 기수</p>
-          <p className="font-medium text-slate-700 mt-0.5">{formatDate(lecture.nextDate)}</p>
+          <p className="text-xs text-white/30">다음 기수</p>
+          <p className="font-medium text-white/80 mt-0.5">{formatDate(lecture.nextDate)}</p>
         </div>
         <div>
-          <p className="text-xs text-slate-400">잔여석</p>
-          <p className={`font-medium mt-0.5 ${isAlmostFull ? "text-red-600" : "text-slate-700"}`}>
+          <p className="text-xs text-white/30">잔여석</p>
+          <p
+            className="font-medium mt-0.5"
+            style={{ color: isAlmostFull ? "#f87171" : "rgba(255,255,255,0.8)" }}
+          >
             {lecture.seatsLeft}석 남음
           </p>
         </div>
       </div>
 
       <div className="space-y-1.5">
-        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
           <div
-            className={`h-full rounded-full transition-all ${isAlmostFull ? "bg-red-500" : "bg-indigo-500"}`}
-            style={{ width: `${Math.round(fillRatio * 100)}%` }}
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${Math.round(fillRatio * 100)}%`,
+              backgroundColor: isAlmostFull ? "#f87171" : "#4f46e5",
+            }}
           />
         </div>
-        <p className="text-xs text-slate-400 text-right">
+        <p className="text-xs text-white/30 text-right">
           {lecture.seats - lecture.seatsLeft}/{lecture.seats}명 신청
         </p>
       </div>
 
-      <div className="pt-3 border-t border-slate-100">
+      <div className="pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-end justify-between mb-3">
           <div>
-            <span className="text-xs text-slate-400 line-through">{lecture.originalPrice}</span>
-            <div className="text-xl font-bold text-slate-900">{lecture.price}</div>
+            <span className="text-xs text-white/30 line-through">{lecture.originalPrice}</span>
+            <div className="text-xl font-bold text-white">{lecture.price}</div>
           </div>
-          <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-            일감 회원 할인 적용
+          <span
+            className="text-xs font-semibold px-2 py-1 rounded-full"
+            style={{ backgroundColor: "rgba(45,212,191,0.12)", color: "#2dd4bf", border: "1px solid rgba(45,212,191,0.2)" }}
+          >
+            VELOR 회원 할인 적용
           </span>
         </div>
-        <button className="w-full text-sm font-semibold py-2.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+        <button
+          className="w-full text-sm font-semibold py-2.5 rounded-xl text-white transition-colors hover:opacity-90"
+          style={{ backgroundColor: "#4f46e5" }}
+        >
           강의 신청하기
         </button>
       </div>
@@ -429,24 +529,33 @@ function LectureCard({ lecture }: { lecture: ExpertLecture }) {
 
 function RevenueBanner() {
   return (
-    <div className="bg-gradient-to-r from-slate-900 to-indigo-900 rounded-2xl p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+    <div
+      className="rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6"
+      style={{
+        background: "linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(45,212,191,0.08) 100%)",
+        border: "1px solid rgba(79,70,229,0.25)",
+      }}
+    >
       <div>
-        <h3 className="text-xl font-bold mb-2">파트너 툴 등록 · 광고 문의</h3>
-        <p className="text-slate-300 text-sm max-w-lg">
-          일감 전문가 네트워크에 귀사의 SaaS / AI 툴을 노출하세요.
+        <h3 className="text-xl font-bold text-white mb-2">파트너 툴 등록 · 광고 문의</h3>
+        <p className="text-white/50 text-sm max-w-lg">
+          VELOR 전문가 네트워크에 귀사의 SaaS / AI 툴을 노출하세요.
           2,400+ 시니어 전문가와 850+ 기업 바이어에게 직접 도달합니다.
           CPL · 쿠폰 수익쉐어 · 스폰서십 패키지 제공.
         </p>
         <div className="flex flex-wrap gap-4 mt-4 text-sm">
           {["CPL 과금 모델", "전용 쿠폰 발급", "전문가 뉴스레터 노출", "대시보드 분석 제공"].map((item) => (
-            <span key={item} className="flex items-center gap-1.5 text-slate-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
+            <span key={item} className="flex items-center gap-1.5 text-white/50">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "#2dd4bf" }} />
               {item}
             </span>
           ))}
         </div>
       </div>
-      <button className="flex-shrink-0 px-6 py-3 rounded-xl bg-white text-slate-900 font-semibold text-sm hover:bg-indigo-50 transition-colors whitespace-nowrap">
+      <button
+        className="flex-shrink-0 px-6 py-3 rounded-xl font-semibold text-sm transition-colors whitespace-nowrap hover:opacity-90"
+        style={{ backgroundColor: "#c9a84c", color: "#060d18" }}
+      >
         파트너십 문의하기
       </button>
     </div>
@@ -463,11 +572,14 @@ function StatsBar() {
     { label: "누적 절감액", value: "₩2.1억+" },
   ];
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-indigo-50 rounded-2xl p-6">
+    <div
+      className="grid grid-cols-2 md:grid-cols-4 gap-4 rounded-2xl p-6"
+      style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+    >
       {stats.map((s) => (
         <div key={s.label} className="text-center">
-          <div className="text-2xl font-black text-indigo-700">{s.value}</div>
-          <div className="text-xs text-slate-500 mt-1">{s.label}</div>
+          <div className="text-2xl font-black font-mono" style={{ color: "#c9a84c" }}>{s.value}</div>
+          <div className="text-xs text-white/40 mt-1">{s.label}</div>
         </div>
       ))}
     </div>
@@ -486,9 +598,17 @@ export default function ToolsPage() {
       : TOOLS.filter((t) => t.category === activeCategory);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: "#060d18" }}>
+      <Nav />
+
       {/* Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-24 pb-16 px-4">
+      <div
+        style={{
+          background: "linear-gradient(135deg, #060d18 0%, #0d1b2a 40%, #0f0c29 100%)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+        className="pt-20 pb-16 px-4"
+      >
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -496,19 +616,24 @@ export default function ToolsPage() {
             variants={stagger}
             className="text-center"
           >
-            <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+            <motion.div
+              variants={fadeInUp}
+              className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full mb-6"
+              style={{ backgroundColor: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+            >
               <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
               </svg>
-              일감 멤버 전용 혜택
+              VELOR 멤버 전용 혜택
             </motion.div>
 
             <motion.h1 variants={fadeInUp} className="text-4xl md:text-5xl font-black text-white mb-4">
-              툴 & 혜택
+              툴 &{" "}
+              <span style={{ color: "#c9a84c" }}>혜택</span>
             </motion.h1>
-            <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
+            <motion.p variants={fadeInUp} className="text-white/40 text-lg max-w-2xl mx-auto">
               검증된 B2B SaaS · AI 툴 할인 쿠폰과 시니어 전문가의 심화 강의를
-              <br className="hidden md:block" /> 일감 멤버에게만 제공합니다.
+              <br className="hidden md:block" /> VELOR 멤버에게만 제공합니다.
             </motion.p>
           </motion.div>
         </div>
@@ -521,16 +646,20 @@ export default function ToolsPage() {
         </motion.div>
 
         {/* Tab Switch */}
-        <div className="flex gap-1 bg-slate-200 rounded-xl p-1 w-fit mt-10 mb-8">
+        <div
+          className="flex gap-1 rounded-xl p-1 w-fit mt-10 mb-8"
+          style={{ backgroundColor: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+        >
           {(["tools", "lectures"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+              className="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+              style={
                 activeTab === tab
-                  ? "bg-white text-indigo-700 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
+                  ? { backgroundColor: "#4f46e5", color: "#fff" }
+                  : { color: "rgba(255,255,255,0.5)" }
+              }
             >
               {tab === "tools" ? "🛠 SaaS · AI 툴 쿠폰" : "🎓 전문가 강의"}
             </button>
@@ -539,17 +668,22 @@ export default function ToolsPage() {
 
         {activeTab === "tools" && (
           <>
-            {/* Category Filter */}
+            {/* Category Filter — dark glass pills */}
             <div className="flex flex-wrap gap-2 mb-8">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+                  style={
                     activeCategory === cat.key
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600"
-                  }`}
+                      ? { backgroundColor: "#4f46e5", color: "#fff" }
+                      : {
+                          backgroundColor: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.10)",
+                          color: "rgba(255,255,255,0.55)",
+                        }
+                  }
                 >
                   {cat.label}
                 </button>
@@ -573,11 +707,14 @@ export default function ToolsPage() {
         {activeTab === "lectures" && (
           <>
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-sm text-slate-500">
-                일감 전문가가 직접 진행하는 심화 강의 · 마스터클래스
+              <p className="text-sm text-white/40">
+                VELOR 전문가가 직접 진행하는 심화 강의 · 마스터클래스
               </p>
-              <span className="text-xs bg-amber-50 text-amber-700 font-semibold px-2.5 py-1 rounded-full">
-                일감 회원 최대 30% 할인
+              <span
+                className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                style={{ backgroundColor: "rgba(201,168,76,0.12)", color: "#c9a84c", border: "1px solid rgba(201,168,76,0.2)" }}
+              >
+                VELOR 회원 최대 30% 할인
               </span>
             </div>
 

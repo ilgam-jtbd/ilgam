@@ -8,15 +8,28 @@ import type { Expert } from "@/lib/types";
 // ─── Nav ─────────────────────────────────────────────────────────────────────
 function Nav() {
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-slate-100">
+    <header
+      className="sticky top-0 z-50 border-b border-white/[0.06] backdrop-blur-md"
+      style={{ backgroundColor: "rgba(6,13,24,0.9)" }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-        <a href="/" className="font-bold text-lg tracking-tight">
-          <span className="text-indigo-600">ILGAM</span>
-          <span className="text-slate-400 font-mono text-xs ml-2">EXPERT</span>
+        <a href="/" className="font-bold text-xl tracking-tight text-white">
+          VE<span style={{ color: "#c9a84c" }}>LOR</span>
         </a>
-        <nav className="flex items-center gap-2 text-sm">
-          <a href="/marketplace" className="px-3 py-1.5 text-slate-600 hover:text-indigo-600 transition-colors">전문가 찾기</a>
-          <a href="/post-project" className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">프로젝트 올리기</a>
+        <nav className="flex items-center gap-1 text-sm font-medium">
+          <a
+            href="/marketplace"
+            className="px-3 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+          >
+            전문가 찾기
+          </a>
+          <a
+            href="/post-project"
+            className="px-3 py-1.5 rounded-lg font-semibold text-white transition-colors hover:opacity-90"
+            style={{ backgroundColor: "#4f46e5" }}
+          >
+            프로젝트 올리기
+          </a>
         </nav>
       </div>
     </header>
