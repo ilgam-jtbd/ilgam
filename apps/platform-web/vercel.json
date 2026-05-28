@@ -4,6 +4,7 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "regions": ["icn1"],
+  "alias": ["velor.kr", "www.velor.kr"],
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "@platform-web-supabase-url",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@platform-web-supabase-anon-key",
