@@ -123,54 +123,65 @@ Claude Code에 작업을 지시할 때 아래 형식을 사용한다.
 ```
 /goal
 
-GOAL:
-[측정 가능한 단일 완료 조건. 예: "워커 온보딩 화면 E2E 0 fail"]
+## 1. GOAL  ← 측정 가능한 단일 완료 조건 (모호한 표현 금지)
+[예: "platform-web /api/openapi GET → 200 + OpenAPI 3.0 스펙 반환"]
 
-CONTEXT:
-- Phase: [현재 Phase]
+## 2. CONTEXT  ← 배경 정보
+- Phase: [0 검증 | 1 유료화 | ...]
 - 관련 파일: [파일 경로 목록]
-- 배경: [왜 이 작업이 필요한지]
+- 배경: [왜 이 작업이 필요한지 — 비즈니스·기술 이유]
 
-CONSTRAINTS:
-- qa-classifier 수정 금지
-- match-engine/index.ts 수정 금지
-- payment-settle/index.ts 수정 금지
-- [추가 제약]
+## 3. CONSTRAINTS  ← 건드리면 안 되는 것 (하드 금지)
+- supabase/functions/qa-classifier/ 수정 금지
+- supabase/functions/match-engine/index.ts 수정 금지
+- supabase/functions/payment-settle/index.ts 수정 금지
+- [추가 제약 — 예: "기존 DB 스키마 변경 금지"]
 
-PRIORITY:
-1. [가장 먼저 해야 할 것]
-2. [다음 순서]
-3. [마지막]
+## 4. PRIORITY  ← 작업 순서·우선 판단 기준
+1. [가장 먼저 해야 할 것 — 블로커 해소]
+2. [핵심 기능 구현]
+3. [테스트·문서화]
 
-PLAN:
+## 5. PLAN  ← 단계별 실행 계획 (체크박스)
 - [ ] Step 1: ...
 - [ ] Step 2: ...
 - [ ] Step 3: ...
 
-DONE WHEN:
-- [ ] [구체적 완료 조건 1]
+## 6. DONE WHEN  ← 완료 판단 조건 (= SUCCESS_CRITERIA)
+- [ ] [구체적 완료 조건 1 — 예: "GET /api/healthz → {"ok":true}"]
 - [ ] [구체적 완료 조건 2]
 - [ ] [구체적 완료 조건 3]
-- [ ] `pnpm turbo lint typecheck test` 전체 통과
+- [ ] `pnpm turbo lint typecheck test` 16/16 tasks 통과
+- [ ] git push + PR opened
 
-VERIFY:
-- 빌드: `pnpm turbo build`
-- 테스트: `pnpm turbo test`
-- 수동: [확인할 화면/API/동작]
+## 7. VERIFY  ← 검증 방법
+- 빌드: `pnpm turbo build --filter=@ilgam/platform-web`
+- 테스트: `pnpm turbo lint typecheck test`
+- 수동: [확인할 화면/API/동작 — 예: "curl https://velor.kr/api/healthz"]
 
-OUTPUT:
+## 8. OUTPUT  ← 산출물 형식·위치
 - 파일: [생성·수정 파일 목록]
-- 커밋: [커밋 메시지 형식]
-- PR: draft PR to main
+- 커밋: `feat|fix|docs|refactor(scope): 한 줄 설명`
+- PR: draft PR → main (ilgam-jtbd/ilgam)
 
-STOP RULES:
-- qa-classifier 파일 수정 시 즉시 중단 + PO 보고
-- match-engine/index.ts 파일 수정 시 즉시 중단 + PO 보고
-- payment-settle/index.ts 파일 수정 시 즉시 중단 + PO 보고
-- 20턴 초과 시 현재 상태 보고 후 중단
-- 동일 오류 3회 반복 시 중단 + 원인 보고
-- DB 데이터 삭제·덮어쓰기 발생 가능 작업 시 PO 확인 후 진행
+## 9. STOP RULES  ← 강제 중단 조건 (하드 리밋)
+- supabase/functions/qa-classifier/ 수정 감지 시 → 즉시 중단 + PO 보고
+- supabase/functions/match-engine/index.ts 수정 감지 시 → 즉시 중단 + PO 보고
+- supabase/functions/payment-settle/index.ts 수정 감지 시 → 즉시 중단 + PO 보고
+- 20턴 초과 시 → 현재 상태 커밋 후 중단 + 진행상황 보고
+- 동일 오류 3회 반복 시 → 중단 + 근본 원인 보고
+- DB 데이터 삭제·덮어쓰기 가능 작업 → PO 확인 후 진행
+- 빌드 비용 $10 초과 예상 시 → PO 확인 후 진행
 ```
+
+### /goal 작성 핵심 원칙
+
+| 섹션 | 핵심 |
+|---|---|
+| GOAL (1) | 모호 금지 — "동작한다" ❌ → "curl → 200 + JSON" ✅ |
+| DONE WHEN (6) | = SUCCESS_CRITERIA. 조건이 명확해야 Claude가 자체 판단 가능 |
+| STOP RULES (9) | 하드 리밋을 조건 자체에 박아둘 것 — 매 턴 evaluator가 확인 |
+| CONSTRAINTS (3) | qa-classifier · match-engine · payment-settle 항상 포함 |
 
 ---
 

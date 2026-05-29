@@ -5,11 +5,59 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "VELOR — 검증된 시니어 전문가 네트워크",
   description: "임원 출신 전문가의 경험을 지금 바로 빌려드립니다. 2,400명의 검증된 시니어 전문가와 850개 기업을 연결하는 스팟워크 플랫폼.",
+  metadataBase: new URL("https://velor.kr"),
   openGraph: {
     title: "VELOR — 검증된 시니어 전문가 네트워크",
     description: "임원 출신 전문가와 1시간 만에 연결. 프로젝트 자문 · 원포인트 자문 · 인재추천.",
     type: "website",
+    url: "https://velor.kr",
+    siteName: "VELOR",
+    locale: "ko_KR",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "VELOR — 검증된 시니어 전문가 네트워크",
+    description: "임원 출신 전문가와 1시간 만에 연결.",
+  },
+  alternates: {
+    canonical: "https://velor.kr",
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "VELOR",
+  alternateName: "벨로",
+  url: "https://velor.kr",
+  logo: "https://velor.kr/logo.png",
+  description: "검증된 시니어 전문가 네트워크 — 임원 출신 전문가와 기업을 연결하는 스팟워크 플랫폼",
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "support@velor.kr",
+    contactType: "customer service",
+    availableLanguage: "Korean",
+  },
+  sameAs: ["https://velor.kr"],
+  offers: [
+    {
+      "@type": "Offer",
+      name: "프로젝트 자문",
+      description: "1~6개월 시니어 전문가 프로젝트 자문",
+    },
+    {
+      "@type": "Offer",
+      name: "원포인트 자문",
+      description: "1~2시간 집중 자문",
+      price: "300000",
+      priceCurrency: "KRW",
+    },
+    {
+      "@type": "Offer",
+      name: "인재추천·스카웃",
+      description: "검증된 시니어 전문가 채용 연결",
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +69,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet"
+        />
+        {/* JSON-LD structured data — Organization schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         {/* VWO Async SmartCode — replace ACCOUNT_ID with actual VWO account */}
         {process.env.NEXT_PUBLIC_VWO_ACCOUNT_ID && (
