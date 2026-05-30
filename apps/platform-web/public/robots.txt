@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Sitemap: https://velor.kr/sitemap.xml
+
+User-agent: Yeti
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: bingbot
+Allow: /
+Crawl-delay: 1
