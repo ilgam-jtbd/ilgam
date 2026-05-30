@@ -98,8 +98,8 @@ tailwind.config={theme:{extend:{
     </div>
     <div class="p-6">
       <div class="bg-spot50 border-2 border-spot200 rounded-2xl p-5">
-        <div class="text-base font-bold">이정환 님 · 67세 · 분당</div>
-        <div class="text-base text-ink700 mt-1">前 파운드리 공정 임원 30년</div>
+        <div class="text-base font-bold">김정환 님 · 54세 · 분당</div>
+        <div class="text-base text-ink700 mt-1">前 파운드리 공정 임원 20년</div>
         <p class="text-base text-ink700 mt-3 leading-relaxed">경력을 말씀만 하시면, AI가 맞는 전문가 일자리를 찾아 드려요.</p>
       </div>
       <button @click="screen='home'" class="mt-6 w-full bg-navy text-white text-lg font-bold rounded-2xl py-4">시작하기</button>
@@ -117,7 +117,7 @@ tailwind.config={theme:{extend:{
         </div>
         <span class="text-xs bg-goldl/25 text-goldl font-bold rounded-full px-3 py-1.5">시니어 골드</span>
       </div>
-      <p class="mt-5 text-base text-spot100">이정환 님, 안녕하세요</p>
+      <p class="mt-5 text-base text-spot100">김정환 님, 안녕하세요</p>
       <div class="mt-1 flex items-end gap-1">
         <span class="text-3xl font-extrabold">1,860,000</span><span class="mb-1 text-spot100">원</span>
       </div>
@@ -259,8 +259,8 @@ tailwind.config={theme:{extend:{
       <div class="flex items-center gap-3">
         <div class="w-14 h-14 bg-white/15 rounded-full flex items-center justify-center text-2xl font-black text-goldl">이</div>
         <div>
-          <div class="text-lg font-extrabold">이정환 전문가</div>
-          <div class="text-sm text-spot100">67세 · 前 파운드리 공정 임원 30년</div>
+          <div class="text-lg font-extrabold">김정환 전문가</div>
+          <div class="text-sm text-spot100">54세 · 前 파운드리 공정 임원 20년</div>
         </div>
       </div>
       <div class="mt-4 flex flex-wrap gap-1.5 text-xs">
@@ -338,7 +338,7 @@ function velorApp(){
     sel:jobs[0],
     quickReplies:['반도체 기술 검증','TIPS 평가위원','현장 단기 일'],
     chatMsgs:[
-      {role:'bot',text:'안녕하세요 이정환 님. 어떤 일을 도와드릴까요? 아래에서 골라 주세요.'}
+      {role:'bot',text:'안녕하세요 김정환 님. 어떤 일을 도와드릴까요? 아래에서 골라 주세요.'}
     ],
     openJob(j){this.sel=j;this.screen='detail';},
     sendQuick(q){
